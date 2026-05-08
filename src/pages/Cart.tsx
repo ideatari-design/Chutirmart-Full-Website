@@ -11,24 +11,72 @@ import {
   ShieldCheck,
   Truck,
   RotateCcw,
-  BadgeCheck
+  BadgeCheck,
+  User,
+  Phone,
+  MapPin,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/context/CartContext';
+import { orderService } from '@/services/orderService';
+import { toast } from 'sonner';
 
 const Cart = () => {
-  const { cart, removeFromCart, updateQuantity, cartTotal, itemCount } = useCart();
+  const { cart, removeFromCart, updateQuantity, cartTotal, itemCount, clearCart } = useCart();
   const navigate = useNavigate();
 
   const deliveryCharge = 80;
   const grandTotal = cartTotal + (cart.length > 0 ? deliveryCharge : 0);
 
+  const [isCheckoutMode, setIsCheckoutMode] = React.useState(false);
+  const [isProcessing, setIsProcessing] = React.useState(false);
+  const [formData, setFormData] = React.useState({
+    name: '',
+    phone: '',
+    address: ''
+  });
+
+  const handlePlaceOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.phone || !formData.address) {
+      toast.error("Please fill in all required information");
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const order = await orderService.createOrder({
+        customerName: formData.name,
+        customerPhone: formData.phone,
+        customerAddress: formData.address,
+        items: cart,
+        total: grandTotal,
+        deposit: 0,
+        status: 'pending',
+        paymentStatus: 'unpaid'
+      });
+
+      if (order) {
+        toast.success("Order placed successfully!");
+        clearCart();
+        navigate(`/track?id=${order.id.replace('#', '')}`);
+      }
+    } catch (err) {
+      toast.error("Order failed. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="bg-[#f8fafc] min-h-screen py-12 md:py-20">
       <div className="max-w-[1140px] mx-auto px-4">
         <h1 className="text-4xl font-black text-slate-900 mb-12 flex items-center gap-4">
-          Shopping Cart
+          {isCheckoutMode ? "Confirm Order Details" : "Shopping Cart"}
           <span className="text-lg font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">{itemCount}</span>
         </h1>
 
@@ -180,22 +228,98 @@ const Cart = () => {
                 </div>
 
                 <div className="p-8 space-y-8">
+                  {isCheckoutMode && (
+                    <div className="space-y-6 pt-2 animate-in fade-in slide-in-from-top-4 duration-500">
+                       <h4 className="text-sm font-black uppercase text-slate-900 border-b pb-4">Checkout Information</h4>
+                       <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Your Name</Label>
+                            <div className="relative">
+                              <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+                              <Input 
+                                placeholder="Enter full name" 
+                                className="h-12 pl-12 rounded-xl bg-slate-50 border-none"
+                                value={formData.name}
+                                onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Phone Number</Label>
+                            <div className="relative">
+                              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+                              <Input 
+                                placeholder="017XXXXXXXX" 
+                                className="h-12 pl-12 rounded-xl bg-slate-50 border-none"
+                                value={formData.phone}
+                                onChange={e => setFormData(p => ({ ...p, phone: e.target.value }))}
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Shipping Address</Label>
+                            <div className="relative">
+                              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+                              <Input 
+                                placeholder="House, Road, Area..." 
+                                className="h-12 pl-12 rounded-xl bg-slate-50 border-none"
+                                value={formData.address}
+                                onChange={e => setFormData(p => ({ ...p, address: e.target.value }))}
+                              />
+                            </div>
+                          </div>
+                       </div>
+                    </div>
+                  )}
+
                   <div className="flex justify-between items-baseline">
                     <span className="text-xs font-black text-slate-400 uppercase">Total Amount</span>
                     <span className="text-[28px] font-black text-slate-900 leading-none">৳ {grandTotal.toLocaleString()}</span>
                   </div>
 
                   <div className="space-y-4">
-                    <Link to="/checkout" className="block w-full">
-                      <Button className="h-16 w-full text-sm font-black uppercase rounded-2xl bg-[#00458f] text-white shadow-xl shadow-[#00458f]/20 hover:scale-[1.02] active:scale-95 transition-all">
+                    {!isCheckoutMode ? (
+                      <Button 
+                        onClick={() => setIsCheckoutMode(true)}
+                        className="h-16 w-full text-sm font-black uppercase rounded-2xl bg-[#00458f] text-white shadow-xl shadow-[#00458f]/20 hover:scale-[1.02] active:scale-95 transition-all"
+                      >
                         Proceed to Checkout
                       </Button>
-                    </Link>
-                    <Link to="/products" className="block w-full">
-                      <Button variant="outline" className="h-14 w-full text-xs font-bold uppercase rounded-2xl border-2 hover:bg-slate-50 transition-all">
-                        Continue Shopping
+                    ) : (
+                      <Button 
+                        onClick={handlePlaceOrder}
+                        disabled={isProcessing}
+                        className="h-16 w-full text-sm font-black uppercase rounded-2xl bg-[#00458f] text-white shadow-xl shadow-[#00458f]/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
+                      >
+                        {isProcessing ? (
+                          <>
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            Placing Order...
+                          </>
+                        ) : (
+                          <>Confirm Order Now</>
+                        )}
                       </Button>
-                    </Link>
+                    )}
+                    
+                    {isCheckoutMode && (
+                      <Button 
+                        variant="ghost" 
+                        onClick={() => setIsCheckoutMode(false)}
+                        className="w-full text-xs font-bold uppercase text-slate-400"
+                        disabled={isProcessing}
+                      >
+                        Back to Cart
+                      </Button>
+                    )}
+
+                    {!isCheckoutMode && (
+                      <Link to="/products" className="block w-full">
+                        <Button variant="outline" className="h-14 w-full text-xs font-bold uppercase rounded-2xl border-2 hover:bg-slate-50 transition-all">
+                          Continue Shopping
+                        </Button>
+                      </Link>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-[10px] text-slate-500 font-medium">

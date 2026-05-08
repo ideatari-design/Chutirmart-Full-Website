@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Package, MapPin, Clock, CheckCircle2, ChevronRight, FileText, Headset } from 'lucide-react';
+import { Search, Package, MapPin, Clock, CheckCircle2, ChevronRight, FileText, Headset, ShoppingBag, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,14 +8,21 @@ import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { orderService } from '@/services/orderService';
-import { useSearchParams } from 'react-router-dom';
+import { productService } from '@/services/productService';
+import { Product } from '@/types';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import ProductCard from '@/components/ProductCard';
+import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 
 const OrderTracking = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [orderId, setOrderId] = useState(searchParams.get('id') || '');
   const [trackingData, setTrackingData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [hotProducts, setHotProducts] = useState<Product[]>([]);
+  const [loadingHot, setLoadingHot] = useState(true);
 
   React.useEffect(() => {
     window.scrollTo(0, 0);
@@ -23,6 +30,15 @@ const OrderTracking = () => {
       const id = searchParams.get('id');
       if (id) handleTrackById(id.startsWith('#') ? id : `#${id}`);
     }
+    
+    // Fetch hot products
+    const fetchHot = async () => {
+      setLoadingHot(true);
+      const products = await productService.getFeaturedProducts();
+      setHotProducts(products.slice(0, 4));
+      setLoadingHot(false);
+    };
+    fetchHot();
   }, [searchParams]);
 
   const handleTrackById = async (id: string) => {
@@ -66,8 +82,22 @@ const OrderTracking = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-20">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Track Your Order</h1>
-        <p className="text-muted-foreground">Enter your Order ID to see the status</p>
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-6">
+          <Package className="h-8 w-8" />
+        </div>
+        <h1 className="text-4xl font-black mb-4">Thank You for Your Order!</h1>
+        <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-8">
+          We appreciate your business. Your order is being processed with priority. 
+          Expect delivery within <span className="text-foreground font-bold italic">24 hours</span> inside Dhaka and 
+          <span className="text-foreground font-bold italic"> 2-3 days</span> outside Dhaka.
+        </p>
+        <Button 
+          onClick={() => navigate('/products')}
+          className="rounded-full h-14 px-8 font-bold gap-2 text-lg shadow-xl shadow-primary/20 hover:scale-105 transition-all"
+        >
+          <ShoppingBag className="h-5 w-5" />
+          Continue Shopping & Go to Store
+        </Button>
       </div>
 
       <Card className="border-none shadow-xl rounded-3xl overflow-hidden bg-white mb-12">
@@ -160,11 +190,58 @@ const OrderTracking = () => {
                      <p className="text-xs text-muted-foreground">Call our customer support</p>
                   </div>
                </div>
-               <Button className="rounded-xl">+88017XXXXXXXX</Button>
+               <Button className="rounded-xl">+8801700000000</Button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Hot Selling Products Section */}
+      <section className="mt-16 md:mt-32">
+        <div className="flex flex-col md:flex-row justify-between items-center sm:items-end mb-8 md:mb-12 gap-6 text-center sm:text-left">
+          <div className="space-y-4 sm:space-y-2">
+            <div className="flex justify-center sm:justify-start">
+              <Badge className="bg-accent text-white border-none px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                Top Recommendations
+              </Badge>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-black text-foreground">Hot Selling Product Guru</h2>
+            <p className="text-muted-foreground">Don't miss out on our most popular items today!</p>
+          </div>
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/products')}
+            className="group font-bold text-primary gap-2 hover:bg-primary/5 rounded-xl pr-2 w-full sm:w-auto justify-center sm:justify-start"
+          >
+            Explore More Products
+            <div className="h-8 w-8 rounded-lg bg-primary text-white flex items-center justify-center group-hover:translate-x-1 transition-transform sm:flex hidden">
+              <ArrowRight className="h-4 w-4" />
+            </div>
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+          {loadingHot ? (
+            [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
+          ) : (
+            hotProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          )}
+        </div>
+        
+        <div className="mt-12 md:mt-16 text-center">
+           <Button 
+             variant="outline" 
+             size="lg"
+             onClick={() => navigate('/products')}
+             className="h-14 md:h-16 px-8 md:px-12 rounded-2xl border-2 font-black text-base md:text-lg gap-3 hover:bg-primary hover:text-white hover:border-primary transition-all shadow-lg w-full sm:w-auto"
+           >
+             <ShoppingBag className="h-5 w-5 md:h-6 md:w-6" />
+             Visit Full Shop Again
+           </Button>
+        </div>
+      </section>
     </div>
   );
 };
