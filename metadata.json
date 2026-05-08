@@ -1,0 +1,10 @@
+{
+  "name": "OJALA Shop - Modern E-commerce Platform",
+  "description": "A refined, minimal e-commerce website with an orange-accented design, focusing on high-quality product discovery and seamless shopping experience in English.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}

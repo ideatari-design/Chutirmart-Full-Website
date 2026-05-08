@@ -1,0 +1,381 @@
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  ChevronRight, 
+  Truck, 
+  Clock, 
+  BadgeCheck, 
+  ThumbsUp, 
+  Star, 
+  ShoppingBag,
+  ExternalLink,
+  ChevronLeft,
+  ArrowRight,
+  MapPin,
+  Search
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { productService } from '@/services/productService';
+import { Product } from '@/types';
+import { useCart } from '@/context/CartContext';
+import { Link } from 'react-router-dom';
+import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import ProductCard from '@/components/ProductCard';
+import ProductCardSkeleton from '@/components/ProductCardSkeleton';
+import Breadcrumbs from '@/components/Breadcrumbs';
+
+const Features = () => (
+  <div className="bg-background py-12 border-b">
+    <div className="max-w-[1140px] mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+      {[
+        { title: "Fast & Free Delivery", desc: "On orders over ৳ 1000", icon: <Truck className="h-7 w-7" /> },
+        { title: "24/7 Support", desc: "Professional assistance", icon: <Clock className="h-7 w-7" /> },
+        { title: "Best Price Guarantee", desc: "We offer competitive prices", icon: <BadgeCheck className="h-7 w-7" /> },
+        { title: "Quality Guarantee", desc: "100% genuine products", icon: <ThumbsUp className="h-7 w-7" /> },
+      ].map((f, i) => (
+        <div key={i} className="flex items-center gap-5 group cursor-pointer hover:translate-y-[-2px] transition-all">
+          <div className="h-14 w-14 rounded-2xl bg-secondary flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all shadow-sm">
+            {f.icon}
+          </div>
+          <div>
+            <h4 className="text-sm font-bold">{f.title}</h4>
+            <p className="text-[11px] text-muted-foreground font-bold mt-0.5">{f.desc}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const CategoryCircles = () => {
+  const categories = [
+    { name: "Smartphone", icon: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=200" },
+    { name: "Home & Decor", icon: "https://images.unsplash.com/photo-1513519245088-0e12902e3a38?auto=format&fit=crop&q=80&w=200" },
+    { name: "Makeup", icon: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&q=80&w=200" },
+    { name: "Autoparts", icon: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=200" },
+    { name: "Laptop", icon: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=200" },
+    { name: "Fashion", icon: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=200" },
+    { name: "Headphones", icon: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=200" },
+    { name: "Handbags", icon: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=200" },
+  ];
+
+  // Triple categories to ensure no gap on very wide screens and smooth loop
+  const allCategories = [...categories, ...categories, ...categories];
+
+  return (
+    <div className="py-16 overflow-hidden bg-background/50">
+      <div className="max-w-[1140px] mx-auto px-4 relative overflow-hidden">
+        <motion.div 
+          className="flex gap-12 w-max"
+          animate={{ x: [0, -1408] }} // 8 items * (128w + 48gap) = 1408px
+          transition={{
+            duration: 40,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          whileHover={{ animationPlayState: "paused" }}
+        >
+          {allCategories.map((c, i) => (
+            <Link 
+              key={i} 
+              to={`/products?category=${c.name}`} 
+              className="flex flex-col items-center gap-4 shrink-0 group cursor-pointer"
+            >
+              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-background border-2 border-border group-hover:border-primary transition-all p-2 bg-secondary/30 relative">
+                <img 
+                  src={c.icon} 
+                  alt={c.name} 
+                  className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-500" 
+                  referrerPolicy="no-referrer"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-all rounded-full" />
+              </div>
+              <p className="text-[11px] font-bold text-center group-hover:text-primary transition-colors">{c.name}</p>
+            </Link>
+          ))}
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+const FlashDeals = () => {
+  const [timeLeft, setTimeLeft] = useState({ h: 11, m: 41, s: 42 });
+  const [dealProducts, setDealProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    productService.getFeaturedProducts().then(setDealProducts);
+    
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev.s > 0) return { ...prev, s: prev.s - 1 };
+        if (prev.m > 0) return { ...prev, m: prev.m - 1, s: 59 };
+        if (prev.h > 0) return { h: prev.h - 1, m: 59, s: 59 };
+        return prev;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="py-20 max-w-[1140px] mx-auto px-0 sm:px-4">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-12 gap-6 bg-secondary/50 p-8 rounded-3xl border border-border mx-4 sm:mx-0">
+        <div className="flex items-center gap-8">
+          <div>
+            <h2 className="text-4xl font-bold text-foreground">Flash sale</h2>
+            <p className="text-xs font-semibold text-muted-foreground mt-2">Don't miss the current deals!</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-[11px] font-bold text-muted-foreground">Ends in:</span>
+            <div className="flex gap-2">
+              {[timeLeft.h, timeLeft.m, timeLeft.s].map((t, i) => (
+                <div key={i} className="flex flex-col items-center">
+                  <div className="bg-accent text-accent-foreground w-12 h-12 flex items-center justify-center text-xl font-bold rounded-xl shadow-lg shadow-accent/20">
+                    {t.toString().padStart(2, '0')}
+                  </div>
+                  <span className="text-[9px] font-bold mt-1 text-muted-foreground">{i === 0 ? 'Hrs' : i === 1 ? 'Min' : 'Sec'}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <Link to="/products">
+          <Button variant="outline" className="rounded-2xl px-10 h-14 font-bold text-[15px] leading-[18px] border-2 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all shadow-sm hover:shadow-md no-underline">
+            See all products
+          </Button>
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 px-4 sm:px-0">
+        {dealProducts.slice(0, 4).map((p) => (
+          <ProductCard key={p.id} product={p} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
+const BannerSlider = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const slides = [
+    {
+      id: 1,
+      image: "https://plus.unsplash.com/premium_photo-1681488262364-8aeb1b6aac56?auto=format&fit=crop&q=80&w=1600",
+    },
+    {
+      id: 2,
+      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=1600",
+    },
+    {
+      id: 3,
+      image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1600",
+    },
+    {
+      id: 4,
+      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=1600",
+    }
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % slides.length);
+    }, 4000); // Faster slide for image-only show
+    return () => clearInterval(timer);
+  }, [slides.length]);
+
+  return (
+    <div className="relative h-full w-full overflow-hidden rounded-[1.5rem] group bg-secondary/20 shadow-xl">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentSlide}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1 }}
+          className="absolute inset-0"
+        >
+          <img 
+            src={slides[currentSlide].image} 
+            alt={`Slide ${currentSlide + 1}`}
+            className="w-full h-full object-cover" 
+            loading="lazy"
+          />
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Navigation Dots */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentSlide(i)}
+            className={`h-1.5 rounded-full transition-all duration-300 ${i === currentSlide ? 'w-8 bg-white' : 'w-1.5 bg-white/40'}`}
+          />
+        ))}
+      </div>
+
+      {/* Arrows */}
+      <button 
+        onClick={() => setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length)}
+        className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-black/40 z-30"
+      >
+        <ChevronLeft className="h-6 w-6" />
+      </button>
+      <button 
+        onClick={() => setCurrentSlide(prev => (prev + 1) % slides.length)}
+        className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-black/40 z-30"
+      >
+        <ChevronRight className="h-6 w-6" />
+      </button>
+    </div>
+  );
+};
+
+const Home = () => {
+  const [activeTab, setActiveTab] = useState('Fashion');
+  const tabs = ['Fashion', 'Smartphones', 'Home & Decor', 'Beauty'];
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { addToCart } = useCart();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      const data = await productService.getAllProducts();
+      setProducts(data);
+      setLoading(false);
+    };
+    fetchProducts();
+  }, []);
+
+  return (
+    <div className="bg-background">
+      {/* Hero Section */}
+      <section className="bg-background py-6 md:py-10">
+        <div className="max-w-[1140px] mx-auto px-4">
+          <div className="relative h-[220px] sm:h-[350px]">
+             <BannerSlider />
+          </div>
+        </div>
+      </section>
+
+      {/* Removed Features section per user request and selector */}
+      
+      <CategoryCircles />
+      
+      <div className="max-w-[1140px] mx-auto px-4">
+         <div className="bg-accent/10 border border-accent/20 p-4 rounded-2xl">
+            <p className="text-[11px] text-center font-bold text-muted-foreground">
+               Super discount for your <span className="text-accent font-bold">first purchase</span> — Use code <span className="bg-accent text-accent-foreground px-2 py-0.5 rounded ml-1">COUPON25</span>
+            </p>
+         </div>
+      </div>
+
+      <FlashDeals />
+      
+      {/* New Arrivals */}
+      <section className="py-20 max-w-[1140px] mx-auto px-0 sm:px-4 border-t">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-12 gap-8 px-4 sm:px-0">
+            <h2 className="text-4xl font-bold text-foreground">New arrivals</h2>
+            <div className="flex flex-wrap justify-center gap-10 items-center">
+              {tabs.map((tab) => (
+                <button 
+                  key={tab} 
+                  onClick={() => setActiveTab(tab)}
+                  className={`text-xs font-bold transition-all relative py-2 ${activeTab === tab ? 'text-accent' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  {tab}
+                  {activeTab === tab && <motion.div layoutId="tabUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-full" />}
+                </button>
+              ))}
+              <Separator orientation="vertical" className="h-6 hidden sm:block bg-border/50" />
+              <Link to="/products" className="text-xs font-bold text-muted-foreground hover:text-accent flex items-center gap-2 transition-colors group">
+                See all <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 px-4 sm:px-0">
+           {loading ? (
+             [...Array(8)].map((_, i) => <ProductCardSkeleton key={i} />)
+           ) : (
+             products.slice(0, 8).map((p) => (
+               <ProductCard key={p.id} product={p} />
+             ))
+           )}
+        </div>
+      </section>
+
+      {/* Best Selling */}
+      <section className="py-24 bg-secondary/30">
+         <div className="max-w-[1140px] mx-auto px-0 sm:px-4">
+            <div className="flex justify-between items-center mb-12 px-4 sm:px-0">
+               <h2 className="text-4xl font-bold text-foreground">Best selling</h2>
+               <Link to="/products" className="text-xs font-bold text-muted-foreground hover:text-accent transition-colors bg-white px-6 py-2.5 rounded-full shadow-sm border border-border/50">See all products</Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 px-4 sm:px-0">
+               {loading ? (
+                 [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
+               ) : (
+                 products.slice(0, 4).map((p) => (
+                   <ProductCard key={p.id} product={p} />
+                 ))
+               )}
+            </div>
+         </div>
+      </section>
+
+      {/* From Our Blog */}
+      <section className="py-20 max-w-[1140px] mx-auto px-4 border-t">
+         <h2 className="text-3xl font-bold mb-12">From our blog</h2>
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { category: "Beauty & fashion", title: "Weekday Outfit Inspiration For All Occasions", author: "Mirtul Mina", image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=600" },
+              { category: "Cosmetics", title: "100% Pure & Natural Sage Essential Oil", author: "Mirtul Mina", image: "https://images.unsplash.com/photo-1522335789203-aabd1fc53bb7?auto=format&fit=crop&q=80&w=600" },
+              { category: "Electronics", title: "Tips for Cleaning Desktop & Laptop", author: "Mirtul Mina", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=600" },
+            ].map((blog, i) => (
+              <div key={i} className="group cursor-pointer">
+                  <div className="aspect-[16/10] overflow-hidden rounded-[2rem] mb-6 shadow-xl shadow-foreground/5">
+                    <img src={blog.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" loading="lazy" />
+                  </div>
+                 <div className="space-y-4 px-2">
+                    <div className="flex items-center gap-4 text-[11px] font-bold text-muted-foreground">
+                       <span className="text-primary">{blog.category}</span>
+                       <span className="w-1 h-1 rounded-full bg-border" />
+                       <span>By <span className="text-foreground">{blog.author}</span></span>
+                    </div>
+                    <h3 className="text-2xl font-bold group-hover:text-primary transition-colors leading-tight">{blog.title}</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec porta et nisl at sodales.</p>
+                    <Button variant="outline" className="h-12 text-[11px] font-bold px-10 rounded-2xl border-2 hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm">Read more</Button>
+                 </div>
+              </div>
+            ))}
+         </div>
+      </section>
+
+      {/* Middle Search banner */}
+      <section className="bg-primary py-24 text-white overflow-hidden relative">
+         <div className="max-w-2xl mx-auto px-4 text-center relative z-10">
+            <h2 className="text-4xl md:text-6xl font-bold mb-8">Looking for <br /> something else?</h2>
+            <div className="relative mb-8 group">
+               <Input placeholder="Search for products..." className="h-16 pr-16 rounded-full text-sm text-center border-none bg-white/10 backdrop-blur-xl text-white placeholder:text-white/40 focus-visible:ring-white/20" />
+               <Button className="absolute right-2 top-2 h-12 w-12 rounded-full bg-white text-primary hover:bg-white/90 shadow-xl"><Search className="h-5 w-5" /></Button>
+            </div>
+            <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-xs font-bold text-white/70">
+               {["Smartphone", "Tablet", "Furniture", "Laptop", "Fashion", "Home & decor", "Camera"].map(tag => (
+                 <span key={tag} className="hover:text-white cursor-pointer transition-colors hover:scale-110 transform duration-300">{tag}</span>
+               ))}
+            </div>
+         </div>
+         <div className="absolute top-1/2 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2" />
+         <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl translate-y-1/2 translate-x-1/2" />
+      </section>
+    </div>
+  );
+};
+
+export default Home;
