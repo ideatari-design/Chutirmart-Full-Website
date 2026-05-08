@@ -775,14 +775,14 @@ const Footer = () => (
 
 export default function App() {
   const location = useLocation();
-  const isAdminPath = location.pathname.startsWith('/admin');
+  const isAdminPath = React.useMemo(() => location.pathname.match(/^\/admin(\/|$)/), [location.pathname]);
 
   return (
     <div className="min-h-screen flex flex-col selection:bg-accent/20 relative">
       {!isAdminPath && <TopHeader />}
       {!isAdminPath && <MainHeader />}
       {!isAdminPath && <NavHeader />}
-      <main className="flex-grow">
+      <main className="flex-grow w-full overflow-x-hidden">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Catalog />} />
