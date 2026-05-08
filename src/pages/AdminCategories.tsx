@@ -30,10 +30,10 @@ import { Label } from '@/components/ui/label';
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([
-    { id: 1, name: 'স্মার্টফোন', slug: 'smartphones', productCount: 124, image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=200' },
-    { id: 2, name: 'হোম ও ডেকর', slug: 'home-decor', productCount: 89, image: 'https://images.unsplash.com/photo-1513519245088-0e12902e3a38?auto=format&fit=crop&q=80&w=200' },
-    { id: 3, name: 'মেকআপ', slug: 'makeup', productCount: 56, image: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&q=80&w=200' },
-    { id: 4, name: 'অটোপার্টস', slug: 'autoparts', productCount: 42, image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=200' },
+    { id: 1, name: 'Smartphones', slug: 'smartphones', productCount: 124, image: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&q=80&w=300' },
+    { id: 2, name: 'Home & Decor', slug: 'home-decor', productCount: 89, image: 'https://images.unsplash.com/photo-1513519245088-0e12902e3a38?auto=format&fit=crop&q=80&w=300' },
+    { id: 3, name: 'Makeup', slug: 'makeup', productCount: 56, image: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&q=80&w=300' },
+    { id: 4, name: 'Autoparts', slug: 'autoparts', productCount: 42, image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=300' },
   ]);
 
   return (
@@ -42,31 +42,31 @@ const AdminCategories = () => {
         <div>
            <h2 className="text-3xl font-black flex items-center gap-3">
               <Tags className="h-8 w-8 text-primary" />
-              ক্যাটাগরি ম্যানেজমেন্ট
+              Category Management
            </h2>
-           <p className="text-muted-foreground font-medium">আপনার শপের সকল ক্যাটাগরি এখান থেকে নিয়ন্ত্রণ করুন</p>
+           <p className="text-muted-foreground font-medium">Control all your shop categories from here</p>
         </div>
         <Dialog>
            <DialogTrigger render={
               <Button className="rounded-xl h-12 px-6 gap-2 bg-primary hover:bg-primary/90 font-bold">
-                <Plus className="h-5 w-5" /> নতুন ক্যাটাগরি
+                <Plus className="h-5 w-5" /> New Category
               </Button>
            } />
            <DialogContent className="rounded-[2rem] sm:max-w-md">
               <DialogHeader>
-                 <DialogTitle className="text-xl font-black">নতুন ক্যাটাগরি তৈরি করুন</DialogTitle>
+                 <DialogTitle className="text-xl font-black">Create New Category</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4">
                  <div className="space-y-2">
-                    <Label className="font-bold">ক্যাটাগরির নাম (বাংলা)</Label>
-                    <Input placeholder="যেমন: ফ্যাশন" className="h-12 rounded-xl" />
+                    <Label className="font-bold">Category Name</Label>
+                    <Input placeholder="e.g. Fashion" className="h-12 rounded-xl" />
                  </div>
                  <div className="space-y-2">
-                    <Label className="font-bold">স্লাগ (Slug)</Label>
-                    <Input placeholder="যেমন: fashion" className="h-12 rounded-xl" />
+                    <Label className="font-bold">Slug</Label>
+                    <Input placeholder="e.g. fashion" className="h-12 rounded-xl" />
                  </div>
                  <div className="space-y-2">
-                    <Label className="font-bold">ইমেজ URL</Label>
+                    <Label className="font-bold">Image URL</Label>
                     <div className="flex gap-2">
                        <Input placeholder="https://..." className="h-12 rounded-xl" />
                        <Button variant="secondary" className="h-12 rounded-xl">
@@ -76,7 +76,7 @@ const AdminCategories = () => {
                  </div>
               </div>
               <DialogFooter>
-                 <Button className="w-full h-12 rounded-xl font-bold uppercase text-xs">সেভ করুন</Button>
+                 <Button className="w-full h-12 rounded-xl font-bold uppercase text-xs">Save Category</Button>
               </DialogFooter>
            </DialogContent>
         </Dialog>
@@ -86,7 +86,7 @@ const AdminCategories = () => {
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="ক্যাটাগরির নাম দিয়ে খুঁজুন..." 
+            placeholder="Search by category name..." 
             className="pl-10 rounded-xl bg-secondary/20 border-none" 
           />
         </div>
@@ -96,11 +96,11 @@ const AdminCategories = () => {
         <Table>
           <TableHeader className="bg-secondary/30">
             <TableRow className="hover:bg-transparent border-none">
-              <TableHead className="pl-6 font-bold text-primary">ইমেজ</TableHead>
-              <TableHead className="font-bold text-primary">নাম</TableHead>
-              <TableHead className="font-bold text-primary">স্লাগ</TableHead>
-              <TableHead className="font-bold text-primary">পণ্য সংখ্যা</TableHead>
-              <TableHead className="font-bold text-primary text-right pr-6">অ্যাকশন</TableHead>
+              <TableHead className="pl-6 font-bold text-primary">Image</TableHead>
+              <TableHead className="font-bold text-primary">Name</TableHead>
+              <TableHead className="font-bold text-primary">Slug</TableHead>
+              <TableHead className="font-bold text-primary">Product Count</TableHead>
+              <TableHead className="font-bold text-primary text-right pr-6">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -114,7 +114,7 @@ const AdminCategories = () => {
                 <TableCell className="font-bold text-primary">{cat.name}</TableCell>
                 <TableCell className="text-muted-foreground font-medium">{cat.slug}</TableCell>
                 <TableCell>
-                   <Badge variant="outline" className="font-bold border-primary/20 text-primary">{cat.productCount}টি পণ্য</Badge>
+                   <Badge variant="outline" className="font-bold border-primary/20 text-primary">{cat.productCount} Products</Badge>
                 </TableCell>
                 <TableCell className="text-right pr-6">
                    <div className="flex justify-end gap-2">

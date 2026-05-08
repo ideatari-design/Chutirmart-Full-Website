@@ -36,22 +36,22 @@ const OrderTracking = () => {
         const currentIdx = statuses.indexOf(order.status);
         
         const steps = [
-          { status: 'অর্ডার গ্রহণ করা হয়েছে', date: new Date(order.createdAt).toLocaleString('bn-BD'), completed: true },
-          { status: 'প্যাকিং চলিতেছে', date: currentIdx >= 1 ? 'সম্পন্ন' : 'অপেক্ষমাণ', completed: currentIdx >= 1 },
-          { status: 'ডেলিভারির জন্য পাঠানো হয়েছে', date: currentIdx >= 2 ? 'সম্পন্ন' : 'অপেক্ষমাণ', completed: currentIdx >= 2 },
-          { status: 'ডেলিভারি সম্পন্ন', date: currentIdx >= 3 ? 'সম্পন্ন' : 'অপেক্ষমাণ', completed: currentIdx >= 3 },
+          { status: 'Order Accepted', date: new Date(order.createdAt).toLocaleString(), completed: true },
+          { status: 'Packing in Progress', date: currentIdx >= 1 ? 'Completed' : 'Pending', completed: currentIdx >= 1 },
+          { status: 'In Transit', date: currentIdx >= 2 ? 'Completed' : 'Pending', completed: currentIdx >= 2 },
+          { status: 'Delivered', date: currentIdx >= 3 ? 'Completed' : 'Pending', completed: currentIdx >= 3 },
         ];
 
         setTrackingData({
           ...order,
-          date: new Date(order.createdAt).toLocaleDateString('bn-BD'),
+          date: new Date(order.createdAt).toLocaleDateString(),
           steps
         });
       } else {
-        toast.error("অর্ডারটি খুঁজে পাওয়া যায়নি।");
+        toast.error("Order not found.");
       }
     } catch (err) {
-      toast.error("তথ্য লোড করতে সমস্যা হয়েছে।");
+      toast.error("Error loading order data.");
     } finally {
       setLoading(false);
     }
@@ -66,8 +66,8 @@ const OrderTracking = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-20">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">অর্ডার ট্র্যাক করুন</h1>
-        <p className="text-muted-foreground">আপনার অর্ডার আইডি ব্যবহার করে বর্তমান অবস্থা জানুন</p>
+        <h1 className="text-4xl font-bold mb-4">Track Your Order</h1>
+        <p className="text-muted-foreground">Enter your Order ID to see the status</p>
       </div>
 
       <Card className="border-none shadow-xl rounded-3xl overflow-hidden bg-white mb-12">
@@ -78,12 +78,12 @@ const OrderTracking = () => {
               <Input 
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
-                placeholder="যেমন: #123456" 
+                placeholder="e.g. #123456" 
                 className="pl-12 h-14 rounded-2xl bg-secondary/30 border-none text-lg"
               />
             </div>
             <Button size="lg" className="h-14 px-10 rounded-2xl text-lg shadow-lg shadow-primary/20" disabled={loading}>
-              {loading ? 'লোড হচ্ছে...' : 'সাবমিট'}
+              {loading ? 'Loading...' : 'Submit'}
             </Button>
           </form>
         </CardContent>
@@ -99,20 +99,23 @@ const OrderTracking = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card className="rounded-2xl border-primary/5 shadow-sm">
                 <CardContent className="p-6 text-center">
-                  <Badge variant="outline" className="mb-2 bg-primary/5">অর্ডার আইডি</Badge>
+                  <Badge variant="outline" className="mb-2 bg-primary/5">Order ID</Badge>
                   <p className="font-bold text-xl">{trackingData.id}</p>
                 </CardContent>
               </Card>
               <Card className="rounded-2xl border-primary/5 shadow-sm">
                 <CardContent className="p-6 text-center">
-                  <Badge variant="outline" className="mb-2 bg-primary/5">অর্ডার তারিখ</Badge>
+                  <Badge variant="outline" className="mb-2 bg-primary/5">Order Date</Badge>
                   <p className="font-bold text-xl">{trackingData.date}</p>
                 </CardContent>
               </Card>
               <Card className="rounded-2xl border-primary/5 shadow-sm">
                 <CardContent className="p-6 text-center">
-                  <Badge variant="outline" className="mb-2 bg-primary/5">পেমেন্ট অবস্থা</Badge>
-                  <p className="font-bold text-xl text-accent">{trackingData.paymentStatus === 'partially_paid' ? 'আংশিক পরিশোধিত' : 'পরিশোধিত'}</p>
+                  <Badge variant="outline" className="mb-2 bg-primary/5">Payment Status</Badge>
+                  <p className="font-bold text-xl text-accent">
+                    {trackingData.paymentStatus === 'partially_paid' ? 'Partially Paid' : 
+                     trackingData.paymentStatus === 'paid' ? 'Paid' : 'Unpaid'}
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -120,10 +123,10 @@ const OrderTracking = () => {
             <Card className="rounded-3xl border-primary/5 shadow-xl p-8">
               <div className="flex justify-between items-center mb-10">
                 <h3 className="font-bold text-xl flex items-center gap-2">
-                  <Package className="h-5 w-5 text-primary" /> শিপিং স্ট্যাটাস
+                  <Package className="h-5 w-5 text-primary" /> Shipping Status
                 </h3>
                 <Button variant="outline" className="gap-2 rounded-xl">
-                  <FileText className="h-4 w-4" /> ইনভয়েস ডাউনলোড
+                  <FileText className="h-4 w-4" /> Download Invoice
                 </Button>
               </div>
 
@@ -139,7 +142,7 @@ const OrderTracking = () => {
                         <p className="text-xs text-muted-foreground mt-1">{step.date}</p>
                       </div>
                       {step.completed && (
-                        <Badge variant="secondary" className="w-fit bg-primary/10 text-primary">সম্পন্ন</Badge>
+                        <Badge variant="secondary" className="w-fit bg-primary/10 text-primary">Completed</Badge>
                       )}
                     </div>
                   </div>
@@ -153,11 +156,11 @@ const OrderTracking = () => {
                      <Headset className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                     <p className="font-bold text-sm">সহায়তা প্রয়োজন?</p>
-                     <p className="text-xs text-muted-foreground">আমাদের কাস্টমার কেয়ারে কল করুন</p>
+                     <p className="font-bold text-sm">Need Help?</p>
+                     <p className="text-xs text-muted-foreground">Call our customer support</p>
                   </div>
                </div>
-               <Button className="rounded-xl">+৮৮০১৭xxxxxxxx</Button>
+               <Button className="rounded-xl">+88017XXXXXXXX</Button>
             </div>
           </motion.div>
         )}

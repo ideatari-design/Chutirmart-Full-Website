@@ -51,14 +51,14 @@ const Features = () => (
 
 const CategoryCircles = () => {
   const categories = [
-    { name: "Smartphone", icon: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=200" },
-    { name: "Home & Decor", icon: "https://images.unsplash.com/photo-1513519245088-0e12902e3a38?auto=format&fit=crop&q=80&w=200" },
-    { name: "Makeup", icon: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&q=80&w=200" },
-    { name: "Autoparts", icon: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=200" },
-    { name: "Laptop", icon: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=200" },
-    { name: "Fashion", icon: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=200" },
-    { name: "Headphones", icon: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=200" },
-    { name: "Handbags", icon: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=200" },
+    { name: "Smartphone", icon: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&q=80&w=300" },
+    { name: "Home & Decor", icon: "https://images.unsplash.com/photo-1513519245088-0e12902e3a38?auto=format&fit=crop&q=80&w=300" },
+    { name: "Makeup", icon: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&q=80&w=300" },
+    { name: "Autoparts", icon: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=300" },
+    { name: "Laptop", icon: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=300" },
+    { name: "Fashion", icon: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=300" },
+    { name: "Headphones", icon: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=300" },
+    { name: "Handbags", icon: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=300" },
   ];
 
   // Triple categories to ensure no gap on very wide screens and smooth loop
@@ -88,8 +88,11 @@ const CategoryCircles = () => {
                   src={c.icon} 
                   alt={c.name} 
                   className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-500" 
-                  referrerPolicy="no-referrer"
                   loading="lazy"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=300';
+                  }}
                 />
                 <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-all rounded-full" />
               </div>
@@ -164,19 +167,19 @@ const BannerSlider = () => {
   const slides = [
     {
       id: 1,
-      image: "https://plus.unsplash.com/premium_photo-1681488262364-8aeb1b6aac56?auto=format&fit=crop&q=80&w=1600",
-    },
-    {
-      id: 2,
-      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=1600",
-    },
-    {
-      id: 3,
       image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1600",
     },
     {
+      id: 2,
+      image: "https://images.unsplash.com/photo-1441984969813-91c709148f06?auto=format&fit=crop&q=80&w=1600",
+    },
+    {
+      id: 3,
+      image: "https://images.unsplash.com/photo-1441986236893-3b3ef3967d6a?auto=format&fit=crop&q=80&w=1600",
+    },
+    {
       id: 4,
-      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=1600",
+      image: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&q=80&w=1600",
     }
   ];
 

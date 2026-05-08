@@ -80,7 +80,10 @@ const Cart = () => {
                                 src={item.images[0]} 
                                 alt={item.name} 
                                 className="w-full h-full object-contain" 
-                                referrerPolicy="no-referrer"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200';
+                                }}
                               />
                             </Link>
                           </div>

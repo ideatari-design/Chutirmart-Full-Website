@@ -50,31 +50,31 @@ const AdminDashboard = () => {
     const successRate = totalOrdersCount > 0 ? Math.round(((totalOrdersCount - incompleteOrdersCount) / totalOrdersCount) * 100) : 0;
 
     return [
-      { label: 'অসম্পূর্ণ অর্ডার', value: incompleteOrdersCount.toLocaleString('bn-BD'), trend: '-২%', icon: <AlertCircle className="h-5 w-5" />, color: 'bg-red-50 text-red-600' },
-      { label: 'সব অর্ডার', value: totalOrdersCount.toLocaleString('bn-BD'), trend: '+৫%', icon: <ShoppingCart className="h-5 w-5" />, color: 'bg-blue-50 text-blue-600' },
-      { label: 'সাফল্যের হার', value: `${successRate.toLocaleString('bn-BD')}%`, trend: '+৮%', icon: <BadgeCheck className="h-5 w-5" />, color: 'bg-indigo-50 text-indigo-600' },
-      { label: 'মোট বিক্রয়', value: `৳ ${totalRevenue.toLocaleString('bn-BD')}`, trend: '+১০%', icon: <BarChart3 className="h-5 w-5" />, color: 'bg-green-50 text-green-600' },
+      { label: 'Incomplete Orders', value: incompleteOrdersCount.toLocaleString(), trend: '-2%', icon: <AlertCircle className="h-5 w-5" />, color: 'bg-red-50 text-red-600' },
+      { label: 'All Orders', value: totalOrdersCount.toLocaleString(), trend: '+5%', icon: <ShoppingCart className="h-5 w-5" />, color: 'bg-blue-50 text-blue-600' },
+      { label: 'Success Rate', value: `${successRate.toLocaleString()}%`, trend: '+8%', icon: <BadgeCheck className="h-5 w-5" />, color: 'bg-indigo-50 text-indigo-600' },
+      { label: 'Total Revenue', value: `৳ ${totalRevenue.toLocaleString()}`, trend: '+10%', icon: <BarChart3 className="h-5 w-5" />, color: 'bg-green-50 text-green-600' },
     ];
   }, [orders]);
 
   const salesData = useMemo(() => {
      // Generate dummy weekly data for now as we don't have historical data in memory server
-     const days = ['শনিবার', 'রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার'];
+     const days = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
      return days.map(day => ({
         name: day,
         sales: Math.floor(Math.random() * 5000) + 1000
      }));
   }, []);
 
-  if (loading) return <div className="p-20 text-center">লোড হচ্ছে...</div>;
+  if (loading) return <div className="p-20 text-center">Loading...</div>;
 
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold">ড্যাশবোর্ড ওভারভিউ</h2>
+        <h2 className="text-3xl font-bold">Dashboard Overview</h2>
         <div className="flex items-center gap-3">
-           <Button variant="outline">রিপোর্ট ডাউনলোড</Button>
-           <Button>অ্যাডমিন সেটিংস</Button>
+           <Button variant="outline">Download Report</Button>
+           <Button>Admin Settings</Button>
         </div>
       </div>
 
@@ -100,8 +100,8 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card className="border-none shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg">বিক্রয় গ্রাফ (সাপ্তাহিক)</CardTitle>
-            <CardDescription>বিগত ৭ দিনের মোট বিক্রয়ের তথ্য</CardDescription>
+            <CardTitle className="text-lg">Sales Graph (Weekly)</CardTitle>
+            <CardDescription>Total sales data for the last 7 days</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -126,30 +126,30 @@ const AdminDashboard = () => {
 
         <Card className="border-none shadow-sm h-full">
           <CardHeader>
-            <CardTitle className="text-lg">সাম্প্রতিক অর্ডার</CardTitle>
-            <CardDescription>সর্বশেষ ৫টি অর্ডারের লিস্ট</CardDescription>
+            <CardTitle className="text-lg">Recent Orders</CardTitle>
+            <CardDescription>List of the latest 5 orders</CardDescription>
           </CardHeader>
           <CardContent>
              <div className="space-y-4">
                 {orders.slice(0, 5).map((o, i) => (
                    <div key={o.id} className="flex items-center justify-between p-3 bg-secondary/20 rounded-xl hover:bg-secondary/40 transition-colors cursor-pointer group">
                       <div className="flex items-center gap-3">
-                         <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center font-bold text-xs uppercase">
+                         <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center font-bold text-xs uppercase border">
                             {o.id.substring(0, 3)}
                          </div>
                          <div>
-                            <p className="text-sm font-bold">অর্ডার {o.id}</p>
-                            <p className="text-xs text-muted-foreground">{new Date(o.createdAt).toLocaleString('bn-BD')}</p>
+                            <p className="text-sm font-bold">Order {o.id}</p>
+                            <p className="text-xs text-muted-foreground">{new Date(o.createdAt).toLocaleString()}</p>
                          </div>
                       </div>
                       <div className="flex items-center gap-4">
-                         <Badge className="bg-primary/10 text-primary hover:bg-primary/10 border-none shadow-none">{o.status}</Badge>
-                         <span className="font-bold text-sm">৳ {o.total.toLocaleString('bn-BD')}</span>
+                         <Badge className="bg-primary/10 text-primary hover:bg-primary/10 border-none shadow-none uppercase text-[10px] font-bold">{o.status}</Badge>
+                         <span className="font-bold text-sm">৳ {o.total.toLocaleString()}</span>
                          <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                       </div>
                    </div>
                 ))}
-                {orders.length === 0 && <p className="text-center text-muted-foreground py-10">কোন অর্ডার পাওয়া যায়নি</p>}
+                {orders.length === 0 && <p className="text-center text-muted-foreground py-10">No orders found</p>}
              </div>
           </CardContent>
         </Card>

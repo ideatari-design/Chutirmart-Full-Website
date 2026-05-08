@@ -44,7 +44,7 @@ const Checkout = () => {
   const handleOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone || !formData.address) {
-      toast.error("অনুগ্রহ করে সব তথ্য পূরণ করুন");
+      toast.error("Please fill in all required information");
       return;
     }
 
@@ -63,12 +63,12 @@ const Checkout = () => {
       });
 
       if (order) {
-        toast.success("আপনার অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে!");
+        toast.success("Your order has been successfully placed!");
         clearCart();
         navigate(`/track?id=${order.id.replace('#', '')}`);
       }
     } catch (err) {
-      toast.error("অর্ডার করতে সমস্যা হচ্ছে, আবার চেষ্টা করুন।");
+      toast.error("Something went wrong, please try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -79,8 +79,8 @@ const Checkout = () => {
       <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center">
         <PackageCheck className="h-10 w-10 text-muted-foreground" />
       </div>
-      <h2 className="text-2xl font-bold">আপনার কার্ট খালি</h2>
-      <Button onClick={() => navigate('/catalog')}>কেনাকাটা করুন</Button>
+      <h2 className="text-2xl font-bold">Your cart is empty</h2>
+      <Button onClick={() => navigate('/catalog')}>Shop Now</Button>
     </div>
   );
 
@@ -110,11 +110,11 @@ const Checkout = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] shadow-sm border border-slate-100">
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase ml-1">আপনারা নাম লিখুন</Label>
+                  <Label className="text-xs font-bold text-slate-500 uppercase ml-1">Your Name</Label>
                   <div className="relative group">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#00458F] transition-colors" />
                     <Input 
-                      placeholder="মুবিন আহমেদ" 
+                      placeholder="e.g. John Doe" 
                       className="pl-12 h-14 rounded-xl border-slate-200 focus:border-[#00458F] focus:ring-4 focus:ring-[#00458F]/10 transition-all bg-slate-50/30" 
                       value={formData.name}
                       onChange={e => setFormData(f => ({ ...f, name: e.target.value }))}
@@ -124,7 +124,7 @@ const Checkout = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase ml-1">আপনার মোবাইল নাম্বার লিখুন</Label>
+                  <Label className="text-xs font-bold text-slate-500 uppercase ml-1">Mobile Number</Label>
                   <div className="relative group">
                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#00458F] transition-colors" />
                     <Input 
@@ -138,11 +138,11 @@ const Checkout = () => {
                 </div>
 
                 <div className="md:col-span-2 space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase ml-1">আপনার সম্পূন্য ঠিকানা লিখুন</Label>
+                  <Label className="text-xs font-bold text-slate-500 uppercase ml-1">Full Shipping Address</Label>
                   <div className="relative group">
                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#00458F] transition-colors" />
                     <Input 
-                      placeholder="বাসা নং, রোড নং, এলাকা ও জেলা" 
+                      placeholder="House No., Road No., Area and City" 
                       className="pl-12 h-14 rounded-xl border-slate-200 focus:border-[#00458F] focus:ring-4 focus:ring-[#00458F]/10 transition-all bg-slate-50/30" 
                       value={formData.address}
                       onChange={e => setFormData(f => ({ ...f, address: e.target.value }))}
@@ -161,43 +161,43 @@ const Checkout = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <div 
-                   onClick={() => setDeliveryArea('inside')}
-                   className={`relative p-5 sm:p-6 rounded-[1.5rem] sm:rounded-3xl border-2 transition-all cursor-pointer flex flex-col gap-4 bg-white shadow-sm ${deliveryArea === 'inside' ? 'border-[#00458F] bg-[#00458F]/5' : 'border-slate-100'}`}
-                 >
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${deliveryArea === 'inside' ? 'bg-[#00458F] text-white' : 'bg-slate-100 text-slate-400'}`}>
-                      <MapPin className="h-6 w-6" />
+                <div 
+                  onClick={() => setDeliveryArea('inside')}
+                  className={`relative p-5 sm:p-6 rounded-[1.5rem] sm:rounded-3xl border-2 transition-all cursor-pointer flex flex-col gap-4 bg-white shadow-sm ${deliveryArea === 'inside' ? 'border-[#00458F] bg-[#00458F]/5' : 'border-slate-100'}`}
+                >
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${deliveryArea === 'inside' ? 'bg-[#00458F] text-white' : 'bg-slate-100 text-slate-400'}`}>
+                    <MapPin className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-800">Inside Dhaka</h4>
+                    <p className="text-sm text-slate-500">Home Delivery</p>
+                  </div>
+                  <div className="mt-2 text-xl font-bold text-[#00458F]">৳ 80</div>
+                  {deliveryArea === 'inside' && (
+                    <div className="absolute top-4 right-4 w-6 h-6 bg-[#00458F] rounded-full flex items-center justify-center">
+                      <div className="w-2.5 h-2.5 rounded-full bg-white" />
                     </div>
-                    <div>
-                      <h4 className="font-bold text-slate-800">ঢাকার ভিতরে</h4>
-                      <p className="text-sm text-slate-500">হোম ডেলিভারি</p>
-                    </div>
-                    <div className="mt-2 text-xl font-bold text-[#00458F]">৳ ৮০</div>
-                    {deliveryArea === 'inside' && (
-                      <div className="absolute top-4 right-4 w-6 h-6 bg-[#00458F] rounded-full flex items-center justify-center">
-                        <div className="w-2.5 h-2.5 rounded-full bg-white" />
-                      </div>
-                    )}
-                 </div>
+                  )}
+                </div>
 
-                 <div 
-                   onClick={() => setDeliveryArea('outside')}
-                   className={`relative p-5 sm:p-6 rounded-[1.5rem] sm:rounded-3xl border-2 transition-all cursor-pointer flex flex-col gap-4 bg-white shadow-sm ${deliveryArea === 'outside' ? 'border-[#00458F] bg-[#00458F]/5' : 'border-slate-100'}`}
-                 >
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${deliveryArea === 'outside' ? 'bg-[#00458F] text-white' : 'bg-slate-100 text-slate-400'}`}>
-                      <MapPin className="h-6 w-6" />
+                <div 
+                  onClick={() => setDeliveryArea('outside')}
+                  className={`relative p-5 sm:p-6 rounded-[1.5rem] sm:rounded-3xl border-2 transition-all cursor-pointer flex flex-col gap-4 bg-white shadow-sm ${deliveryArea === 'outside' ? 'border-[#00458F] bg-[#00458F]/5' : 'border-slate-100'}`}
+                >
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${deliveryArea === 'outside' ? 'bg-[#00458F] text-white' : 'bg-slate-100 text-slate-400'}`}>
+                    <MapPin className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-800">Outside Dhaka</h4>
+                    <p className="text-sm text-slate-500">Courier Delivery</p>
+                  </div>
+                  <div className="mt-2 text-xl font-bold text-[#00458F]">৳ 130</div>
+                  {deliveryArea === 'outside' && (
+                    <div className="absolute top-4 right-4 w-6 h-6 bg-[#00458F] rounded-full flex items-center justify-center">
+                      <div className="w-2.5 h-2.5 rounded-full bg-white" />
                     </div>
-                    <div>
-                      <h4 className="font-bold text-slate-800">ঢাকার বাহিরে</h4>
-                      <p className="text-sm text-slate-500">কুরিয়ার ডেলিভারি</p>
-                    </div>
-                    <div className="mt-2 text-xl font-bold text-[#00458F]">৳ ১৩০</div>
-                    {deliveryArea === 'outside' && (
-                      <div className="absolute top-4 right-4 w-6 h-6 bg-[#00458F] rounded-full flex items-center justify-center">
-                        <div className="w-2.5 h-2.5 rounded-full bg-white" />
-                      </div>
-                    )}
-                 </div>
+                  )}
+                </div>
               </div>
             </section>
 
@@ -298,7 +298,7 @@ const Checkout = () => {
 
                   <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-[10px] text-slate-500 font-medium leading-relaxed">
                     <ShieldCheck className="h-4 w-4 text-[#00458F] shrink-0" />
-                    <span>অর্ডার কনফার্ম করার মাধ্যমে আপনি আমাদের শর্তাবলীর সাথে একমত হতে সম্মত হচ্ছেন।</span>
+                    <span>By confirming the order, you agree to our terms and conditions.</span>
                   </div>
                </div>
             </div>

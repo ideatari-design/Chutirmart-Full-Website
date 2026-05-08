@@ -51,10 +51,10 @@ const AdminOrders = () => {
   const updateStatus = async (id: string, status: string) => {
     const success = await orderService.updateOrderStatus(id, status);
     if (success) {
-      toast.success("অর্ডার স্ট্যাটাস আপডেট হয়েছে");
+      toast.success("Order status updated successfully");
       fetchOrders();
     } else {
-      toast.error("আপডেট করা সম্ভব হয়নি");
+      toast.error("Could not update order status");
     }
   };
 
@@ -66,31 +66,31 @@ const AdminOrders = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'pending': return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">পেন্ডিং</Badge>;
-      case 'processing': return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">প্রসেসিং</Badge>;
-      case 'delivered': return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">ডেলিভারড</Badge>;
-      default: return <Badge variant="outline">{status}</Badge>;
+      case 'pending': return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 uppercase text-[10px] font-bold">Pending</Badge>;
+      case 'processing': return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 uppercase text-[10px] font-bold">Processing</Badge>;
+      case 'delivered': return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 uppercase text-[10px] font-bold">Delivered</Badge>;
+      case 'cancelled': return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 uppercase text-[10px] font-bold">Cancelled</Badge>;
+      case 'shipped': return <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 uppercase text-[10px] font-bold">Shipped</Badge>;
+      default: return <Badge variant="outline" className="uppercase text-[10px] font-bold">{status}</Badge>;
     }
   };
 
   const getPaymentBadge = (status: string) => {
      switch (status) {
-       case 'paid': return <Badge className="bg-green-500 hover:bg-green-600">পরিশোধিত</Badge>;
-       case 'partially_paid': return <Badge className="bg-accent hover:bg-accent/90">আংশিক</Badge>;
-       case 'unpaid': return <Badge variant="destructive">বাকি</Badge>;
-       default: return <Badge>{status}</Badge>;
+       case 'paid': return <Badge className="bg-green-500 hover:bg-green-600 uppercase text-[10px] font-bold">Paid</Badge>;
+       case 'partially_paid': return <Badge className="bg-accent hover:bg-accent/90 uppercase text-[10px] font-bold">Partial</Badge>;
+       case 'unpaid': return <Badge variant="destructive" className="uppercase text-[10px] font-bold">Unpaid</Badge>;
+       default: return <Badge className="uppercase text-[10px] font-bold">{status}</Badge>;
      }
   };
 
   return (
     <div className="space-y-6">
-
-
       <div className="flex items-center gap-4 py-4 px-6 bg-white rounded-2xl shadow-sm border border-primary/5">
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="অর্ডার আইডি বা মোবাইল দিয়ে খুঁজুন..." 
+            placeholder="Search by Order ID or mobile..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10 rounded-xl bg-secondary/20 border-none" 
@@ -102,12 +102,12 @@ const AdminOrders = () => {
         <Table>
           <TableHeader className="bg-secondary/30">
             <TableRow className="hover:bg-transparent border-none">
-              <TableHead className="pl-6 font-bold text-primary">অর্ডার আইডি</TableHead>
-              <TableHead className="font-bold text-primary">কাস্টমার</TableHead>
-              <TableHead className="font-bold text-primary">পেমেন্ট</TableHead>
-              <TableHead className="font-bold text-primary">স্টেটাস</TableHead>
-              <TableHead className="font-bold text-primary">মোট মূল্য</TableHead>
-              <TableHead className="font-bold text-primary text-right pr-6">অ্যাকশন</TableHead>
+              <TableHead className="pl-6 font-bold text-primary">Order ID</TableHead>
+              <TableHead className="font-bold text-primary">Customer</TableHead>
+              <TableHead className="font-bold text-primary">Payment</TableHead>
+              <TableHead className="font-bold text-primary">Status</TableHead>
+              <TableHead className="font-bold text-primary">Total Price</TableHead>
+              <TableHead className="font-bold text-primary text-right pr-6">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -130,23 +130,23 @@ const AdminOrders = () => {
                     </DialogTrigger>
                     <DialogContent className="max-w-xl">
                        <DialogHeader>
-                          <DialogTitle>অর্ডার বিস্তারিত ({o.id})</DialogTitle>
+                          <DialogTitle>Order Details ({o.id})</DialogTitle>
                        </DialogHeader>
                        <div className="space-y-6 py-4">
                           <div className="grid grid-cols-2 gap-4">
                              <div className="p-4 bg-secondary/30 rounded-2xl">
-                                <p className="text-xs text-muted-foreground font-bold uppercase mb-1">কাস্টমার তথ্য</p>
+                                <p className="text-xs text-muted-foreground font-bold uppercase mb-1">Customer Info</p>
                                 <p className="font-bold">{o.customerName}</p>
                                 <p className="text-sm">{o.customerPhone}</p>
                              </div>
                              <div className="p-4 bg-secondary/30 rounded-2xl">
-                                <p className="text-xs text-muted-foreground font-bold uppercase mb-1">অর্ডার তারিখ</p>
-                                <p className="font-bold">{new Date(o.createdAt).toLocaleDateString('bn-BD')}</p>
+                                <p className="text-xs text-muted-foreground font-bold uppercase mb-1">Order Date</p>
+                                <p className="font-bold">{new Date(o.createdAt).toLocaleDateString()}</p>
                              </div>
                           </div>
                           
                           <div className="space-y-3">
-                             <h4 className="font-bold text-sm">অর্ডার স্ট্যাটাস আপডেট করুন</h4>
+                             <h4 className="font-bold text-sm">Update Order Status</h4>
                              <div className="flex flex-wrap gap-2">
                                 <Button 
                                   variant={o.status === 'delivered' ? 'default' : 'outline'} 
@@ -154,7 +154,7 @@ const AdminOrders = () => {
                                   className="rounded-lg gap-2"
                                   onClick={() => updateStatus(o.id, 'delivered')}
                                 >
-                                  <CheckCircle2 className="h-3 w-3" /> ডেলিভারড
+                                  <CheckCircle2 className="h-3 w-3" /> Delivered
                                 </Button>
                                 <Button 
                                   variant={o.status === 'shipped' ? 'default' : 'outline'} 
@@ -162,7 +162,7 @@ const AdminOrders = () => {
                                   className="rounded-lg gap-2"
                                   onClick={() => updateStatus(o.id, 'shipped')}
                                 >
-                                  <Truck className="h-3 w-3" /> শিপিং
+                                  <Truck className="h-3 w-3" /> Shipped
                                 </Button>
                                 <Button 
                                   variant={o.status === 'cancelled' ? 'default' : 'outline'} 
@@ -170,13 +170,13 @@ const AdminOrders = () => {
                                   className="rounded-lg gap-2 text-destructive hover:bg-destructive/10"
                                   onClick={() => updateStatus(o.id, 'cancelled')}
                                 >
-                                  <XCircle className="h-3 w-3" /> ক্যানসেল
+                                  <XCircle className="h-3 w-3" /> Cancel
                                 </Button>
                              </div>
                           </div>
                        </div>
                        <DialogFooter>
-                          <Button className="w-full">ইনভয়েস প্রিন্ট করুন</Button>
+                          <Button className="w-full">Print Invoice</Button>
                        </DialogFooter>
                     </DialogContent>
                   </Dialog>

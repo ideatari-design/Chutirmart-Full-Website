@@ -175,8 +175,11 @@ const ProductDetail = () => {
                 src={product.images[selectedImage]} 
                 alt={product.name} 
                 className={`w-full h-full object-contain p-8 mix-blend-multiply transition-all duration-700 ${zoom ? 'opacity-0' : 'opacity-100'}`}
-                referrerPolicy="no-referrer"
                 loading="lazy"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800';
+                }}
               />
               {zoom && (
                 <div 
@@ -216,7 +219,16 @@ const ProductDetail = () => {
                 onClick={() => setSelectedImage(i)}
                 className={`w-20 h-20 rounded-2xl overflow-hidden border-2 flex-shrink-0 transition-all ${selectedImage === i ? 'border-primary ring-4 ring-primary/10' : 'border-border opacity-60 hover:opacity-100 hover:border-primary/30'}`}
               >
-                <img src={img} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" />
+                <img 
+                  src={img} 
+                  alt="" 
+                  className="w-full h-full object-cover" 
+                  loading="lazy" 
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200';
+                  }}
+                />
               </button>
             ))}
           </div>

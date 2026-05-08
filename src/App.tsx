@@ -66,7 +66,7 @@ const TopHeader = () => (
       </div>
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-1 cursor-pointer hover:text-primary">
-          <img src="https://flagcdn.com/w20/us.png" alt="US" className="w-4 h-3 object-cover" />
+          <img src="https://flagcdn.com/us.svg" alt="US" className="w-5 h-auto object-contain" />
           <span>English</span>
           <ChevronDown className="h-3 w-3" />
         </div>
@@ -193,7 +193,15 @@ const MainHeader = () => {
                       onMouseEnter={() => setSelectedIndex(idx)}
                     >
                       <div className="w-12 h-12 rounded-xl overflow-hidden bg-secondary flex-shrink-0">
-                        <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        <img 
+                          src={product.images[0]} 
+                          alt={product.name} 
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200';
+                          }}
+                        />
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-bold truncate group-hover:text-primary transition-colors">
@@ -264,7 +272,15 @@ const MainHeader = () => {
                     {wishlist.map(item => (
                       <div key={item.id} className="flex gap-4 group">
                         <Link to={`/product/${item.id}`} className="w-20 h-20 bg-secondary rounded-2xl overflow-hidden flex-shrink-0">
-                          <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" referrerPolicy="no-referrer" />
+                          <img 
+                            src={item.images[0]} 
+                            alt={item.name} 
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200';
+                            }}
+                          />
                         </Link>
                         <div className="flex-grow min-w-0">
                           <h4 className="font-bold text-sm truncate">{item.name}</h4>
@@ -320,7 +336,15 @@ const MainHeader = () => {
                     {cart.map(item => (
                       <div key={item.id} className="flex gap-4 group">
                         <div className="w-20 h-20 bg-secondary rounded-2xl overflow-hidden flex-shrink-0">
-                          <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" referrerPolicy="no-referrer" />
+                          <img 
+                            src={item.images[0]} 
+                            alt={item.name} 
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200';
+                            }}
+                          />
                         </div>
                         <div className="flex-grow min-w-0">
                           <h4 className="font-bold text-sm truncate">{item.name}</h4>
@@ -392,7 +416,15 @@ const MainHeader = () => {
                               setSearchQuery('');
                             }}
                           >
-                            <img src={product.images[0]} alt={product.name} className="w-8 h-8 object-cover rounded-lg" referrerPolicy="no-referrer" />
+                            <img 
+                              src={product.images[0]} 
+                              alt={product.name} 
+                              className="w-8 h-8 object-cover rounded-lg"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200';
+                              }}
+                            />
                             <div className="min-w-0">
                               <p className="text-xs font-bold truncate">{product.name}</p>
                               <p className="text-[10px] text-primary font-black">৳{product.price.toLocaleString()}</p>
@@ -582,11 +614,14 @@ const Footer = () => (
 );
 
 export default function App() {
+  const location = useLocation();
+  const isAdminPath = location.pathname.startsWith('/admin');
+
   return (
     <div className="min-h-screen flex flex-col selection:bg-accent/20 relative">
-      <TopHeader />
-      <MainHeader />
-      <NavHeader />
+      {!isAdminPath && <TopHeader />}
+      {!isAdminPath && <MainHeader />}
+      {!isAdminPath && <NavHeader />}
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -598,7 +633,7 @@ export default function App() {
           <Route path="/admin/*" element={<AdminLayout />} />
         </Routes>
       </main>
-      <Footer />
+      {!isAdminPath && <Footer />}
       <Toaster position="bottom-right" richColors />
     </div>
   );
