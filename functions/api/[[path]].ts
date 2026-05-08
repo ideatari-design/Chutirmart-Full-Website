@@ -1,3 +1,48 @@
+const PRODUCTS = [
+  { 
+    id: '1', 
+    name: 'Portable Crusher Juicer', 
+    nameBn: 'পোর্টেবল জুসার', 
+    price: 600, 
+    oldPrice: 1200,
+    category: 'Home & Decor', 
+    images: ['https://images.unsplash.com/photo-1544787210-2213d28929c1?auto=format&fit=crop&q=80&w=800'], 
+    stock: 10, 
+    isFeatured: true, 
+    stars: 4.8,
+    description: 'Mini portable blender for students and office workers.',
+    specs: { 'Power': '200W', 'Battery': '2000mAh', 'Capacity': '380ml' }
+  },
+  { 
+    id: '2', 
+    name: 'Pro Neck Fan', 
+    nameBn: 'নেক ফ্যান', 
+    price: 1500, 
+    oldPrice: 2000,
+    category: 'Gadgets', 
+    images: ['https://images.unsplash.com/photo-1622541929213-167c6d45100d?auto=format&fit=crop&q=80&w=800'], 
+    stock: 15, 
+    isFeatured: true, 
+    stars: 4.5,
+    description: 'Bladeless portable neck fan for outdoor activities.',
+    specs: { 'Battery': '4000mAh', 'Speeds': '3 Levels' }
+  },
+  { 
+    id: '3', 
+    name: 'Gaming Headset Elite', 
+    nameBn: 'গেমিং হেডসেট', 
+    price: 4500, 
+    oldPrice: 6000,
+    category: 'Audio', 
+    images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=800'], 
+    stock: 5, 
+    isFeatured: true, 
+    stars: 5.0,
+    description: 'RGB Gaming headset with noise cancelling mic.',
+    specs: { 'Drivers': '50mm', 'Connector': 'USB & 3.5mm' }
+  }
+];
+
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -32,7 +77,17 @@ export async function onRequest(context) {
   try {
     // --- Products API ---
     if (path === "/api/products" && method === "GET") {
+      if (!env.DB) {
+        console.warn("D1 DB mapping missing, using fallback products.");
+        return jsonResponse(PRODUCTS);
+      }
+
       const { results } = await env.DB.prepare("SELECT * FROM products").all();
+      
+      if (!results || results.length === 0) {
+        return jsonResponse(PRODUCTS); // Fallback if DB empty
+      }
+
       const parsedResults = results.map(p => ({
         ...p,
         images: JSON.parse(p.images || "[]"),
@@ -44,8 +99,18 @@ export async function onRequest(context) {
 
     if (path.startsWith("/api/products/") && method === "GET") {
       const id = path.split("/").pop();
+      
+      if (!env.DB) {
+        const product = PRODUCTS.find(p => p.id === id);
+        return product ? jsonResponse(product) : jsonResponse({ error: "Not found" }, 404);
+      }
+
       const product = await env.DB.prepare("SELECT * FROM products WHERE id = ?").bind(id).first();
-      if (!product) return jsonResponse({ error: "Product not found" }, 404);
+      
+      if (!product) {
+        const fbProduct = PRODUCTS.find(p => p.id === id);
+        return fbProduct ? jsonResponse(fbProduct) : jsonResponse({ error: "Product not found" }, 404);
+      }
       
       const parsedProduct = {
         ...product,
