@@ -40,6 +40,76 @@ const PRODUCTS = [
     stars: 5.0,
     description: 'RGB Gaming headset with noise cancelling mic.',
     specs: { 'Drivers': '50mm', 'Connector': 'USB & 3.5mm' }
+  },
+  { 
+    id: '4', 
+    name: 'Mechanical Mini Keyboard', 
+    nameBn: 'মেকানিক্যাল কিবোর্ড', 
+    price: 3200, 
+    oldPrice: 4500,
+    category: 'Accessories', 
+    images: ['https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?auto=format&fit=crop&q=80&w=800'], 
+    stock: 8, 
+    isFeatured: true, 
+    stars: 4.7,
+    description: '60% Mechanical keyboard with red switches.',
+    specs: { 'Type': 'Mechanical', 'Switch': 'Red' }
+  },
+  { 
+    id: '5', 
+    name: 'Smart Mirror Beauty', 
+    nameBn: 'স্মার্ট মিরর বিউটি', 
+    price: 2500, 
+    oldPrice: 3500,
+    category: 'Beauty', 
+    images: ['https://images.unsplash.com/photo-1616489953149-6f9661158d60?auto=format&fit=crop&q=80&w=800'], 
+    stock: 12, 
+    isFeatured: true, 
+    stars: 4.6,
+    description: 'LED Smart mirror with touch controls.',
+    specs: { 'Light': 'LED', 'Power': 'Rechargeable' }
+  },
+  { 
+    id: '6', 
+    name: 'Air Purifier X', 
+    nameBn: 'এয়ার পিউরিফায়ার X', 
+    price: 12000, 
+    oldPrice: 15000,
+    category: 'Appliances', 
+    images: ['https://images.unsplash.com/photo-1585776245991-cf89dd7fc73a?auto=format&fit=crop&q=80&w=800'], 
+    stock: 3, 
+    isFeatured: true, 
+    stars: 4.9,
+    description: 'High efficiency HEPA air purifier.',
+    specs: { 'Filter': 'HEPA', 'Coverage': '500sqft' }
+  },
+  { 
+    id: '7', 
+    name: 'Bluetooth Speaker Boom', 
+    nameBn: 'ব্লুটুথ স্পিকার', 
+    price: 1800, 
+    oldPrice: 2500,
+    category: 'Audio', 
+    images: ['https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&q=80&w=800'], 
+    stock: 20, 
+    isFeatured: true, 
+    stars: 4.4,
+    description: 'Portable waterproof Bluetooth speaker.',
+    specs: { 'Waterproof': 'IPX7', 'Battery': '12h' }
+  },
+  { 
+    id: '8', 
+    name: 'Modern Table Lamp', 
+    nameBn: 'মডার্ন টেবিল ল্যাম্প', 
+    price: 1200, 
+    oldPrice: 1900,
+    category: 'Home & Decor', 
+    images: ['https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=800'], 
+    stock: 15, 
+    isFeatured: true, 
+    stars: 4.7,
+    description: 'Elegant Nordic style table lamp.',
+    specs: { 'Material': 'Wood/Metal', 'Bulb': 'E27' }
   }
 ];
 
