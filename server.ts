@@ -216,29 +216,28 @@ let REVIEWS: any[] = [
 ];
 
 // --- Cloudflare D1 Helper ---
-const D1_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID;
-const D1_DATABASE_ID = process.env.CLOUDFLARE_DATABASE_ID;
-const D1_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN;
-
 async function queryD1(sql: string, params: any[] = []) {
-  if (!D1_ACCOUNT_ID || !D1_DATABASE_ID || !D1_API_TOKEN) {
-    console.warn("D1 Credentials missing in environment variables. Check Settings > Secrets.");
+  const accountId = (process.env.CLOUDFLARE_ACCOUNT_ID || "").trim();
+  const databaseId = (process.env.CLOUDFLARE_DATABASE_ID || "").trim();
+  const token = (process.env.CLOUDFLARE_API_TOKEN || "").trim();
+
+  if (!accountId || !databaseId || !token) {
+    console.warn("D1 Credentials missing in environment variables. Please check Settings > Secrets.");
     return null;
   }
 
   try {
-    const accountId = (D1_ACCOUNT_ID || "").trim();
-    const databaseId = (D1_DATABASE_ID || "").trim();
-    const token = (D1_API_TOKEN || "").trim();
-
-    if (!accountId || !databaseId || !token) {
-      console.warn("D1 Credentials partially missing. AccountID:", !!accountId, "DBID:", !!databaseId, "Token:", !!token);
-      return null;
-    }
-
     const authHeader = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
 
-    console.log(`Attempting D1 Query with AccountID: ${accountId.substring(0, 4)}... and DBID: ${databaseId.substring(0, 4)}...`);
+    if (accountId.length !== 32) {
+      console.warn(`[D1 Hint] Account ID is ${accountId.length} chars, usually it's exactly 32 hex chars.`);
+    }
+    if (databaseId.length !== 32) {
+      console.warn(`[D1 Hint] Database ID is ${databaseId.length} chars, usually it's exactly 32 hex chars.`);
+    }
+
+    console.log(`[D1] SQL: ${sql.substring(0, 50)}...`);
+    console.log(`[D1] Using Account: ${accountId.substring(0, 8)}... and DB: ${databaseId.substring(0, 8)}...`);
 
     const res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${databaseId}/query`, {
       method: "POST",
@@ -250,17 +249,23 @@ async function queryD1(sql: string, params: any[] = []) {
     });
 
     const data: any = await res.json();
+    
     if (!data.success) {
-      console.error("D1 API FULL ERROR:", JSON.stringify(data));
-      // Specific check for Token Verification Error
+      console.error("[D1 ERROR]", JSON.stringify(data.errors));
       if (data.errors && data.errors.some((e: any) => e.code === 10000)) {
-        console.error("CRITICAL: Cloudflare rejected the token. Possible reasons: 1. Token is wrong, 2. Account ID is wrong, 3. Token expired.");
+        console.error("CRITICAL: Authentication failed. Please verify your CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in Secrets.");
       }
       return null;
     }
-    return data.result && data.result.length > 0 ? data.result[0] : { results: [], success: true };
+    
+    // Cloudflare returns result as an array of operation results
+    // We want the results from the first operation (usually there's only one)
+    if (data.result && Array.isArray(data.result)) {
+      return data.result[0];
+    }
+    return data.result;
   } catch (err) {
-    console.error("D1 Query Exception:", err);
+    console.error("D1 Fetch Exception:", err);
     return null;
   }
 }
@@ -273,19 +278,37 @@ async function startServer() {
 
   // --- Troubleshooting Endpoints ---
 
-  // Verify Cloudflare Token
+  // Verify Cloudflare Token and List Accounts
   app.get("/api/admin/verify-token", async (req, res) => {
     const token = (process.env.CLOUDFLARE_API_TOKEN || "").trim();
-    if (!token) return res.json({ success: false, message: "Token is missing in Settings." });
+    const providedAccountId = (process.env.CLOUDFLARE_ACCOUNT_ID || "").trim();
+    
+    if (!token) return res.json({ success: false, message: "Token is missing in Settings > Secrets." });
 
     const authHeader = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
 
     try {
-      const response = await fetch("https://api.cloudflare.com/client/v4/user/tokens/verify", {
+      // 1. Verify Token
+      const verifyRes = await fetch("https://api.cloudflare.com/client/v4/user/tokens/verify", {
         headers: { "Authorization": authHeader }
       });
-      const data: any = await response.json();
-      res.json(data);
+      const verifyData: any = await verifyRes.json();
+
+      // 2. List Accessible Accounts
+      const accountsRes = await fetch("https://api.cloudflare.com/client/v4/accounts", {
+        headers: { "Authorization": authHeader }
+      });
+      const accountsData: any = await accountsRes.json();
+
+      res.json({
+        verification: verifyData,
+        accounts: accountsData,
+        check: {
+          providedAccountId,
+          tokenLength: token.length,
+          isAccountMatch: accountsData.result?.some((a: any) => a.id === providedAccountId) || false
+        }
+      });
     } catch (err) {
       res.status(500).json({ success: false, error: String(err) });
     }
