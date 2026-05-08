@@ -17,7 +17,8 @@ import {
   CheckCircle2,
   Truck,
   XCircle,
-  FileText
+  FileText,
+  Package
 } from 'lucide-react';
 import {
   Dialog,

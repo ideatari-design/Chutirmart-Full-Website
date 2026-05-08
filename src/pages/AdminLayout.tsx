@@ -83,9 +83,9 @@ const SidebarContent = ({ pathname, onLinkClick }: { pathname: string, onLinkCli
               className="block"
             >
               <div className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 group ${
-                pathname.startsWith(item.path) && (item.path !== '/admin' || pathname === '/admin' || pathname === '/admin/') ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-600 hover:bg-primary/5 hover:text-primary'
+                (item.path === '/admin' ? pathname === '/admin' || pathname === '/admin/' : pathname.startsWith(item.path)) ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-600 hover:bg-primary/5 hover:text-primary'
               }`}>
-                <div className={`${pathname.startsWith(item.path) && (item.path !== '/admin' || pathname === '/admin' || pathname === '/admin/') ? 'text-white' : 'text-slate-400 group-hover:text-primary'}`}>
+                <div className={`${(item.path === '/admin' ? pathname === '/admin' || pathname === '/admin/' : pathname.startsWith(item.path)) ? 'text-white' : 'text-slate-400 group-hover:text-primary'}`}>
                   {item.icon}
                 </div>
                 <span className="font-semibold text-sm">{item.label}</span>
