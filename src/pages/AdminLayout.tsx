@@ -25,6 +25,11 @@ import AdminIncompleteOrders from '@/pages/AdminIncompleteOrders';
 import AdminCategories from '@/pages/AdminCategories';
 import AdminPayments from '@/pages/AdminPayments';
 import AdminCustomers from '@/pages/AdminCustomers';
+import AdminDeliveryZones from '@/pages/AdminDeliveryZones';
+import AdminCMS from '@/pages/AdminCMS';
+import AdminBanners from '@/pages/AdminBanners';
+import AdminSettings from '@/pages/AdminSettings';
+import AdminCoupons from '@/pages/AdminCoupons';
 
 const AdminLayout = () => {
   const location = useLocation();
@@ -107,11 +112,11 @@ const AdminLayout = () => {
               <Route path="/payments" element={<AdminPayments />} />
               <Route path="/customers" element={<AdminCustomers />} />
               <Route path="/categories" element={<AdminCategories />} />
-              <Route path="/coupons" element={<div className="p-10 text-center">Coupon page coming soon...</div>} />
-              <Route path="/delivery-zones" element={<div className="p-10 text-center">Delivery zone page coming soon...</div>} />
-              <Route path="/cms" element={<div className="p-10 text-center">CMS page coming soon...</div>} />
-              <Route path="/banners" element={<div className="p-10 text-center">Banner page coming soon...</div>} />
-              <Route path="/settings" element={<div className="p-10 text-center">Settings page coming soon...</div>} />
+              <Route path="/coupons" element={<AdminCoupons />} />
+              <Route path="/delivery-zones" element={<AdminDeliveryZones />} />
+              <Route path="/cms" element={<AdminCMS />} />
+              <Route path="/banners" element={<AdminBanners />} />
+              <Route path="/settings" element={<AdminSettings />} />
               <Route path="*" element={<div className="p-20 text-center text-muted-foreground italic bg-white rounded-2xl border shadow-sm">New feature coming soon...</div>} />
             </Routes>
          </div>

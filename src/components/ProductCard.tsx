@@ -36,9 +36,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <div className="group bg-white flex flex-col gap-5 transition-all duration-500 hover:shadow-2xl hover:shadow-[#00458f]/10 p-5 rounded-3xl border border-slate-100 w-full relative">
+    <div className="group bg-white flex flex-col transition-all duration-500 hover:shadow-2xl hover:shadow-[#00458f]/10 rounded-3xl border border-slate-100 w-full relative overflow-hidden">
       {/* Image Section */}
-      <div className="relative aspect-square overflow-hidden rounded-[17px] shadow-sm bg-muted/40">
+      <div className="relative aspect-square overflow-hidden bg-muted/20">
         <Link to={`/product/${product.id}`} className="w-full h-full block">
           <img 
             src={product.images[0] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800'} 
@@ -75,7 +75,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
 
       {/* Content Section */}
-      <div className="flex flex-col items-start text-left space-y-3">
+      <div className="flex flex-col items-start text-left space-y-3 p-5 pt-4">
         <Link to={`/product/${product.id}`} className="w-full transition-colors group/title">
           <h3 className="text-base font-bold line-clamp-2 leading-[29px] min-h-[2.5rem] group-hover/title:text-primary transition-colors">
             {product.name}
@@ -100,10 +100,21 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               addToCart(product);
               toast.success(`${product.name} added to cart`, {
                 description: 'You can continue shopping or go to checkout.',
+                duration: 5000,
                 action: {
                   label: 'Checkout',
                   onClick: () => navigate('/checkout'),
                 },
+                actionButtonStyle: {
+                  backgroundColor: '#00458F',
+                  color: 'white',
+                  fontWeight: '900',
+                  borderRadius: '10px',
+                  padding: '8px 16px',
+                  textTransform: 'uppercase',
+                  fontSize: '10px',
+                  letterSpacing: '0.05em',
+                }
               });
             }}
             variant="outline" 

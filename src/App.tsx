@@ -56,7 +56,7 @@ import { productService } from '@/services/productService';
 import { Product } from '@/types';
 
 const TopHeader = () => (
-  <div className="bg-background border-b py-2 text-xs text-muted-foreground">
+  <div className="bg-background border-b py-2 text-xs text-muted-foreground hidden lg:block">
     <div className="max-w-[1140px] mx-auto px-4 flex justify-between items-center">
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2">

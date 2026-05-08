@@ -243,8 +243,8 @@ const Checkout = () => {
                   <div className="space-y-4 md:space-y-6 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
                     {cart.map(item => (
                       <div key={item.id} className="group relative flex gap-4 md:gap-5 bg-slate-50 p-3 md:p-4 rounded-2xl md:rounded-3xl border border-transparent hover:border-slate-200 transition-all">
-                        <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl md:rounded-2xl overflow-hidden bg-white border border-slate-100 p-2 shrink-0">
-                          <img src={item.images[0]} alt={item.name} className="w-full h-full object-contain" />
+                        <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl md:rounded-2xl overflow-hidden bg-white border border-slate-100 shrink-0">
+                          <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex flex-col justify-between py-1">
                           <div className="space-y-1">

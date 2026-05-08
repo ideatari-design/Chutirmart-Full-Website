@@ -27,6 +27,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([
@@ -38,6 +39,14 @@ const AdminCategories = () => {
 
   const [newCat, setNewCat] = useState({ name: '', slug: '', image: '' });
   const [isOpen, setIsOpen] = useState(false);
+  const [editingCat, setEditingCat] = useState<any>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [search, setSearch] = useState('');
+
+  const filteredCategories = categories.filter(c => 
+    c.name.toLowerCase().includes(search.toLowerCase()) ||
+    c.slug.toLowerCase().includes(search.toLowerCase())
+  );
 
   const handleAdd = () => {
     if (!newCat.name) return;
@@ -54,11 +63,21 @@ const AdminCategories = () => {
     toast.success("Category added successfully!");
   };
 
+  const handleUpdate = () => {
+    if (!editingCat || !editingCat.name) return;
+    setCategories(categories.map(c => c.id === editingCat.id ? editingCat : c));
+    setIsEditOpen(false);
+    toast.success("Category updated successfully!");
+  };
+
   const handleDelete = (id: string) => {
-    if (window.confirm("Delete this category?")) {
-      setCategories(categories.filter(c => c.id !== id));
-      toast.success("Category deleted");
-    }
+    setCategories(categories.filter(c => c.id !== id));
+    toast.success("Category deleted");
+  };
+
+  const openEdit = (cat: any) => {
+    setEditingCat({...cat});
+    setIsEditOpen(true);
   };
 
   return (
@@ -72,7 +91,7 @@ const AdminCategories = () => {
            <p className="text-muted-foreground font-medium">Control all your shop categories from here</p>
         </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-           <DialogTrigger nativeButton={false} render={
+           <DialogTrigger nativeButton={true} render={
               <Button className="rounded-xl h-12 px-6 gap-2 bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20">
                 <Plus className="h-5 w-5" /> New Category
               </Button>
@@ -120,6 +139,54 @@ const AdminCategories = () => {
               </DialogFooter>
            </DialogContent>
         </Dialog>
+        
+        {/* Edit Dialog */}
+        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+           <DialogContent className="rounded-[2rem] sm:max-w-md">
+              <DialogHeader>
+                 <DialogTitle className="text-2xl font-black">Edit Category</DialogTitle>
+              </DialogHeader>
+              {editingCat && (
+                 <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                       <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">Category Name</Label>
+                       <Input 
+                         placeholder="e.g. Fashion" 
+                         className="h-12 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all" 
+                         value={editingCat.name}
+                         onChange={e => setEditingCat({...editingCat, name: e.target.value})}
+                       />
+                    </div>
+                    <div className="space-y-2">
+                       <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">Slug</Label>
+                       <Input 
+                         placeholder="e.g. fashion" 
+                         className="h-12 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all" 
+                         value={editingCat.slug}
+                         onChange={e => setEditingCat({...editingCat, slug: e.target.value})}
+                       />
+                    </div>
+                    <div className="space-y-2">
+                       <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">Image URL</Label>
+                       <div className="flex gap-2">
+                          <Input 
+                           placeholder="https://..." 
+                           className="h-12 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all" 
+                           value={editingCat.image}
+                           onChange={e => setEditingCat({...editingCat, image: e.target.value})}
+                          />
+                          <Button variant="secondary" className="h-12 w-12 p-0 rounded-xl">
+                             <ImageIcon className="h-5 w-5" />
+                          </Button>
+                       </div>
+                    </div>
+                 </div>
+              )}
+              <DialogFooter>
+                 <Button className="w-full h-12 rounded-xl font-bold uppercase text-xs tracking-widest" onClick={handleUpdate}>Update Category</Button>
+              </DialogFooter>
+           </DialogContent>
+        </Dialog>
       </div>
 
       <div className="flex items-center gap-4 py-4 px-6 bg-white rounded-2xl shadow-sm border border-primary/5">
@@ -128,6 +195,8 @@ const AdminCategories = () => {
           <Input 
             placeholder="Search by category name..." 
             className="pl-10 rounded-xl bg-secondary/10 border-none h-11" 
+            value={search}
+            onChange={e => setSearch(e.target.value)}
           />
         </div>
       </div>
@@ -144,7 +213,7 @@ const AdminCategories = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {categories.map((cat) => (
+            {filteredCategories.map((cat) => (
               <TableRow key={cat.id} className="hover:bg-secondary/10 transition-colors border-b-primary/5">
                 <TableCell className="pl-6 py-4">
                    <div className="w-12 h-12 bg-secondary/50 rounded-xl overflow-hidden border border-slate-100 shadow-sm">
@@ -158,7 +227,7 @@ const AdminCategories = () => {
                 </TableCell>
                 <TableCell className="text-right pr-6">
                    <div className="flex justify-end gap-2 text-muted-foreground">
-                      <Button variant="ghost" size="icon" className="h-9 w-9 hover:text-primary hover:bg-primary/5 rounded-xl transition-all">
+                      <Button variant="ghost" size="icon" className="h-9 w-9 hover:text-primary hover:bg-primary/5 rounded-xl transition-all" onClick={() => openEdit(cat)}>
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="icon" className="h-9 w-9 hover:text-destructive hover:bg-destructive/5 rounded-xl transition-all" onClick={() => handleDelete(cat.id)}>

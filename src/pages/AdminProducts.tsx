@@ -55,6 +55,7 @@ const AdminProducts = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [filterCategory, setFilterCategory] = useState('All');
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -133,14 +134,12 @@ const AdminProducts = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      const deleted = await productService.deleteProduct(id);
-      if (deleted) {
-        toast.success("Product deleted successfully");
-        fetchProducts();
-      } else {
-        toast.error("Could not delete product");
-      }
+    const deleted = await productService.deleteProduct(id);
+    if (deleted) {
+      toast.success("Product deleted successfully");
+      fetchProducts();
+    } else {
+      toast.error("Could not delete product");
     }
   };
 
@@ -149,10 +148,14 @@ const AdminProducts = () => {
     setIsEditOpen(true);
   };
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(search.toLowerCase()) || 
-    (p.nameBn && p.nameBn.includes(search))
-  );
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || 
+      (p.nameBn && p.nameBn.includes(search));
+    const matchesFilter = filterCategory === 'All' || p.category === filterCategory;
+    return matchesSearch && matchesFilter;
+  });
+
+  const categories = ['All', ...new Set(products.map(p => p.category))];
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const currentProducts = filteredProducts.slice(
@@ -172,7 +175,7 @@ const AdminProducts = () => {
            <p className="text-muted-foreground">Manage your shop's inventory here</p>
         </div>
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-          <DialogTrigger nativeButton={false} render={
+          <DialogTrigger nativeButton={true} render={
             <Button size="lg" className="rounded-xl gap-2 h-12 px-6">
               <Plus className="h-4 w-4" /> Add New Product
             </Button>
@@ -216,13 +219,17 @@ const AdminProducts = () => {
               </div>
               <div className="col-span-2 space-y-2">
                 <Label htmlFor="category" className="font-bold">Category</Label>
-                <Input 
+                <select 
                   id="category" 
-                  placeholder="e.g. Electronics" 
-                  className="rounded-xl h-12" 
+                  className="w-full h-12 rounded-xl border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
                   value={newProduct.category}
                   onChange={e => setNewProduct(p => ({ ...p, category: e.target.value }))}
-                />
+                >
+                   <option value="">Select Category</option>
+                   {categories.filter(c => c !== 'All').map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                   ))}
+                </select>
               </div>
               <div className="col-span-2 space-y-2">
                 <Label htmlFor="mainImage" className="font-bold">Main Image URL</Label>
@@ -307,6 +314,32 @@ const AdminProducts = () => {
                        />
                     </div>
                     <div className="col-span-2 space-y-2">
+                       <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">Main Image URL</Label>
+                       <Input 
+                          placeholder="https://..." 
+                          className="h-12 rounded-xl" 
+                          value={editingProduct.images[0] || ''}
+                          onChange={e => {
+                             const newImages = [...editingProduct.images];
+                             newImages[0] = e.target.value;
+                             setEditingProduct({...editingProduct, images: newImages});
+                          }}
+                       />
+                    </div>
+                    <div className="col-span-2 space-y-2">
+                       <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">Gallery Image URLs (One URL per line)</Label>
+                       <textarea 
+                          className="w-full h-24 rounded-xl border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-sm"
+                          placeholder="Enter multiple image URLs here..."
+                          value={editingProduct.images.slice(1).join('\n')}
+                          onChange={(e) => {
+                             const gallery = e.target.value.split('\n').filter(url => url.trim() !== '');
+                             const updatedImages = [editingProduct.images[0] || '', ...gallery];
+                             setEditingProduct({ ...editingProduct, images: updatedImages });
+                          }}
+                       />
+                    </div>
+                    <div className="col-span-2 space-y-2">
                        <Label className="font-bold">Description</Label>
                        <textarea 
                           value={editingProduct.description}
@@ -336,9 +369,18 @@ const AdminProducts = () => {
             className="pl-10 rounded-xl bg-secondary/20 border-none" 
           />
         </div>
-        <Button variant="outline" className="rounded-xl gap-2">
-          <Filter className="h-4 w-4" /> Filter
-        </Button>
+        <div className="flex items-center gap-2">
+           <Label className="hidden sm:block text-xs font-bold text-muted-foreground uppercase">Filter:</Label>
+           <select 
+             className="h-10 rounded-xl bg-secondary/20 border-none px-3 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none"
+             value={filterCategory}
+             onChange={(e) => setFilterCategory(e.target.value)}
+           >
+              {categories.map(cat => (
+                 <option key={cat} value={cat}>{cat}</option>
+              ))}
+           </select>
+        </div>
       </div>
 
       <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-primary/5">

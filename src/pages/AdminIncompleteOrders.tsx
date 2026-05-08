@@ -36,6 +36,7 @@ const AdminIncompleteOrders = () => {
   const [search, setSearch] = useState('');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filterPayment, setFilterPayment] = useState('All');
 
   React.useEffect(() => {
     fetchOrders();
@@ -63,11 +64,13 @@ const AdminIncompleteOrders = () => {
     }
   };
 
-  const filteredOrders = orders.filter(o => 
-    o.id.toLowerCase().includes(search.toLowerCase()) || 
-    o.customerPhone.includes(search) ||
-    o.customerName.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredOrders = orders.filter(o => {
+    const matchesSearch = o.id.toLowerCase().includes(search.toLowerCase()) || 
+      o.customerPhone.includes(search) ||
+      o.customerName.toLowerCase().includes(search.toLowerCase());
+    const matchesPayment = filterPayment === 'All' || o.paymentStatus === filterPayment;
+    return matchesSearch && matchesPayment;
+  });
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -116,6 +119,18 @@ const AdminIncompleteOrders = () => {
             className="pl-10 rounded-xl bg-secondary/20 border-none" 
           />
         </div>
+        <div className="flex items-center gap-2">
+           <span className="hidden sm:block text-xs font-bold text-muted-foreground uppercase">Payment:</span>
+           <select 
+             className="h-10 rounded-xl bg-secondary/20 border-none px-3 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none"
+             value={filterPayment}
+             onChange={(e) => setFilterPayment(e.target.value)}
+           >
+              <option value="All">All Incomplete</option>
+              <option value="unpaid">Unpaid</option>
+              <option value="partially_paid">Partial</option>
+           </select>
+        </div>
       </div>
 
       <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-primary/5">
@@ -144,7 +159,7 @@ const AdminIncompleteOrders = () => {
                   <TableCell className="font-bold">৳ {o.total.toLocaleString()}</TableCell>
                   <TableCell className="text-right pr-6">
                     <Dialog>
-                      <DialogTrigger render={
+                      <DialogTrigger nativeButton={true} render={
                         <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-primary hover:bg-primary/5 rounded-lg">
                           <Eye className="h-4 w-4" />
                         </Button>

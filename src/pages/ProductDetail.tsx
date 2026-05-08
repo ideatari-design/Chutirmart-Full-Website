@@ -107,10 +107,21 @@ const ProductDetail = () => {
     } else {
       toast.success(`${product.name} added to cart`, {
         description: 'You can continue shopping or go to checkout.',
+        duration: 5000,
         action: {
           label: 'Checkout',
           onClick: () => navigate('/checkout'),
         },
+        actionButtonStyle: {
+          backgroundColor: '#00458F',
+          color: 'white',
+          fontWeight: '900',
+          borderRadius: '10px',
+          padding: '8px 16px',
+          textTransform: 'uppercase',
+          fontSize: '10px',
+          letterSpacing: '0.05em',
+        }
       });
     }
   };
@@ -174,7 +185,7 @@ const ProductDetail = () => {
               <img 
                 src={product.images[selectedImage]} 
                 alt={product.name} 
-                className={`w-full h-full object-contain p-8 mix-blend-multiply transition-all duration-700 ${zoom ? 'opacity-0' : 'opacity-100'}`}
+                className={`w-full h-full object-cover mix-blend-multiply transition-all duration-700 ${zoom ? 'opacity-0' : 'opacity-100'}`}
                 loading="lazy"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
@@ -299,8 +310,7 @@ const ProductDetail = () => {
             </div>
             
             <Button 
-              variant="secondary" 
-              className="w-full h-16 rounded-2xl text-sm font-bold gap-2 bg-[#11bb99] hover:opacity-90 text-white shadow-2xl shadow-accent/20 transition-all active:scale-95"
+              className="w-full h-16 rounded-2xl text-sm font-bold gap-2 bg-[#00458F] hover:bg-[#00356F] text-white shadow-2xl shadow-[#00458F]/20 transition-all active:scale-95"
               onClick={() => window.open(`tel:01700000000`)}
             >
               <Phone className="h-5 w-5 fill-current" /> Call to order

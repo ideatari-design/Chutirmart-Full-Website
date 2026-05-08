@@ -39,6 +39,7 @@ const AdminOrders = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [filterStatus, setFilterStatus] = useState('All');
 
   React.useEffect(() => {
     fetchOrders();
@@ -61,11 +62,15 @@ const AdminOrders = () => {
     }
   };
 
-  const filteredOrders = orders.filter(o => 
-    o.id.toLowerCase().includes(search.toLowerCase()) || 
-    o.customerPhone.includes(search) ||
-    o.customerName.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredOrders = orders.filter(o => {
+    const matchesSearch = o.id.toLowerCase().includes(search.toLowerCase()) || 
+      o.customerPhone.includes(search) ||
+      o.customerName.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = filterStatus === 'All' || o.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
+
+  const statuses = ['All', 'pending', 'processing', 'shipped', 'delivered', 'cancelled'];
 
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
   const currentOrders = filteredOrders.slice(
@@ -109,6 +114,18 @@ const AdminOrders = () => {
             className="pl-10 rounded-xl bg-secondary/20 border-none" 
           />
         </div>
+        <div className="flex items-center gap-2">
+           <span className="hidden sm:block text-xs font-bold text-muted-foreground uppercase">Status:</span>
+           <select 
+             className="h-10 rounded-xl bg-secondary/20 border-none px-3 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none"
+             value={filterStatus}
+             onChange={(e) => setFilterStatus(e.target.value)}
+           >
+              {statuses.map(s => (
+                 <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+              ))}
+           </select>
+        </div>
       </div>
 
       <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-primary/5">
@@ -144,7 +161,7 @@ const AdminOrders = () => {
                 <TableCell className="font-bold">৳ {o.total.toLocaleString()}</TableCell>
                 <TableCell className="text-right pr-6">
                   <Dialog>
-                    <DialogTrigger nativeButton={false} render={
+                    <DialogTrigger nativeButton={true} render={
                       <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-primary hover:bg-primary/5 rounded-lg">
                         <Eye className="h-4 w-4" />
                       </Button>
