@@ -14,10 +14,12 @@ import {
   FileText,
   Image as ImageIcon,
   AlertCircle,
-  LayoutDashboard
+  LayoutDashboard,
+  Menu
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import AdminDashboard from '@/pages/AdminDashboard';
 import AdminProducts from '@/pages/AdminProducts';
 import AdminOrders from '@/pages/AdminOrders';
@@ -33,6 +35,7 @@ import AdminCoupons from '@/pages/AdminCoupons';
 
 const AdminLayout = () => {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   
   const menuItems = [
     { label: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" />, path: '/admin' },
@@ -61,66 +64,99 @@ const AdminLayout = () => {
     { label: 'Settings', icon: <Settings className="h-5 w-5" />, path: '/admin/settings' },
   ];
 
-  return (
-    <div className="flex min-h-screen bg-slate-50">
-      {/* Sidebar */}
-      <aside className="w-72 bg-white border-r hidden lg:flex flex-col sticky top-0 h-screen shadow-sm">
-        <div className="p-8 border-b bg-white/50 backdrop-blur-md sticky top-0 z-10">
-           <Link to="/" className="text-2xl font-black text-primary flex items-center">
-             OJALA <span className="text-accent ml-1 italic font-light">SHOP</span>
-           </Link>
-           <p className="text-[10px] uppercase font-bold text-muted-foreground mt-1">Admin Control Panel</p>
-        </div>
-        <ScrollArea className="flex-grow">
-          <nav className="p-4 space-y-1">
-            {menuItems.map((item, i) => (
-              item.isHeader ? (
-                <p key={i} className="text-[10px] font-bold uppercase text-muted-foreground px-4 pt-4 pb-2">
-                  {item.label}
-                </p>
-              ) : (
-                <Link key={i} to={item.path!}>
-                  <div className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 group ${
-                    location.pathname === item.path ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-600 hover:bg-primary/5 hover:text-primary'
-                  }`}>
-                    <div className={`${location.pathname === item.path ? 'text-white' : 'text-slate-400 group-hover:text-primary'}`}>
-                      {item.icon}
-                    </div>
-                    <span className="font-semibold text-sm">{item.label}</span>
+  const SidebarContent = () => (
+    <>
+      <div className="p-8 border-b bg-white/50 backdrop-blur-md sticky top-0 z-10">
+         <Link to="/" className="text-2xl font-black text-primary flex items-center group">
+           OJALA <span className="text-accent ml-1 italic font-light group-hover:translate-x-1 transition-transform">SHOP</span>
+         </Link>
+         <p className="text-[10px] uppercase font-bold text-muted-foreground mt-1">Admin Control Panel</p>
+      </div>
+      <ScrollArea className="flex-grow">
+        <nav className="p-4 space-y-1">
+          {menuItems.map((item, i) => (
+            item.isHeader ? (
+              <p key={i} className="text-[10px] font-bold uppercase text-muted-foreground px-4 pt-4 pb-2">
+                {item.label}
+              </p>
+            ) : (
+              <Link 
+                key={i} 
+                to={item.path!} 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block"
+              >
+                <div className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 group ${
+                  location.pathname === item.path ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-600 hover:bg-primary/5 hover:text-primary'
+                }`}>
+                  <div className={`${location.pathname === item.path ? 'text-white' : 'text-slate-400 group-hover:text-primary'}`}>
+                    {item.icon}
                   </div>
-                </Link>
-              )
-            ))}
-          </nav>
-        </ScrollArea>
-        <div className="p-4 border-t bg-white">
+                  <span className="font-semibold text-sm">{item.label}</span>
+                </div>
+              </Link>
+            )
+          ))}
+        </nav>
+      </ScrollArea>
+      <div className="p-4 border-t bg-white">
+         <Link to="/" className="block">
            <Button variant="ghost" className="w-full justify-start gap-3 text-slate-600 hover:text-destructive hover:bg-destructive/5 rounded-lg h-11">
               <LogOut className="h-5 w-5" />
-              <span className="font-bold text-sm">Logout</span>
+              <span className="font-bold text-sm">Exit Admin</span>
            </Button>
-        </div>
+         </Link>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="flex min-h-screen bg-slate-50 relative">
+      {/* Sidebar for Desktop */}
+      <aside className="w-72 bg-white border-r hidden lg:flex flex-col sticky top-0 h-screen shadow-sm z-20">
+        <SidebarContent />
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-grow p-6 lg:p-10">
-         <div className="max-w-7xl mx-auto">
-            <Routes>
-              <Route path="/" element={<AdminDashboard />} />
-              <Route path="/products" element={<AdminProducts />} />
-              <Route path="/orders" element={<AdminOrders />} />
-              <Route path="/incomplete-orders" element={<AdminIncompleteOrders />} />
-              <Route path="/payments" element={<AdminPayments />} />
-              <Route path="/customers" element={<AdminCustomers />} />
-              <Route path="/categories" element={<AdminCategories />} />
-              <Route path="/coupons" element={<AdminCoupons />} />
-              <Route path="/delivery-zones" element={<AdminDeliveryZones />} />
-              <Route path="/cms" element={<AdminCMS />} />
-              <Route path="/banners" element={<AdminBanners />} />
-              <Route path="/settings" element={<AdminSettings />} />
-              <Route path="*" element={<div className="p-20 text-center text-muted-foreground italic bg-white rounded-2xl border shadow-sm">New feature coming soon...</div>} />
-            </Routes>
-         </div>
-      </main>
+      {/* Main Content Area */}
+      <div className="flex-grow flex flex-col min-w-0">
+        {/* Mobile Top Header */}
+        <header className="lg:hidden h-16 bg-white border-b flex items-center justify-between px-6 sticky top-0 z-30 shadow-sm">
+           <Link to="/admin" className="text-xl font-black text-primary">
+              OJALA<span className="text-accent italic font-light">SHOP</span> <span className="text-[8px] text-muted-foreground uppercase ml-1">Admin</span>
+           </Link>
+           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <SheetTrigger nativeButton={false} render={
+                <Button variant="ghost" size="icon" className="-mr-2">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              } />
+              <SheetContent side="left" className="p-0 w-72 flex flex-col">
+                 <SidebarContent />
+              </SheetContent>
+           </Sheet>
+        </header>
+
+        {/* Main View Area */}
+        <main className="flex-grow p-4 md:p-6 lg:p-10 overflow-x-hidden">
+           <div className="max-w-7xl mx-auto">
+              <Routes>
+                <Route path="/" element={<AdminDashboard />} />
+                <Route path="/products" element={<AdminProducts />} />
+                <Route path="/orders" element={<AdminOrders />} />
+                <Route path="/incomplete-orders" element={<AdminIncompleteOrders />} />
+                <Route path="/payments" element={<AdminPayments />} />
+                <Route path="/customers" element={<AdminCustomers />} />
+                <Route path="/categories" element={<AdminCategories />} />
+                <Route path="/coupons" element={<AdminCoupons />} />
+                <Route path="/delivery-zones" element={<AdminDeliveryZones />} />
+                <Route path="/cms" element={<AdminCMS />} />
+                <Route path="/banners" element={<AdminBanners />} />
+                <Route path="/settings" element={<AdminSettings />} />
+                <Route path="*" element={<div className="p-20 text-center text-muted-foreground italic bg-white rounded-2xl border shadow-sm">New feature coming soon...</div>} />
+              </Routes>
+           </div>
+        </main>
+      </div>
     </div>
   );
 };
