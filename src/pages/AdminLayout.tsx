@@ -67,7 +67,7 @@ const AdminLayout = () => {
   const SidebarContent = () => (
     <>
       <div className="p-8 border-b bg-white/50 backdrop-blur-md sticky top-0 z-10">
-         <Link to="/" className="text-2xl font-black text-primary flex items-center group">
+         <Link to="/admin" className="text-2xl font-black text-primary flex items-center group">
            OJALA <span className="text-accent ml-1 italic font-light group-hover:translate-x-1 transition-transform">SHOP</span>
          </Link>
          <p className="text-[10px] uppercase font-bold text-muted-foreground mt-1">Admin Control Panel</p>
@@ -141,17 +141,17 @@ const AdminLayout = () => {
            <div className="max-w-7xl mx-auto">
               <Routes>
                 <Route path="/" element={<AdminDashboard />} />
-                <Route path="/products" element={<AdminProducts />} />
-                <Route path="/orders" element={<AdminOrders />} />
-                <Route path="/incomplete-orders" element={<AdminIncompleteOrders />} />
-                <Route path="/payments" element={<AdminPayments />} />
-                <Route path="/customers" element={<AdminCustomers />} />
-                <Route path="/categories" element={<AdminCategories />} />
-                <Route path="/coupons" element={<AdminCoupons />} />
-                <Route path="/delivery-zones" element={<AdminDeliveryZones />} />
-                <Route path="/cms" element={<AdminCMS />} />
-                <Route path="/banners" element={<AdminBanners />} />
-                <Route path="/settings" element={<AdminSettings />} />
+                <Route path="products" element={<AdminProducts />} />
+                <Route path="orders" element={<AdminOrders />} />
+                <Route path="incomplete-orders" element={<AdminIncompleteOrders />} />
+                <Route path="payments" element={<AdminPayments />} />
+                <Route path="customers" element={<AdminCustomers />} />
+                <Route path="categories" element={<AdminCategories />} />
+                <Route path="coupons" element={<AdminCoupons />} />
+                <Route path="delivery-zones" element={<AdminDeliveryZones />} />
+                <Route path="cms" element={<AdminCMS />} />
+                <Route path="banners" element={<AdminBanners />} />
+                <Route path="settings" element={<AdminSettings />} />
                 <Route path="*" element={<div className="p-20 text-center text-muted-foreground italic bg-white rounded-2xl border shadow-sm">New feature coming soon...</div>} />
               </Routes>
            </div>
