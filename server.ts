@@ -277,6 +277,18 @@ async function startServer() {
     res.status(204).send();
   });
 
+  // Update product
+  app.patch("/api/products/:id", (req, res) => {
+    const index = PRODUCTS.findIndex(p => p.id === req.params.id);
+    if (index === -1) return res.status(404).json({ message: "Product not found" });
+    
+    PRODUCTS[index] = {
+      ...PRODUCTS[index],
+      ...req.body
+    };
+    res.json(PRODUCTS[index]);
+  });
+
   // Create order
   app.post("/api/orders", (req, res) => {
     const orderData = req.body;

@@ -23,6 +23,8 @@ import AdminProducts from '@/pages/AdminProducts';
 import AdminOrders from '@/pages/AdminOrders';
 import AdminIncompleteOrders from '@/pages/AdminIncompleteOrders';
 import AdminCategories from '@/pages/AdminCategories';
+import AdminPayments from '@/pages/AdminPayments';
+import AdminCustomers from '@/pages/AdminCustomers';
 
 const AdminLayout = () => {
   const location = useLocation();
@@ -58,6 +60,12 @@ const AdminLayout = () => {
     <div className="flex min-h-screen bg-slate-50">
       {/* Sidebar */}
       <aside className="w-72 bg-white border-r hidden lg:flex flex-col sticky top-0 h-screen shadow-sm">
+        <div className="p-8 border-b bg-white/50 backdrop-blur-md sticky top-0 z-10">
+           <Link to="/" className="text-2xl font-black text-primary flex items-center">
+             OJALA <span className="text-accent ml-1 italic font-light">SHOP</span>
+           </Link>
+           <p className="text-[10px] uppercase font-bold text-muted-foreground mt-1">Admin Control Panel</p>
+        </div>
         <ScrollArea className="flex-grow">
           <nav className="p-4 space-y-1">
             {menuItems.map((item, i) => (
@@ -96,8 +104,8 @@ const AdminLayout = () => {
               <Route path="/products" element={<AdminProducts />} />
               <Route path="/orders" element={<AdminOrders />} />
               <Route path="/incomplete-orders" element={<AdminIncompleteOrders />} />
-              <Route path="/payments" element={<div className="p-10 text-center">Payment page coming soon...</div>} />
-              <Route path="/customers" element={<div className="p-10 text-center">Customer page coming soon...</div>} />
+              <Route path="/payments" element={<AdminPayments />} />
+              <Route path="/customers" element={<AdminCustomers />} />
               <Route path="/categories" element={<AdminCategories />} />
               <Route path="/coupons" element={<div className="p-10 text-center">Coupon page coming soon...</div>} />
               <Route path="/delivery-zones" element={<div className="p-10 text-center">Delivery zone page coming soon...</div>} />

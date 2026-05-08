@@ -31,11 +31,14 @@ import {
 import { orderService } from '@/services/orderService';
 import { Order } from '@/types';
 import { toast } from 'sonner';
+import AdminPagination from '@/components/AdminPagination';
 
 const AdminOrders = () => {
   const [search, setSearch] = useState('');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   React.useEffect(() => {
     fetchOrders();
@@ -63,6 +66,16 @@ const AdminOrders = () => {
     o.customerPhone.includes(search) ||
     o.customerName.toLowerCase().includes(search.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const currentOrders = filteredOrders.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -111,7 +124,15 @@ const AdminOrders = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredOrders.map((o) => (
+            {loading ? (
+               <TableRow>
+                  <TableCell colSpan={6} className="py-20 text-center font-medium italic opacity-50">Loading orders...</TableCell>
+               </TableRow>
+            ) : currentOrders.length === 0 ? (
+               <TableRow>
+                  <TableCell colSpan={6} className="py-20 text-center font-medium italic opacity-50">No orders found.</TableCell>
+               </TableRow>
+            ) : currentOrders.map((o) => (
               <TableRow key={o.id} className="hover:bg-secondary/10 transition-colors border-b-primary/5">
                 <TableCell className="pl-6 font-bold text-primary">{o.id}</TableCell>
                 <TableCell>
@@ -123,11 +144,11 @@ const AdminOrders = () => {
                 <TableCell className="font-bold">৳ {o.total.toLocaleString()}</TableCell>
                 <TableCell className="text-right pr-6">
                   <Dialog>
-                    <DialogTrigger asChild>
+                    <DialogTrigger nativeButton={false} render={
                       <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-primary hover:bg-primary/5 rounded-lg">
                         <Eye className="h-4 w-4" />
                       </Button>
-                    </DialogTrigger>
+                    } />
                     <DialogContent className="max-w-xl">
                        <DialogHeader>
                           <DialogTitle>Order Details ({o.id})</DialogTitle>
@@ -142,6 +163,34 @@ const AdminOrders = () => {
                              <div className="p-4 bg-secondary/30 rounded-2xl">
                                 <p className="text-xs text-muted-foreground font-bold uppercase mb-1">Order Date</p>
                                 <p className="font-bold">{new Date(o.createdAt).toLocaleDateString()}</p>
+                             </div>
+                          </div>
+                          
+                          <div className="space-y-3">
+                             <h4 className="font-bold text-sm uppercase text-muted-foreground">Order Items</h4>
+                             <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+                                {o.items && o.items.length > 0 ? (
+                                   o.items.map((item, idx) => (
+                                      <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                         <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-white rounded-lg border flex items-center justify-center text-[10px] font-bold text-slate-400 overflow-hidden">
+                                               {item.image ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" /> : <Package className="h-4 w-4" />}
+                                            </div>
+                                            <div>
+                                               <p className="text-sm font-bold leading-tight">{item.name}</p>
+                                               <p className="text-[10px] text-muted-foreground">Qty: {item.quantity}</p>
+                                            </div>
+                                         </div>
+                                         <p className="text-sm font-bold text-primary">৳ {(item.price * item.quantity).toLocaleString()}</p>
+                                      </div>
+                                   ))
+                                ) : (
+                                   <p className="text-sm italic text-muted-foreground p-4 bg-slate-50 rounded-xl text-center border border-dashed">No items found in this order</p>
+                                )}
+                             </div>
+                             <div className="flex justify-between items-center p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                                <span className="font-bold text-sm">Total Amount</span>
+                                <span className="font-black text-lg text-primary">৳ {o.total.toLocaleString()}</span>
                              </div>
                           </div>
                           
@@ -185,6 +234,14 @@ const AdminOrders = () => {
             ))}
           </TableBody>
         </Table>
+        
+        <AdminPagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={filteredOrders.length}
+          itemsPerPage={itemsPerPage}
+        />
       </div>
     </div>
   );

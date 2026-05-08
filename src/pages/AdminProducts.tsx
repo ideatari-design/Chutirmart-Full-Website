@@ -33,10 +33,14 @@ import { productService } from '@/services/productService';
 import { Product } from '@/types';
 import { toast } from 'sonner';
 
+import AdminPagination from '@/components/AdminPagination';
+
 const AdminProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: '',
@@ -44,8 +48,13 @@ const AdminProducts = () => {
     price: '',
     stock: '',
     category: '',
-    description: ''
+    description: '',
+    mainImage: '',
+    gallery: ''
   });
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -64,8 +73,18 @@ const AdminProducts = () => {
       return;
     }
 
+    setIsSubmitting(true);
     const price = parseFloat(newProduct.price);
     const stock = parseInt(newProduct.stock) || 0;
+
+    const galleryArray = newProduct.gallery 
+      ? newProduct.gallery.split('\n').filter(url => url.trim() !== '') 
+      : [];
+    
+    const images = [
+      newProduct.mainImage || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800',
+      ...galleryArray
+    ];
 
     const added = await productService.addProduct({
       name: newProduct.name,
@@ -74,16 +93,42 @@ const AdminProducts = () => {
       stock,
       category: newProduct.category || 'Uncategorized',
       description: newProduct.description,
-      images: ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800']
+      images
     });
 
+    setIsSubmitting(false);
     if (added) {
       toast.success("Product added successfully!");
       setIsAddOpen(false);
-      setNewProduct({ name: '', nameBn: '', price: '', stock: '', category: '', description: '' });
+      setNewProduct({ 
+        name: '', 
+        nameBn: '', 
+        price: '', 
+        stock: '', 
+        category: '', 
+        description: '',
+        mainImage: '',
+        gallery: ''
+      });
       fetchProducts();
     } else {
       toast.error("Could not add product");
+    }
+  };
+
+  const handleEditProduct = async () => {
+    if (!editingProduct) return;
+    
+    setIsSubmitting(true);
+    const updated = await productService.updateProduct(editingProduct.id, editingProduct);
+    
+    setIsSubmitting(false);
+    if (updated) {
+      toast.success("Product updated successfully!");
+      setIsEditOpen(false);
+      fetchProducts();
+    } else {
+      toast.error("Could not update product");
     }
   };
 
@@ -99,10 +144,25 @@ const AdminProducts = () => {
     }
   };
 
+  const openEdit = (product: Product) => {
+    setEditingProduct(product);
+    setIsEditOpen(true);
+  };
+
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(search.toLowerCase()) || 
     (p.nameBn && p.nameBn.includes(search))
   );
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const currentProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   return (
     <div className="space-y-6">
@@ -112,60 +172,80 @@ const AdminProducts = () => {
            <p className="text-muted-foreground">Manage your shop's inventory here</p>
         </div>
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-          <DialogTrigger nativeButton={true} render={
-            <Button size="lg" className="rounded-xl gap-2 h-12 px-6" />
-          }>
-               <Plus className="h-4 w-4" /> Add New Product
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-2xl">
+          <DialogTrigger nativeButton={false} render={
+            <Button size="lg" className="rounded-xl gap-2 h-12 px-6">
+              <Plus className="h-4 w-4" /> Add New Product
+            </Button>
+          } />
+          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem]">
             <DialogHeader>
-              <DialogTitle>Add New Product</DialogTitle>
+              <DialogTitle className="text-2xl font-black">Add New Product</DialogTitle>
             </DialogHeader>
             <div className="grid grid-cols-2 gap-4 py-4">
               <div className="col-span-2 space-y-2">
-                <Label htmlFor="name">Product Name</Label>
+                <Label htmlFor="name" className="font-bold">Product Name</Label>
                 <Input 
                   id="name" 
                   placeholder="Enter product name" 
-                  className="rounded-xl" 
+                  className="rounded-xl h-12" 
                   value={newProduct.name}
                   onChange={e => setNewProduct(p => ({ ...p, name: e.target.value }))}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="price">Price (৳)</Label>
+                <Label htmlFor="price" className="font-bold">Price (৳)</Label>
                 <Input 
                   id="price" 
                   type="number" 
                   placeholder="0.00" 
-                  className="rounded-xl" 
+                  className="rounded-xl h-12" 
                   value={newProduct.price}
                   onChange={e => setNewProduct(p => ({ ...p, price: e.target.value }))}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="stock">Stock Quantity</Label>
+                <Label htmlFor="stock" className="font-bold">Stock Quantity</Label>
                 <Input 
                   id="stock" 
                   type="number" 
                   placeholder="0" 
-                  className="rounded-xl" 
+                  className="rounded-xl h-12" 
                   value={newProduct.stock}
                   onChange={e => setNewProduct(p => ({ ...p, stock: e.target.value }))}
                 />
               </div>
               <div className="col-span-2 space-y-2">
-                <Label htmlFor="category">Category</Label>
+                <Label htmlFor="category" className="font-bold">Category</Label>
                 <Input 
                   id="category" 
                   placeholder="e.g. Electronics" 
-                  className="rounded-xl" 
+                  className="rounded-xl h-12" 
                   value={newProduct.category}
                   onChange={e => setNewProduct(p => ({ ...p, category: e.target.value }))}
                 />
               </div>
               <div className="col-span-2 space-y-2">
-                <Label htmlFor="desc">Full Description</Label>
+                <Label htmlFor="mainImage" className="font-bold">Main Image URL</Label>
+                <Input 
+                  id="mainImage" 
+                  placeholder="https://images.unsplash.com/..." 
+                  className="rounded-xl h-12" 
+                  value={newProduct.mainImage}
+                  onChange={e => setNewProduct(p => ({ ...p, mainImage: e.target.value }))}
+                />
+              </div>
+              <div className="col-span-2 space-y-2">
+                <Label htmlFor="gallery" className="font-bold">Gallery Image URLs (One URL per line)</Label>
+                <textarea 
+                  id="gallery" 
+                  className="w-full h-24 rounded-xl border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-sm"
+                  placeholder="Enter multiple image URLs here..."
+                  value={newProduct.gallery}
+                  onChange={e => setNewProduct(p => ({ ...p, gallery: e.target.value }))}
+                />
+              </div>
+              <div className="col-span-2 space-y-2">
+                <Label htmlFor="desc" className="font-bold">Full Description</Label>
                 <textarea 
                   id="desc" 
                   className="w-full h-32 rounded-xl border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-sm"
@@ -175,11 +255,74 @@ const AdminProducts = () => {
                 />
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
-              <Button onClick={handleAddProduct}>Save Product</Button>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" className="rounded-xl h-12" onClick={() => setIsAddOpen(false)}>Cancel</Button>
+              <Button onClick={handleAddProduct} disabled={isSubmitting} className="rounded-xl h-12 px-8 font-bold uppercase text-xs tracking-widest">
+                {isSubmitting ? 'Saving...' : 'Save Product'}
+              </Button>
             </DialogFooter>
           </DialogContent>
+        </Dialog>
+
+        {/* Edit Dialog */}
+        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+           <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem]">
+              <DialogHeader>
+                 <DialogTitle className="text-2xl font-black">Edit Product</DialogTitle>
+              </DialogHeader>
+              {editingProduct && (
+                 <div className="grid grid-cols-2 gap-4 py-4">
+                    <div className="col-span-2 space-y-2">
+                       <Label className="font-bold">Product Name</Label>
+                       <Input 
+                          value={editingProduct.name}
+                          onChange={e => setEditingProduct({...editingProduct, name: e.target.value})}
+                          className="h-12 rounded-xl"
+                       />
+                    </div>
+                    <div className="space-y-2">
+                       <Label className="font-bold">Price (৳)</Label>
+                       <Input 
+                          type="number"
+                          value={editingProduct.price}
+                          onChange={e => setEditingProduct({...editingProduct, price: parseFloat(e.target.value)})}
+                          className="h-12 rounded-xl"
+                       />
+                    </div>
+                    <div className="space-y-2">
+                       <Label className="font-bold">Stock</Label>
+                       <Input 
+                          type="number"
+                          value={editingProduct.stock}
+                          onChange={e => setEditingProduct({...editingProduct, stock: parseInt(e.target.value)})}
+                          className="h-12 rounded-xl"
+                       />
+                    </div>
+                    <div className="col-span-2 space-y-2">
+                       <Label className="font-bold">Category</Label>
+                       <Input 
+                          value={editingProduct.category}
+                          onChange={e => setEditingProduct({...editingProduct, category: e.target.value})}
+                          className="h-12 rounded-xl"
+                       />
+                    </div>
+                    <div className="col-span-2 space-y-2">
+                       <Label className="font-bold">Description</Label>
+                       <textarea 
+                          value={editingProduct.description}
+                          onChange={e => setEditingProduct({...editingProduct, description: e.target.value})}
+                          className="w-full h-32 rounded-xl border px-3 py-2 text-sm"
+                       />
+                    </div>
+                 </div>
+              )}
+              <DialogFooter>
+                 <Button variant="outline" className="rounded-xl h-12" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+                 <Button onClick={handleEditProduct} disabled={isSubmitting} className="rounded-xl h-12 px-8">
+                    {isSubmitting ? 'Updating...' : 'Update Product'}
+                 </Button>
+              </DialogFooter>
+           </DialogContent>
         </Dialog>
       </div>
 
@@ -211,12 +354,20 @@ const AdminProducts = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredProducts.map((p) => (
+            {loading ? (
+               <TableRow>
+                  <TableCell colSpan={6} className="py-20 text-center font-medium italic opacity-50">Loading products...</TableCell>
+               </TableRow>
+            ) : currentProducts.length === 0 ? (
+               <TableRow>
+                  <TableCell colSpan={6} className="py-20 text-center font-medium italic opacity-50">No products found.</TableCell>
+               </TableRow>
+            ) : currentProducts.map((p) => (
               <TableRow key={p.id} className="hover:bg-secondary/10 transition-colors border-b-primary/5">
                 <TableCell className="pl-6">
                   <div className="w-12 h-12 bg-secondary rounded-lg overflow-hidden border">
                     <img 
-                      src={p.images[0]} 
+                      src={p.images && p.images.length > 0 ? p.images[0] : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200'} 
                       alt={p.name} 
                       className="w-full h-full object-cover" 
                       onError={(e) => {
@@ -238,7 +389,7 @@ const AdminProducts = () => {
                 </TableCell>
                 <TableCell className="text-right pr-6">
                   <div className="flex items-center justify-end gap-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-primary hover:bg-primary/5 rounded-lg"><Edit className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-primary hover:bg-primary/5 rounded-lg" onClick={() => openEdit(p)}><Edit className="h-4 w-4" /></Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-destructive hover:bg-destructive/5 rounded-lg" onClick={() => handleDelete(p.id)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                 </TableCell>
@@ -247,14 +398,13 @@ const AdminProducts = () => {
           </TableBody>
         </Table>
         
-        {/* Pagination placeholder */}
-        <div className="p-4 border-t flex items-center justify-between text-sm text-muted-foreground">
-           <p>Showing 1 to {filteredProducts.length} of {products.length}</p>
-           <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="rounded-lg h-8 w-8 p-0" disabled><ChevronLeft className="h-4 w-4" /></Button>
-              <Button variant="outline" size="sm" className="rounded-lg h-8 w-8 p-0" disabled><ChevronRight className="h-4 w-4" /></Button>
-           </div>
-        </div>
+        <AdminPagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={filteredProducts.length}
+          itemsPerPage={itemsPerPage}
+        />
       </div>
     </div>
   );

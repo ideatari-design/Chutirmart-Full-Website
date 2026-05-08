@@ -141,6 +141,24 @@ const MainHeader = () => {
     }
   };
   
+  const searchRef = React.useRef<HTMLDivElement>(null);
+  const mobileSearchRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSearchFocused(false);
+      }
+      if (mobileSearchRef.current && !mobileSearchRef.current.contains(event.target as Node)) {
+        setIsMobileSearchFocused(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const [isMobileSearchFocused, setIsMobileSearchFocused] = React.useState(false);
+
   return (
     <div className="bg-background border-b py-5 sticky top-0 z-50 shadow-sm">
       <div className="max-w-[1140px] mx-auto px-4 flex items-center justify-between gap-4 md:gap-8">
@@ -149,7 +167,7 @@ const MainHeader = () => {
           <span className="w-1.5 h-1.5 bg-accent rounded-full ml-1 self-end mb-1 md:mb-1.5" />
         </Link>
         
-        <div className="flex-grow max-w-2xl hidden md:block relative">
+        <div className="flex-grow max-w-2xl hidden md:block relative" ref={searchRef}>
           <div className="flex items-center bg-secondary rounded-full overflow-hidden px-4 border border-transparent focus-within:border-primary/20 transition-all">
             {isLoadingSuggestions ? (
               <Loader2 className="h-5 w-5 text-primary animate-spin mr-2" />
@@ -162,7 +180,6 @@ const MainHeader = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}
-              onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
               onKeyDown={handleKeyDown}
             />
           </div>
@@ -394,43 +411,67 @@ const MainHeader = () => {
                 </SheetTitle>
               </SheetHeader>
               <div className="p-4 border-b">
-                 <div className="relative">
+                 <div className="relative" ref={mobileSearchRef}>
                     <div className="flex items-center bg-secondary rounded-xl overflow-hidden px-4 border border-transparent focus-within:border-primary/20 transition-all">
-                      <Search className="h-4 w-4 text-muted-foreground mr-2" />
+                      {isLoadingSuggestions ? (
+                        <Loader2 className="h-4 w-4 text-primary animate-spin mr-2" />
+                      ) : (
+                        <Search className="h-4 w-4 text-muted-foreground mr-2" />
+                      )}
                       <Input 
                         placeholder="Search products..." 
                         className="border-none bg-transparent focus-visible:ring-0 text-sm h-10" 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        onFocus={() => setIsMobileSearchFocused(true)}
                         onKeyDown={handleKeyDown}
                       />
                     </div>
-                    {searchQuery.trim().length >= 2 && suggestions.length > 0 && (
+                    {isMobileSearchFocused && searchQuery.trim().length >= 2 && (
                       <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-xl shadow-lg overflow-hidden z-50 max-h-[300px] overflow-y-auto">
-                        {suggestions.map(product => (
-                          <div 
-                            key={product.id}
-                            className="p-3 hover:bg-secondary cursor-pointer flex items-center gap-3 border-b last:border-0"
-                            onClick={() => {
-                              navigate(`/product/${product.id}`);
-                              setSearchQuery('');
-                            }}
-                          >
-                            <img 
-                              src={product.images[0]} 
-                              alt={product.name} 
-                              className="w-8 h-8 object-cover rounded-lg"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200';
+                        {isLoadingSuggestions ? (
+                          <div className="p-4 text-center text-xs text-muted-foreground animate-pulse">Searching...</div>
+                        ) : suggestions.length > 0 ? (
+                          suggestions.map(product => (
+                            <div 
+                              key={product.id}
+                              className="p-3 hover:bg-secondary cursor-pointer flex items-center gap-3 border-b last:border-0"
+                              onClick={() => {
+                                navigate(`/product/${product.id}`);
+                                setSearchQuery('');
+                                setIsMobileSearchFocused(false);
                               }}
-                            />
-                            <div className="min-w-0">
-                              <p className="text-xs font-bold truncate">{product.name}</p>
-                              <p className="text-[10px] text-primary font-black">৳{product.price.toLocaleString()}</p>
+                            >
+                              <img 
+                                src={product.images[0]} 
+                                alt={product.name} 
+                                className="w-8 h-8 object-cover rounded-lg"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200';
+                                }}
+                              />
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold truncate">{product.name}</p>
+                                <p className="text-[10px] text-primary font-black">৳{product.price.toLocaleString()}</p>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))
+                        ) : (
+                          <div className="p-4 text-center text-xs text-muted-foreground">No products found</div>
+                        )}
+                        <div 
+                          className="p-3 bg-secondary/30 text-center cursor-pointer border-t"
+                          onClick={() => {
+                            if (searchQuery.trim()) {
+                              navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
+                              setSearchQuery('');
+                              setIsMobileSearchFocused(false);
+                            }
+                          }}
+                        >
+                          <p className="text-[10px] font-bold text-primary">View all results</p>
+                        </div>
                       </div>
                     )}
                  </div>

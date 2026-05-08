@@ -55,6 +55,21 @@ export const productService = {
     }
   },
 
+  async updateProduct(id: string, product: Partial<Product>): Promise<Product | null> {
+    try {
+      const response = await fetch(`/api/products/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(product)
+      });
+      if (!response.ok) throw new Error('Failed to update product');
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating product:', error);
+      return null;
+    }
+  },
+
   async searchProducts(query: string): Promise<Product[]> {
     try {
       const products = await this.getAllProducts();

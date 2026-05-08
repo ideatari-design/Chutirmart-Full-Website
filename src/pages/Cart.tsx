@@ -74,12 +74,12 @@ const Cart = () => {
                       >
                         {/* Product Info */}
                         <div className="flex gap-6 items-center min-w-0">
-                          <div className="w-24 h-24 bg-slate-50 rounded-2xl overflow-hidden p-2 group-hover:scale-105 transition-transform duration-500 underline-none">
+                          <div className="w-24 h-24 bg-slate-100 rounded-xl overflow-hidden group-hover:scale-105 transition-transform duration-500">
                             <Link to={`/product/${item.id}`}>
                               <img 
                                 src={item.images[0]} 
                                 alt={item.name} 
-                                className="w-full h-full object-contain" 
+                                className="w-full h-full object-cover" 
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement;
                                   target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200';
