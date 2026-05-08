@@ -258,12 +258,9 @@ async function queryD1(sql: string, params: any[] = []) {
       return null;
     }
     
-    // Cloudflare returns result as an array of operation results
-    // We want the results from the first operation (usually there's only one)
-    if (data.result && Array.isArray(data.result)) {
-      return data.result[0];
-    }
-    return data.result;
+    // Cloudflare returns an array of results for each query in the POST body
+    // Since we only send one query, we take the first result
+    return Array.isArray(data.result) ? data.result[0] : data.result;
   } catch (err) {
     console.error("D1 Fetch Exception:", err);
     return null;
@@ -388,16 +385,22 @@ async function startServer() {
 
   // Get all products
   app.get("/api/products", async (req, res) => {
-    const d1Result = await queryD1("SELECT * FROM products");
-    if (d1Result) {
-      const products = d1Result.results.map((p: any) => ({
-        ...p,
-        images: JSON.parse(p.images || "[]"),
-        specs: JSON.parse(p.specs || "{}")
-      }));
-      return res.json(products);
+    try {
+      const d1Result = await queryD1("SELECT * FROM products");
+      if (d1Result && d1Result.results && d1Result.results.length > 0) {
+        const products = d1Result.results.map((p: any) => ({
+          ...p,
+          images: JSON.parse(p.images || "[]"),
+          specs: JSON.parse(p.specs || "{}")
+        }));
+        return res.json(products);
+      }
+      console.warn("D1 query returned no results or failed, falling back to in-memory data.");
+      res.json(PRODUCTS);
+    } catch (err) {
+      console.error("Products API error:", err);
+      res.json(PRODUCTS);
     }
-    res.json(PRODUCTS);
   });
 
   // Get single product
