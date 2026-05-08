@@ -319,16 +319,16 @@ async function startServer() {
       CREATE TABLE IF NOT EXISTS products (
         id TEXT PRIMARY KEY,
         name TEXT,
+        nameBn TEXT,
         price REAL,
+        oldPrice REAL,
         category TEXT,
-        brand TEXT,
-        description TEXT,
         images TEXT,
-        specs TEXT,
-        rating REAL,
         stock INTEGER,
         isFeatured INTEGER,
-        discount REAL
+        stars REAL,
+        description TEXT,
+        specs TEXT
       )
     `;
 
@@ -354,13 +354,88 @@ async function startServer() {
       } else {
         return res.status(500).json({ 
           success: false, 
-          message: "Failed to create tables. Check server logs for Authentication or ID errors.",
-          details: "Make sure CLOUDFLARE_ACCOUNT_ID and API_TOKEN are correct." 
+          message: "Failed to create tables. Check server logs for Authentication or ID errors." 
         });
       }
     } catch (err) {
       res.status(500).json({ success: false, error: String(err) });
     }
+  });
+
+  // Emergency Reset Endpoint (Drop and Recreate)
+  app.get("/api/admin/reset-db", async (req, res) => {
+    console.log("CRITICAL: Resetting database tables...");
+    try {
+      await queryD1("DROP TABLE IF EXISTS products");
+      await queryD1("DROP TABLE IF EXISTS orders");
+      
+      const createProductsTable = `
+        CREATE TABLE products (
+          id TEXT PRIMARY KEY,
+          name TEXT,
+          nameBn TEXT,
+          price REAL,
+          oldPrice REAL,
+          category TEXT,
+          images TEXT,
+          stock INTEGER,
+          isFeatured INTEGER,
+          stars REAL,
+          description TEXT,
+          specs TEXT
+        )
+      `;
+
+      const createOrdersTable = `
+        CREATE TABLE orders (
+          id TEXT PRIMARY KEY,
+          customerName TEXT,
+          customerPhone TEXT,
+          customerAddress TEXT,
+          total REAL,
+          items TEXT,
+          status TEXT,
+          createdAt TEXT
+        )
+      `;
+
+      const pResult = await queryD1(createProductsTable);
+      const oResult = await queryD1(createOrdersTable);
+
+      if (pResult && oResult) {
+        return res.json({ success: true, message: "Database reset and recreated successfully! Now run /api/admin/seed to fill data." });
+      }
+      res.status(500).json({ success: false, message: "Failed logic during recreation." });
+    } catch (err) {
+      res.status(500).json({ success: false, error: String(err) });
+    }
+  });
+
+  // Seed Database with Initial Data
+  app.get("/api/admin/seed", async (req, res) => {
+    console.log("Seeding database...");
+    let successCount = 0;
+    
+    for (const p of PRODUCTS) {
+      try {
+        const sql = `
+          INSERT OR REPLACE INTO products (id, name, nameBn, price, oldPrice, category, images, stock, isFeatured, stars, description, specs)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        const params = [
+          p.id, p.name, p.nameBn, p.price, p.oldPrice, p.category, 
+          JSON.stringify(p.images), p.stock, p.isFeatured ? 1 : 0, p.stars, 
+          p.description, JSON.stringify(p.specs)
+        ];
+        
+        const result = await queryD1(sql, params);
+        if (result && result.success) successCount++;
+      } catch (e) {
+        console.error(`Failed to seed product ${p.id}:`, e);
+      }
+    }
+    
+    res.json({ success: true, message: `Seeded ${successCount} out of ${PRODUCTS.length} products.` });
   });
 
   // --- API Routes ---
@@ -387,18 +462,33 @@ async function startServer() {
   app.get("/api/products", async (req, res) => {
     try {
       const d1Result = await queryD1("SELECT * FROM products");
+      
+      // If D1 is working and has data
       if (d1Result && d1Result.results && d1Result.results.length > 0) {
         const products = d1Result.results.map((p: any) => ({
           ...p,
           images: JSON.parse(p.images || "[]"),
-          specs: JSON.parse(p.specs || "{}")
+          specs: JSON.parse(p.specs || "{}"),
+          isFeatured: Boolean(p.isFeatured)
         }));
         return res.json(products);
       }
-      console.warn("D1 query returned no results or failed, falling back to in-memory data.");
+      
+      // If D1 query failed (null) or is explicitly unsuccessful
+      if (!d1Result || d1Result.success === false) {
+        console.warn("[D1 Fallback] Database query failed or returned no result object. Using memory data.");
+        return res.json(PRODUCTS);
+      }
+
+      // If D1 query succeeded but database is empty
+      if (d1Result.results && d1Result.results.length === 0) {
+        console.info("[D1 Status] Database is empty. Showing default products.");
+        return res.json(PRODUCTS);
+      }
+
       res.json(PRODUCTS);
     } catch (err) {
-      console.error("Products API error:", err);
+      console.error("Products API exception:", err);
       res.json(PRODUCTS);
     }
   });
