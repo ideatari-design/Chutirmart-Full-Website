@@ -192,26 +192,75 @@ export async function onRequest(context) {
     }
 
     // --- Orders API ---
+    if (path === "/api/orders" && method === "GET") {
+      if (!env.DB) return jsonResponse([]);
+      const { results } = await env.DB.prepare("SELECT * FROM orders ORDER BY createdAt DESC").all();
+      const parsedResults = results.map(o => ({
+        ...o,
+        items: JSON.parse(o.items || "[]")
+      }));
+      return jsonResponse(parsedResults);
+    }
+
+    if (path.startsWith("/api/orders/") && method === "GET") {
+      const parts = path.split("/");
+      let id = parts[3] || parts.pop();
+      id = decodeURIComponent(id).replace(/^#/, ""); // Strip leading #
+      
+      if (!env.DB) {
+        return jsonResponse({
+          id,
+          customerName: "Guest",
+          customerPhone: "01700000000",
+          customerAddress: "Dhaka",
+          total: 0,
+          items: [],
+          status: "pending",
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      const order = await env.DB.prepare("SELECT * FROM orders WHERE id = ?").bind(id).first();
+      if (!order) return jsonResponse({ error: "Order not found" }, 404);
+      
+      return jsonResponse({
+        ...order,
+        items: JSON.parse(order.items || "[]")
+      });
+    }
+
     if (path === "/api/orders" && method === "POST") {
       const order = await request.json();
       const id = crypto.randomUUID();
       const createdAt = new Date().toISOString();
       
-      await env.DB.prepare(`
-        INSERT INTO orders (id, customerName, customerPhone, customerAddress, total, items, status, createdAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `).bind(
-        id, 
-        order.customerName, 
-        order.customerPhone, 
-        order.customerAddress, 
-        order.total, 
-        JSON.stringify(order.items), 
-        "pending", 
-        createdAt
-      ).run();
+      if (env.DB) {
+        await env.DB.prepare(`
+          INSERT INTO orders (id, customerName, customerPhone, customerAddress, total, items, status, createdAt)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          id, 
+          order.customerName, 
+          order.customerPhone, 
+          order.customerAddress, 
+          order.total, 
+          JSON.stringify(order.items), 
+          "pending", 
+          createdAt
+        ).run();
+      }
 
-      return jsonResponse({ success: true, id }, 201);
+      return jsonResponse({ ...order, id, status: "pending", createdAt }, 201);
+    }
+
+    if (path.includes("/status") && method === "PATCH") {
+      const id = path.split("/")[3];
+      const { status } = await request.json();
+      
+      if (env.DB) {
+        await env.DB.prepare("UPDATE orders SET status = ? WHERE id = ?").bind(status, id).run();
+      }
+      return jsonResponse({ success: true });
     }
 
     // --- Database Initialization/Health ---

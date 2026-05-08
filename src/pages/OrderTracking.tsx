@@ -28,7 +28,7 @@ const OrderTracking = () => {
     window.scrollTo(0, 0);
     if (searchParams.get('id')) {
       const id = searchParams.get('id');
-      if (id) handleTrackById(id.startsWith('#') ? id : `#${id}`);
+      if (id) handleTrackById(id);
     }
     
     // Fetch hot products
@@ -76,7 +76,7 @@ const OrderTracking = () => {
   const handleTrack = (e: React.FormEvent) => {
     e.preventDefault();
     if (!orderId) return;
-    handleTrackById(orderId.startsWith('#') ? orderId : `#${orderId}`);
+    handleTrackById(orderId);
   };
 
   return (
