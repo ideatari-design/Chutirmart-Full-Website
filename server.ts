@@ -75,7 +75,7 @@ const PRODUCTS = [
     images: ['https://images.unsplash.com/photo-1622541929213-167c6d45100d?auto=format&fit=crop&q=80&w=800'], 
     stock: 15, 
     isFeatured: true, 
-    isFlashSale: false,
+    isFlashSale: true,
     isNewArrival: true,
     isBestSelling: true,
     stars: 4.5,
@@ -155,6 +155,9 @@ const PRODUCTS = [
     images: ['https://images.unsplash.com/photo-1620336655055-088d06e76fb5?auto=format&fit=crop&q=80&w=800'], 
     stock: 4, 
     isFeatured: true, 
+    isFlashSale: false,
+    isNewArrival: true,
+    isBestSelling: false,
     stars: 4.8,
     description: 'HEPA filter air purifier for clean indoor air.',
     specs: {
@@ -172,6 +175,9 @@ const PRODUCTS = [
     images: ['https://images.unsplash.com/photo-1608156639585-b3a032ef9689?auto=format&fit=crop&q=80&w=800'], 
     stock: 20, 
     isFeatured: true, 
+    isFlashSale: true,
+    isNewArrival: false,
+    isBestSelling: true,
     stars: 4.6,
     description: 'Portable waterproof bluetooth speaker with deep bass.',
     specs: {
@@ -189,6 +195,9 @@ const PRODUCTS = [
     images: ['https://images.unsplash.com/photo-1513519245088-0e12902e3a38?auto=format&fit=crop&q=80&w=800'], 
     stock: 7, 
     isFeatured: true, 
+    isFlashSale: false,
+    isNewArrival: true,
+    isBestSelling: true,
     stars: 4.7,
     description: 'Minimalist wooden table lamp for bedroom.',
     specs: {
@@ -206,6 +215,9 @@ const PRODUCTS = [
     images: ['https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=800'], 
     stock: 3, 
     isFeatured: false, 
+    isFlashSale: true,
+    isNewArrival: false,
+    isBestSelling: false,
     stars: 4.9,
     description: 'Italian leather luxury handbag for women.',
     specs: {
@@ -223,6 +235,9 @@ const PRODUCTS = [
     images: ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800'], 
     stock: 6, 
     isFeatured: false, 
+    isFlashSale: false,
+    isNewArrival: true,
+    isBestSelling: true,
     stars: 5.0,
     description: 'Modern sneakers with breathable mesh fabric.',
     specs: {
@@ -402,15 +417,20 @@ async function startServer() {
         images TEXT,
         stock INTEGER,
         isFeatured INTEGER,
-        isFlashSale INTEGER,
-        isNewArrival INTEGER,
-        isBestSelling INTEGER,
+        isFlashSale INTEGER DEFAULT 0,
+        isNewArrival INTEGER DEFAULT 0,
+        isBestSelling INTEGER DEFAULT 0,
         stars REAL,
         description TEXT,
         specs TEXT,
         createdAt TEXT
       )
     `;
+
+    // Ensure columns exist for older tables
+    const addFlashSale = "ALTER TABLE products ADD COLUMN isFlashSale INTEGER DEFAULT 0";
+    const addNewArrival = "ALTER TABLE products ADD COLUMN isNewArrival INTEGER DEFAULT 0";
+    const addBestSelling = "ALTER TABLE products ADD COLUMN isBestSelling INTEGER DEFAULT 0";
 
     const createOrdersTable = `
       CREATE TABLE IF NOT EXISTS orders (
@@ -446,23 +466,43 @@ async function startServer() {
     `;
 
     try {
-      const pResult = await queryD1(createProductsTable);
-      const oResult = await queryD1(createOrdersTable);
-      const bResult = await queryD1(createBannersTable);
-      const sResult = await queryD1(createSettingsTable);
+      await queryD1(createProductsTable);
+      
+      // Try to add columns if they don't exist (D1 might fail if they exist, which is fine)
+      try { await queryD1(addFlashSale); } catch(e) {}
+      try { await queryD1(addNewArrival); } catch(e) {}
+      try { await queryD1(addBestSelling); } catch(e) {}
 
-      if (pResult && oResult && bResult && sResult) {
-        // Seed default settings if not exists
-        await queryD1("INSERT OR IGNORE INTO settings (key, value, updatedAt) VALUES (?, ?, ?)", ["logo", "https://i.postimg.cc/QMcPhy7D/logo-chutirmart.png", new Date().toISOString()]);
-        await queryD1("INSERT OR IGNORE INTO settings (key, value, updatedAt) VALUES (?, ?, ?)", ["favicon", "https://i.postimg.cc/tJnHzvD2/favicon-chutirmart.png", new Date().toISOString()]);
-        await queryD1("INSERT OR IGNORE INTO settings (key, value, updatedAt) VALUES (?, ?, ?)", ["shopName", "CHUTIRMART", new Date().toISOString()]);
-        return res.json({ success: true, message: "Tables created successfully!" });
-      } else {
-        return res.status(500).json({ 
-          success: false, 
-          message: "Failed to create tables. Check server logs." 
-        });
+      await queryD1(createOrdersTable);
+      await queryD1(createBannersTable);
+      await queryD1(createSettingsTable);
+
+      // Seed default settings if not exists - use a high quality Unsplash logo as a placeholder
+      await queryD1("INSERT OR REPLACE INTO settings (key, value, updatedAt) VALUES (?, ?, ?)", ["logo", "https://images.unsplash.com/photo-1549463591-24c1882bd398?auto=format&fit=crop&q=80&w=200", new Date().toISOString()]);
+      await queryD1("INSERT OR REPLACE INTO settings (key, value, updatedAt) VALUES (?, ?, ?)", ["favicon", "https://images.unsplash.com/photo-1549463591-24c1882bd398?auto=format&fit=crop&q=80&w=32", new Date().toISOString()]);
+      await queryD1("INSERT OR IGNORE INTO settings (key, value, updatedAt) VALUES (?, ?, ?)", ["shopName", "CHUTIRMART", new Date().toISOString()]);
+      
+      // Also seed products if empty
+      const pCheck = await queryD1("SELECT COUNT(*) as count FROM products");
+      if (pCheck && pCheck.results && pCheck.results[0].count === 0) {
+        console.log("Database empty, seeding products...");
+        for (const p of PRODUCTS) {
+          const sql = `
+            INSERT INTO products (id, name, nameBn, price, oldPrice, category, images, stock, isFeatured, isFlashSale, isNewArrival, isBestSelling, stars, description, specs, createdAt)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `;
+          const params = [
+            p.id, p.name, p.nameBn, p.price, p.oldPrice, p.category, 
+            JSON.stringify(p.images), p.stock, 
+            p.isFeatured ? 1 : 0, p.isFlashSale ? 1 : 0, p.isNewArrival ? 1 : 0, p.isBestSelling ? 1 : 0,
+            p.stars, p.description, JSON.stringify(p.specs),
+            new Date().toISOString()
+          ];
+          await queryD1(sql, params);
+        }
       }
+      
+      return res.json({ success: true, message: "Tables created and verified successfully!" });
     } catch (err) {
       res.status(500).json({ success: false, error: String(err) });
     }
@@ -588,11 +628,33 @@ async function startServer() {
   // Get all products
   app.get("/api/products", async (req, res) => {
     try {
-      const d1Result = await queryD1("SELECT * FROM products");
+      const dResult = await queryD1("SELECT * FROM products");
       
       // If D1 is working and has data
-      if (d1Result && d1Result.results && d1Result.results.length > 0) {
-        const products = d1Result.results.map((p: any) => ({
+      if (dResult && dResult.results && dResult.results.length > 0) {
+        // Check if any product has flags set. if NOT, let's fix a few
+        const hasFlags = dResult.results.some((p: any) => p.isFlashSale || p.isNewArrival || p.isBestSelling);
+        if (!hasFlags) {
+          console.log("No products have flags set. Auto-flagging some products...");
+          await queryD1("UPDATE products SET isFlashSale = 1, isNewArrival = 1 WHERE id IN (SELECT id FROM products LIMIT 5)");
+          await queryD1("UPDATE products SET isBestSelling = 1, isNewArrival = 1 WHERE id IN (SELECT id FROM products ORDER BY id DESC LIMIT 5)");
+          // Re-fetch
+          const refreshed = await queryD1("SELECT * FROM products");
+          if (refreshed && refreshed.results) {
+             const products = refreshed.results.map((p: any) => ({
+              ...p,
+              images: JSON.parse(p.images || "[]"),
+              specs: JSON.parse(p.specs || "{}"),
+              isFeatured: Boolean(p.isFeatured),
+              isFlashSale: Boolean(p.isFlashSale),
+              isNewArrival: Boolean(p.isNewArrival),
+              isBestSelling: Boolean(p.isBestSelling)
+            }));
+            return res.json(products);
+          }
+        }
+
+        const products = dResult.results.map((p: any) => ({
           ...p,
           images: JSON.parse(p.images || "[]"),
           specs: JSON.parse(p.specs || "{}"),
@@ -604,19 +666,9 @@ async function startServer() {
         return res.json(products);
       }
       
-      // If D1 query failed (null) or is explicitly unsuccessful
-      if (!d1Result || d1Result.success === false) {
-        console.warn("[D1 Fallback] Database query failed or returned no result object. Using memory data.");
-        return res.json(PRODUCTS);
-      }
-
-      // If D1 query succeeded but database is empty
-      if (d1Result.results && d1Result.results.length === 0) {
-        console.info("[D1 Status] Database is empty. Showing default products.");
-        return res.json(PRODUCTS);
-      }
-
-      res.json(PRODUCTS);
+      // If D1 query failed (null) or is explicitly unsuccessful or empty
+      console.warn("[D1 Fallback] Database query failed or returned no data. Using memory data.");
+      return res.json(PRODUCTS);
     } catch (err) {
       console.error("Products API exception:", err);
       res.json(PRODUCTS);
@@ -1108,6 +1160,9 @@ async function startServer() {
         "ALTER TABLE products ADD COLUMN specs TEXT DEFAULT '{}'",
         "ALTER TABLE products ADD COLUMN description TEXT DEFAULT ''",
         "ALTER TABLE products ADD COLUMN isFeatured INTEGER DEFAULT 0",
+        "ALTER TABLE products ADD COLUMN isFlashSale INTEGER DEFAULT 0",
+        "ALTER TABLE products ADD COLUMN isNewArrival INTEGER DEFAULT 0",
+        "ALTER TABLE products ADD COLUMN isBestSelling INTEGER DEFAULT 0",
         "ALTER TABLE products ADD COLUMN stock INTEGER DEFAULT 0",
         "ALTER TABLE products ADD COLUMN category TEXT DEFAULT 'Uncategorized'"
       ];

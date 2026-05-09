@@ -58,6 +58,7 @@ import { orderService } from '@/services/orderService';
 import { productService } from '@/services/productService';
 import { Product } from '@/types';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 const TopHeader = () => (
   <div className="bg-background border-b py-2 text-xs text-muted-foreground hidden lg:block">
@@ -86,6 +87,29 @@ const TopHeader = () => (
     </div>
   </div>
 );
+
+const Logo = ({ className = "", invert = false }: { className?: string, invert?: boolean }) => {
+  const { settings } = useSettings();
+  const [error, setError] = React.useState(false);
+
+  if (settings.logo && !error) {
+    return (
+      <img 
+        src={settings.logo} 
+        alt={settings.shopName || "Logo"} 
+        className={cn(invert ? "brightness-0 invert" : "", className)}
+        onError={() => setError(true)}
+      />
+    );
+  }
+
+  return (
+    <div className={cn("text-2xl md:text-3xl font-black flex items-center text-primary uppercase whitespace-nowrap", className)}>
+      {settings.shopName || 'OJALA'}
+      <span className="w-1.5 h-1.5 bg-accent rounded-full ml-1 self-end mb-1 md:mb-1.5" />
+    </div>
+  );
+};
 
 const MainHeader = () => {
   const { itemCount, cartTotal, cart, removeFromCart, updateQuantity, clearCart } = useCart();
@@ -168,18 +192,7 @@ const MainHeader = () => {
     <div className="bg-background border-b py-5 sticky top-0 z-50 shadow-sm">
       <div className="max-w-[1140px] mx-auto px-4 flex items-center justify-between gap-4 md:gap-8">
         <Link to="/" className="flex items-center shrink-0 transition-transform active:scale-95 group">
-          {settings.logo ? (
-            <img 
-              src={settings.logo} 
-              alt={settings.shopName || "Logo"} 
-              className="h-10 md:h-12 w-auto object-contain" 
-            />
-          ) : (
-            <div className="text-2xl md:text-3xl font-black flex items-center text-primary uppercase">
-              {settings.shopName || 'OJALA'}
-              <span className="w-1.5 h-1.5 bg-accent rounded-full ml-1 self-end mb-1 md:mb-1.5" />
-            </div>
-          )}
+          <Logo className="h-10 md:h-12 w-auto object-contain" />
         </Link>
         
         <div className="flex-grow max-w-2xl hidden md:block relative" ref={searchRef}>
@@ -448,15 +461,8 @@ const MainHeader = () => {
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] p-0 flex flex-col">
               <SheetHeader className="p-6 border-b text-left">
-                <SheetTitle className="text-2xl font-black flex items-center text-primary uppercase">
-                  {settings.logo ? (
-                    <img src={settings.logo} alt="Logo" className="h-8 w-auto object-contain" />
-                  ) : (
-                    <>
-                      {settings.shopName || 'OJALA'}
-                      <span className="w-1.5 h-1.5 bg-accent rounded-full ml-1 self-end mb-1" />
-                    </>
-                  )}
+                <SheetTitle>
+                  <Logo className="h-8 w-auto object-contain" />
                 </SheetTitle>
               </SheetHeader>
               <div className="p-4 border-b">
@@ -616,14 +622,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-20">
           <div className="lg:col-span-2">
             <Link to="/">
-              {settings.logo ? (
-                <img src={settings.logo} alt="Logo" className="h-12 w-auto object-contain mb-8 brightness-0 invert" />
-              ) : (
-                <h2 className="text-4xl font-black mb-8 text-primary uppercase">
-                  {settings.shopName || 'OJALA'}
-                  <span className="w-2 h-2 bg-accent inline-block rounded-full ml-1" />
-                </h2>
-              )}
+              <Logo className="h-12 w-auto object-contain mb-8" invert />
             </Link>
             <div className="space-y-4 text-sm text-muted-foreground">
             <div className="flex gap-3">

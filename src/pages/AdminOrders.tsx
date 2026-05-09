@@ -155,27 +155,29 @@ const AdminOrders = () => {
             ) : currentOrders.map((o) => (
               <TableRow key={o.id} className="hover:bg-secondary/5 transition-colors border-b border-secondary/20">
                 <TableCell className="pl-6 py-4">
-                  <div className="flex -space-x-4">
-                    {o.items && o.items.length > 0 ? (
-                       o.items.slice(0, 3).map((item, idx) => (
-                         <div key={idx} className="w-10 h-10 rounded-full border-2 border-white bg-secondary flex items-center justify-center overflow-hidden shadow-sm relative z-[10]">
-                            <img 
-                              src={item.images && item.images.length > 0 ? item.images[0] : 'https://via.placeholder.com/40'} 
-                              alt={item.name} 
-                              className="w-full h-full object-cover" 
-                            />
-                         </div>
-                       ))
-                    ) : (
-                      <div className="w-10 h-10 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-slate-400">
-                        <Package className="h-4 w-4" />
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-xl border border-border bg-secondary flex items-center justify-center overflow-hidden shadow-sm">
+                        {o.items && o.items.length > 0 ? (
+                           <img 
+                              src={o.items[0].images?.[0] || 'https://via.placeholder.com/48'} 
+                              alt={o.items[0].name} 
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200';
+                              }}
+                           />
+                        ) : (
+                          <Package className="h-5 w-5 text-muted-foreground/30" />
+                        )}
                       </div>
-                    )}
-                    {o.items && o.items.length > 3 && (
-                      <div className="w-10 h-10 rounded-full border-2 border-white bg-primary text-white flex items-center justify-center text-[10px] font-bold z-[5]">
-                        +{o.items.length - 3}
-                      </div>
-                    )}
+                      {o.items && o.items.length > 1 && (
+                        <div className="absolute -top-2 -right-2 bg-primary text-white text-[9px] font-bold h-5 w-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm z-10">
+                          +{o.items.length - 1}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell className="font-bold text-primary text-xs">{o.id}</TableCell>

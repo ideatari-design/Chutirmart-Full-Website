@@ -488,12 +488,20 @@ const Home = () => {
          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { category: "Beauty & fashion", title: "Weekday Outfit Inspiration For All Occasions", author: "Mirtul Mina", image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=600" },
-              { category: "Cosmetics", title: "100% Pure & Natural Sage Essential Oil", author: "Mirtul Mina", image: "https://images.unsplash.com/photo-1522335789203-aabd1fc53bb7?auto=format&fit=crop&q=80&w=600" },
+              { category: "Cosmetics", title: "100% Pure & Natural Sage Essential Oil", author: "Mirtul Mina", image: "https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&q=80&w=600" },
               { category: "Electronics", title: "Tips for Cleaning Desktop & Laptop", author: "Mirtul Mina", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=600" },
             ].map((blog, i) => (
               <div key={i} className="group cursor-pointer">
                   <div className="aspect-[16/10] overflow-hidden rounded-[2rem] mb-6 shadow-xl shadow-foreground/5">
-                    <img src={blog.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" loading="lazy" />
+                    <img 
+                      src={blog.image} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" 
+                      loading="lazy" 
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&q=80&w=600';
+                      }}
+                    />
                   </div>
                  <div className="space-y-4 px-2">
                     <div className="flex items-center gap-4 text-[11px] font-bold text-muted-foreground">
