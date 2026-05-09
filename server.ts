@@ -12,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // --- Multer Configuration for File Uploads ---
-const uploadDir = path.join(process.cwd(), "public", "uploads");
+const uploadDir = path.resolve(process.cwd(), "uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -30,15 +30,19 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 10 * 1024 * 1024 }, // Increase to 10MB
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|ico|svg|webp/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const allowedTypes = /jpeg|jpg|png|gif|ico|svg|webp|avif/;
+    const ext = path.extname(file.originalname).toLowerCase();
+    const extname = allowedTypes.test(ext);
     const mimetype = allowedTypes.test(file.mimetype);
-    if (extname && mimetype) {
+    
+    console.log(`[Upload Filter] Receiving file: ${file.originalname} (${file.mimetype})`);
+    
+    if (extname || mimetype) {
       return cb(null, true);
     }
-    cb(new Error("Invalid file type. Only JPEG, PNG, GIF, ICO, SVG and WebP are allowed."));
+    cb(new Error(`Invalid file type: ${file.mimetype}. Only images are allowed.`));
   }
 });
 
@@ -345,21 +349,26 @@ async function startServer() {
 
   // --- Upload API ---
   app.post("/api/upload", (req, res, next) => {
+    console.log("[Upload API] Received upload request");
     upload.single("file")(req, res, (err) => {
       if (err instanceof multer.MulterError) {
+        console.error("[Upload API] Multer Error:", err);
         if (err.code === 'LIMIT_FILE_SIZE') {
           return res.status(400).json({ success: false, message: "File too large (Max 5MB)" });
         }
         return res.status(400).json({ success: false, message: err.message });
       } else if (err) {
+        console.error("[Upload API] General Error:", err);
         return res.status(400).json({ success: false, message: err.message });
       }
       
       if (!req.file) {
+        console.warn("[Upload API] No file in request");
         return res.status(400).json({ success: false, message: "No file chosen" });
       }
       
       const fileUrl = `/uploads/${req.file.filename}`;
+      console.log(`[Upload API] File uploaded successfully: ${fileUrl}`);
       res.json({ success: true, url: fileUrl });
     });
   });
@@ -607,9 +616,14 @@ async function startServer() {
 
   // --- API Routes ---
 
-  // Health check
-  app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", message: "Ojala Shop Server Running" });
+  // Debug uploads directory
+  app.get("/api/admin/debug-uploads", (req, res) => {
+    try {
+      const files = fs.readdirSync(uploadDir);
+      res.json({ uploadDir, files, cwd: process.cwd() });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
   });
 
   // Get all orders
@@ -776,7 +790,15 @@ async function startServer() {
       if (d1Result && d1Result.results) {
         const settings: any = {};
         d1Result.results.forEach((s: any) => {
-          settings[s.key] = s.value;
+          let val = s.value;
+          if (typeof val === 'string' && (val.startsWith('{') || val.startsWith('['))) {
+            try {
+              val = JSON.parse(val);
+            } catch (e) {
+              // Not JSON, keep as is
+            }
+          }
+          settings[s.key] = val;
         });
         return res.json(settings);
       }
@@ -791,9 +813,10 @@ async function startServer() {
     const updates = req.body;
     try {
       for (const [key, value] of Object.entries(updates)) {
+        const valToStore = typeof value === 'object' ? JSON.stringify(value) : String(value);
         await queryD1(
           "INSERT OR REPLACE INTO settings (key, value, updatedAt) VALUES (?, ?, ?)",
-          [key, String(value), new Date().toISOString()]
+          [key, valToStore, new Date().toISOString()]
         );
       }
       res.json({ success: true });

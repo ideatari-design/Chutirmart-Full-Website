@@ -198,7 +198,7 @@ const AdminSettings = () => {
                         src={settings.logo} 
                         alt="Preview" 
                         className="max-h-full max-w-full object-contain drop-shadow-sm" 
-                        key={`${settings.logo}-${Date.now()}`} // Bypass cache
+                        key={settings.logo} 
                       />
                     ) : (
                       <>
@@ -257,7 +257,7 @@ const AdminSettings = () => {
                           src={settings.favicon} 
                           alt="Favicon" 
                           className="h-10 w-10 object-contain" 
-                          key={`${settings.favicon}-${Date.now()}`}
+                          key={settings.favicon}
                         />
                       </div>
                     ) : (
