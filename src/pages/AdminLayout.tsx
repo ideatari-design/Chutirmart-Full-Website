@@ -35,6 +35,7 @@ import AdminBanners from '@/pages/AdminBanners';
 import AdminSettings from '@/pages/AdminSettings';
 import AdminCoupons from '@/pages/AdminCoupons';
 import { useSettings } from '@/context/SettingsContext';
+import { convertGoogleDriveLink } from '@/lib/imageUtils';
 
 const menuItems = [
   { label: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" />, path: '/admin' },
@@ -71,9 +72,10 @@ const SidebarContent = ({ pathname, onLinkClick }: { pathname: string, onLinkCli
          <Link to="/admin" className="flex items-center shrink-0 transition-transform active:scale-95 group">
            {settings.logo ? (
              <img 
-               src={settings.logo} 
+               src={convertGoogleDriveLink(settings.logo)} 
                alt="Logo" 
                className="h-10 w-auto object-contain" 
+               referrerPolicy="no-referrer"
              />
            ) : (
              <div className="text-2xl font-black text-primary flex items-center group uppercase">
@@ -147,7 +149,7 @@ const AdminLayout = () => {
         <header className="lg:hidden h-16 bg-white border-b flex items-center justify-between px-6 sticky top-0 z-30 shadow-sm">
            <Link to="/admin" className="flex items-center">
               {settings.logo ? (
-                <img src={settings.logo} alt="Logo" className="h-8 w-auto object-contain" />
+                <img src={convertGoogleDriveLink(settings.logo)} alt="Logo" className="h-8 w-auto object-contain" referrerPolicy="no-referrer" />
               ) : (
                 <div className="text-xl font-black text-primary uppercase">
                   {settings.shopName || 'OJALA SHOP'} <span className="text-[8px] text-muted-foreground uppercase ml-1">Admin</span>

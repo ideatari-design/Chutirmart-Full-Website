@@ -27,6 +27,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { bannerService, Banner } from '@/services/bannerService';
+import { convertGoogleDriveLink } from '@/lib/imageUtils';
 
 const AdminBanners = () => {
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -141,7 +142,11 @@ const AdminBanners = () => {
                       placeholder="https://..." 
                       className="h-12 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all font-medium" 
                       value={newBanner.image}
-                      onChange={e => setNewBanner({...newBanner, image: e.target.value})}
+                      onChange={e => {
+                        const val = e.target.value;
+                        const converted = convertGoogleDriveLink(val);
+                        setNewBanner({...newBanner, image: converted});
+                      }}
                     />
                     <p className="text-[10px] text-muted-foreground ml-1">Must be a full URL (e.g. from Unsplash or Imgur)</p>
                  </div>
@@ -189,7 +194,12 @@ const AdminBanners = () => {
             banners.map((banner) => (
               <div key={banner.id} className="group relative bg-white rounded-3xl overflow-hidden shadow-sm border border-primary/5 p-4 flex flex-col md:flex-row gap-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500">
               <div className="md:w-48 h-32 rounded-2xl overflow-hidden shadow-inner border border-slate-100 flex-shrink-0 relative">
-                 <img src={banner.image} alt={banner.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                 <img 
+                   src={banner.image} 
+                   alt={banner.title} 
+                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                   referrerPolicy="no-referrer"
+                 />
                  <div className="absolute inset-0 bg-black/10 transition-opacity opacity-0 group-hover:opacity-100 flex items-center justify-center">
                     <Eye className="text-white h-8 w-8" />
                  </div>
@@ -268,7 +278,11 @@ const AdminBanners = () => {
                          placeholder="https://..." 
                          className="h-12 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all font-medium" 
                          value={editingBanner.image}
-                         onChange={e => setEditingBanner({...editingBanner, image: e.target.value})}
+                         onChange={e => {
+                           const val = e.target.value;
+                           const converted = convertGoogleDriveLink(val);
+                           setEditingBanner({...editingBanner, image: converted});
+                         }}
                        />
                     </div>
                     <div className="space-y-2">

@@ -24,6 +24,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { settingsService } from '@/services/settingsService';
+import { convertGoogleDriveLink } from '@/lib/imageUtils';
 
 const AdminSettings = () => {
   const [activeSection, setActiveSection] = useState('general');
@@ -177,7 +178,8 @@ const AdminSettings = () => {
                 <p className="text-sm text-amber-800 leading-relaxed">
                   Local file uploads are <strong>not supported</strong> on static platforms like Cloudflare Pages or GitHub Pages. 
                   <br />
-                  <span className="font-medium">Solution:</span> Please upload your images to a service like <a href="https://cloudinary.com" target="_blank" rel="noreferrer" className="underline font-bold">Cloudinary</a> or <a href="https://imgur.com" target="_blank" rel="noreferrer" className="underline font-bold">Imgur</a> and paste the direct image URL into the fields below.
+                  <span className="font-medium">Solution:</span> Drive links are <strong>automatically optimized</strong>! 
+                  Just upload your images to <a href="https://drive.google.com" target="_blank" rel="noreferrer" className="underline font-bold">Google Drive</a>, share it with "Anyone with the link", and paste the link below.
                 </p>
               </div>
             </div>
@@ -235,6 +237,7 @@ const AdminSettings = () => {
                         alt="Preview" 
                         className="max-h-full max-w-full object-contain drop-shadow-sm" 
                         key={settings.logo} 
+                        referrerPolicy="no-referrer"
                       />
                     ) : (
                       <>
@@ -252,9 +255,13 @@ const AdminSettings = () => {
                 
                 <div className="space-y-2">
                   <Input 
-                    placeholder="Or paste logo URL here..."
+                    placeholder="Paste logo URL here..."
                     value={settings.logo}
-                    onChange={e => setSettings({...settings, logo: e.target.value})}
+                    onChange={e => {
+                      const val = e.target.value;
+                      const converted = convertGoogleDriveLink(val);
+                      setSettings({...settings, logo: converted});
+                    }}
                     className="h-11 rounded-xl text-xs font-medium"
                   />
                   <p className="text-[10px] text-muted-foreground italic px-1">Tip: Use high-quality transparent PNG for best results.</p>
@@ -294,6 +301,7 @@ const AdminSettings = () => {
                           alt="Favicon" 
                           className="h-10 w-10 object-contain" 
                           key={settings.favicon}
+                          referrerPolicy="no-referrer"
                         />
                       </div>
                     ) : (
@@ -312,9 +320,13 @@ const AdminSettings = () => {
                 
                 <div className="space-y-2">
                   <Input 
-                    placeholder="Or paste favicon URL here..."
+                    placeholder="Paste favicon URL here..."
                     value={settings.favicon}
-                    onChange={e => setSettings({...settings, favicon: e.target.value})}
+                    onChange={e => {
+                      const val = e.target.value;
+                      const converted = convertGoogleDriveLink(val);
+                      setSettings({...settings, favicon: converted});
+                    }}
                     className="h-11 rounded-xl text-xs font-medium"
                   />
                   <p className="text-[10px] text-muted-foreground italic px-1">Tip: Standard .ico or .png works in most browsers.</p>

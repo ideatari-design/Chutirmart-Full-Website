@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { convertGoogleDriveLink } from '@/lib/imageUtils';
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([
@@ -126,7 +127,11 @@ const AdminCategories = () => {
                         placeholder="https://..." 
                         className="h-12 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all" 
                         value={newCat.image}
-                        onChange={e => setNewCat({...newCat, image: e.target.value})}
+                        onChange={e => {
+                           const val = e.target.value;
+                           const converted = convertGoogleDriveLink(val);
+                           setNewCat({...newCat, image: converted});
+                        }}
                        />
                        <Button variant="secondary" className="h-12 w-12 p-0 rounded-xl">
                           <ImageIcon className="h-5 w-5" />
@@ -173,7 +178,11 @@ const AdminCategories = () => {
                            placeholder="https://..." 
                            className="h-12 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all" 
                            value={editingCat.image}
-                           onChange={e => setEditingCat({...editingCat, image: e.target.value})}
+                           onChange={e => {
+                              const val = e.target.value;
+                              const converted = convertGoogleDriveLink(val);
+                              setEditingCat({...editingCat, image: converted});
+                           }}
                           />
                           <Button variant="secondary" className="h-12 w-12 p-0 rounded-xl">
                              <ImageIcon className="h-5 w-5" />
@@ -217,7 +226,7 @@ const AdminCategories = () => {
               <TableRow key={cat.id} className="hover:bg-secondary/10 transition-colors border-b-primary/5">
                 <TableCell className="pl-6 py-4">
                    <div className="w-12 h-12 bg-secondary/50 rounded-xl overflow-hidden border border-slate-100 shadow-sm">
-                      <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
+                      <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                    </div>
                 </TableCell>
                 <TableCell className="font-bold text-primary">{cat.name}</TableCell>

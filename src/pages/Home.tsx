@@ -26,6 +26,7 @@ import ProductCard from '@/components/ProductCard';
 import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import { bannerService, Banner } from '@/services/bannerService';
+import { convertGoogleDriveLink } from '@/lib/imageUtils';
 
 const Features = () => (
   <div className="bg-background py-12 border-b">
@@ -86,9 +87,10 @@ const CategoryCircles = () => {
             >
               <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-background border-2 border-border group-hover:border-primary transition-all p-2 bg-secondary/30 relative">
                 <img 
-                  src={c.icon} 
+                  src={convertGoogleDriveLink(c.icon)} 
                   alt={c.name} 
                   className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-500" 
+                  referrerPolicy="no-referrer"
                   loading="lazy"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -278,9 +280,10 @@ const BannerSlider = () => {
           {slides[currentSlide].link ? (
             <Link to={slides[currentSlide].link} className="block w-full h-full">
               <img 
-                src={slides[currentSlide].image} 
+                src={convertGoogleDriveLink(slides[currentSlide].image)} 
                 alt={slides[currentSlide].title}
                 className="w-full h-full object-cover select-none pointer-events-none" 
+                referrerPolicy="no-referrer"
                 loading="eager"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
@@ -290,9 +293,10 @@ const BannerSlider = () => {
             </Link>
           ) : (
             <img 
-              src={slides[currentSlide].image} 
+              src={convertGoogleDriveLink(slides[currentSlide].image)} 
               alt={slides[currentSlide].title}
               className="w-full h-full object-cover select-none pointer-events-none" 
+              referrerPolicy="no-referrer"
               loading="eager"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;

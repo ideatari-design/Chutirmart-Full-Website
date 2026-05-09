@@ -7,6 +7,7 @@ import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { convertGoogleDriveLink } from '@/lib/imageUtils';
 
 interface ProductCardProps {
   product: Product;
@@ -41,9 +42,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <div className="relative aspect-square overflow-hidden bg-muted/20">
         <Link to={`/product/${product.id}`} className="w-full h-full block">
           <img 
-            src={product.images[0] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800'} 
+            src={convertGoogleDriveLink(product.images[0] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800')} 
             alt={product.name} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            referrerPolicy="no-referrer"
             loading="lazy"
             onError={(e) => {
               const target = e.target as HTMLImageElement;

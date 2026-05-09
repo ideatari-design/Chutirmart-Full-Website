@@ -37,6 +37,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { productService } from '@/services/productService';
 import { Product } from '@/types';
 import { toast } from 'sonner';
+import { convertGoogleDriveLink } from '@/lib/imageUtils';
 
 import AdminPagination from '@/components/AdminPagination';
 
@@ -281,7 +282,11 @@ const AdminProducts = () => {
                   placeholder="https://images.unsplash.com/..." 
                   className="rounded-xl h-12" 
                   value={newProduct.mainImage}
-                  onChange={e => setNewProduct(p => ({ ...p, mainImage: e.target.value }))}
+                  onChange={e => {
+                    const val = e.target.value;
+                    const converted = convertGoogleDriveLink(val);
+                    setNewProduct(p => ({ ...p, mainImage: converted }));
+                  }}
                 />
               </div>
               <div className="col-span-2 space-y-2">
@@ -289,9 +294,14 @@ const AdminProducts = () => {
                 <textarea 
                   id="gallery" 
                   className="w-full h-24 rounded-xl border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-sm"
-                  placeholder="Enter multiple image URLs here..."
+                  placeholder="Enter multiple image URLs here (one per line)..."
                   value={newProduct.gallery}
-                  onChange={e => setNewProduct(p => ({ ...p, gallery: e.target.value }))}
+                  onChange={e => {
+                    const val = e.target.value;
+                    const lines = val.split('\n');
+                    const convertedLines = lines.map(line => convertGoogleDriveLink(line.trim()));
+                    setNewProduct(p => ({ ...p, gallery: convertedLines.join('\n') }));
+                  }}
                 />
               </div>
               <div className="col-span-2 space-y-2">
@@ -422,8 +432,10 @@ const AdminProducts = () => {
                           className="h-12 rounded-xl" 
                           value={editingProduct.images[0] || ''}
                           onChange={e => {
+                             const val = e.target.value;
+                             const converted = convertGoogleDriveLink(val);
                              const newImages = [...editingProduct.images];
-                             newImages[0] = e.target.value;
+                             newImages[0] = converted;
                              setEditingProduct({...editingProduct, images: newImages});
                           }}
                        />
@@ -435,7 +447,9 @@ const AdminProducts = () => {
                           placeholder="Enter multiple image URLs here..."
                           value={editingProduct.images.slice(1).join('\n')}
                           onChange={(e) => {
-                             const gallery = e.target.value.split('\n').filter(url => url.trim() !== '');
+                             const val = e.target.value;
+                             const lines = val.split('\n');
+                             const gallery = lines.map(line => convertGoogleDriveLink(line.trim())).filter(url => url !== '');
                              const updatedImages = [editingProduct.images[0] || '', ...gallery];
                              setEditingProduct({ ...editingProduct, images: updatedImages });
                           }}
@@ -550,6 +564,7 @@ const AdminProducts = () => {
                       src={p.images && p.images.length > 0 ? p.images[0] : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200'} 
                       alt={p.name} 
                       className="w-full h-full object-cover" 
+                      referrerPolicy="no-referrer"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200';

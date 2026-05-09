@@ -59,6 +59,7 @@ import { productService } from '@/services/productService';
 import { Product } from '@/types';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { convertGoogleDriveLink } from '@/lib/imageUtils';
 
 const TopHeader = () => (
   <div className="bg-background border-b py-2 text-xs text-muted-foreground hidden lg:block">
@@ -95,9 +96,10 @@ const Logo = ({ className = "", invert = false }: { className?: string, invert?:
   if (settings.logo && !error) {
     return (
       <img 
-        src={settings.logo} 
+        src={convertGoogleDriveLink(settings.logo)} 
         alt={settings.shopName || "Logo"} 
         className={cn(invert ? "brightness-0 invert" : "", className)}
+        referrerPolicy="no-referrer"
         onError={() => setError(true)}
       />
     );
@@ -239,9 +241,10 @@ const MainHeader = () => {
                     >
                       <div className="w-12 h-12 rounded-xl overflow-hidden bg-secondary flex-shrink-0">
                         <img 
-                          src={product.images[0]} 
+                          src={convertGoogleDriveLink(product.images[0])} 
                           alt={product.name} 
                           className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200';
@@ -318,9 +321,10 @@ const MainHeader = () => {
                       <div key={item.id} className="flex gap-4 group">
                         <Link to={`/product/${item.id}`} className="w-20 h-20 bg-secondary rounded-2xl overflow-hidden flex-shrink-0">
                           <img 
-                            src={item.images[0]} 
+                            src={convertGoogleDriveLink(item.images[0])} 
                             alt={item.name} 
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            referrerPolicy="no-referrer"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200';
@@ -382,9 +386,10 @@ const MainHeader = () => {
                       <div key={item.id} className="flex gap-4 group">
                         <div className="w-16 h-16 md:w-20 md:h-20 bg-secondary rounded-2xl overflow-hidden flex-shrink-0">
                           <img 
-                            src={item.images[0]} 
+                            src={convertGoogleDriveLink(item.images[0])} 
                             alt={item.name} 
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            referrerPolicy="no-referrer"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200';

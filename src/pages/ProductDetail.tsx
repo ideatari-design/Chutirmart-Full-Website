@@ -34,6 +34,7 @@ import ProductCard from '@/components/ProductCard';
 import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import { useWishlist } from '@/context/WishlistContext';
+import { convertGoogleDriveLink } from '@/lib/imageUtils';
 import { Heart } from 'lucide-react';
 
 const ProductDetail = () => {
@@ -192,9 +193,10 @@ const ProductDetail = () => {
               className="aspect-square bg-secondary/30 rounded-[2rem] overflow-hidden border border-border shadow-xl shadow-secondary/50 relative cursor-crosshair"
             >
               <img 
-                src={product.images[selectedImage]} 
+                src={convertGoogleDriveLink(product.images[selectedImage])} 
                 alt={product.name} 
                 className={`w-full h-full object-cover mix-blend-multiply transition-all duration-700 ${zoom ? 'opacity-0' : 'opacity-100'}`}
+                referrerPolicy="no-referrer"
                 loading="lazy"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
@@ -205,7 +207,7 @@ const ProductDetail = () => {
                 <div 
                   className="absolute inset-0 bg-no-repeat pointer-events-none"
                   style={{
-                    backgroundImage: `url(${product.images[selectedImage]})`,
+                    backgroundImage: `url(${convertGoogleDriveLink(product.images[selectedImage])})`,
                     backgroundPosition: `${mousePos.x}% ${mousePos.y}%`,
                     backgroundSize: '200%',
                   }}
@@ -240,9 +242,10 @@ const ProductDetail = () => {
                 className={`w-20 h-20 rounded-2xl overflow-hidden border-2 flex-shrink-0 transition-all ${selectedImage === i ? 'border-primary ring-4 ring-primary/10' : 'border-border opacity-60 hover:opacity-100 hover:border-primary/30'}`}
               >
                 <img 
-                  src={img} 
+                  src={convertGoogleDriveLink(img)} 
                   alt="" 
                   className="w-full h-full object-cover" 
+                  referrerPolicy="no-referrer"
                   loading="lazy" 
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
