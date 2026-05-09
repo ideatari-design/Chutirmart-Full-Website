@@ -173,15 +173,27 @@ const AdminSettings = () => {
                 <Info className="h-6 w-6" />
               </div>
               <div className="space-y-1">
-                <h4 className="font-black text-amber-900">Static Hosting Detected</h4>
+                <h4 className="font-black text-amber-900">Static Hosting Environment Detected</h4>
                 <p className="text-sm text-amber-800 leading-relaxed">
-                  You are currently viewing this app on a static host (like Cloudflare Pages). 
-                  <strong> Local file uploads are not supported here.</strong> 
-                  Please use the official deployment link or configure a cloud storage service to enable uploads.
+                  Local file uploads are <strong>not supported</strong> on static platforms like Cloudflare Pages or GitHub Pages. 
+                  <br />
+                  <span className="font-medium">Solution:</span> Please upload your images to a service like <a href="https://cloudinary.com" target="_blank" rel="noreferrer" className="underline font-bold">Cloudinary</a> or <a href="https://imgur.com" target="_blank" rel="noreferrer" className="underline font-bold">Imgur</a> and paste the direct image URL into the fields below.
                 </p>
               </div>
             </div>
           )}
+
+          <div className="bg-blue-50 border border-blue-200 rounded-3xl p-6 mb-8 flex items-start gap-4">
+            <div className="bg-blue-100 p-3 rounded-2xl text-blue-600">
+              <Settings className="h-6 w-6" />
+            </div>
+            <div className="space-y-1">
+              <h4 className="font-black text-blue-900">Persistence Notice</h4>
+              <p className="text-sm text-blue-800 leading-relaxed md:pr-10">
+                Uploaded files in this preview environment are temporary. For a production site, we highly recommend using a Cloud Storage bucket or a CDN URL to ensure your logo and banners are always available.
+              </p>
+            </div>
+          </div>
 
           {activeSection === 'general' && (
             <div className="space-y-6">
