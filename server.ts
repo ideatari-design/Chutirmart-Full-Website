@@ -12,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // --- Multer Configuration for File Uploads ---
-const uploadDir = path.resolve(process.cwd(), "uploads");
+const uploadDir = path.join(process.cwd(), "public", "uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -30,7 +30,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // Increase to 10MB
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|ico|svg|webp|avif/;
     const ext = path.extname(file.originalname).toLowerCase();
@@ -352,23 +352,23 @@ async function startServer() {
     console.log("[Upload API] Received upload request");
     upload.single("file")(req, res, (err) => {
       if (err instanceof multer.MulterError) {
-        console.error("[Upload API] Multer Error:", err);
+        console.error("[Upload API] Multer Error:", err.code, err.message);
         if (err.code === 'LIMIT_FILE_SIZE') {
-          return res.status(400).json({ success: false, message: "File too large (Max 5MB)" });
+          return res.status(400).json({ success: false, message: "File too large (Max 10MB)" });
         }
-        return res.status(400).json({ success: false, message: err.message });
+        return res.status(400).json({ success: false, message: `Upload Error: ${err.message}` });
       } else if (err) {
-        console.error("[Upload API] General Error:", err);
-        return res.status(400).json({ success: false, message: err.message });
+        console.error("[Upload API] General Error:", err.message);
+        return res.status(400).json({ success: false, message: `General Error: ${err.message}` });
       }
       
       if (!req.file) {
-        console.warn("[Upload API] No file in request");
-        return res.status(400).json({ success: false, message: "No file chosen" });
+        console.warn("[Upload API] No file in request after multer processing");
+        return res.status(400).json({ success: false, message: "No file chosen or invalid request" });
       }
       
       const fileUrl = `/uploads/${req.file.filename}`;
-      console.log(`[Upload API] File uploaded successfully: ${fileUrl}`);
+      console.log(`[Upload API] File uploaded successfully to ${req.file.path} -> URL: ${fileUrl}`);
       res.json({ success: true, url: fileUrl });
     });
   });

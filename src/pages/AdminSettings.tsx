@@ -29,6 +29,7 @@ const AdminSettings = () => {
   const [activeSection, setActiveSection] = useState('general');
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState<string | null>(null);
+  const [isStaticHost, setIsStaticHost] = useState(false);
   
   const logoInputRef = React.useRef<HTMLInputElement>(null);
   const faviconInputRef = React.useRef<HTMLInputElement>(null);
@@ -49,6 +50,10 @@ const AdminSettings = () => {
   });
 
   useEffect(() => {
+    if (window.location.hostname.includes('pages.dev') || window.location.hostname.includes('github.io')) {
+      setIsStaticHost(true);
+    }
+
     const fetchSettings = async () => {
       setIsLoading(true);
       try {
@@ -88,10 +93,13 @@ const AdminSettings = () => {
         setSettings(prev => ({ ...prev, [type]: result.url }));
         toast.success(`${type === 'logo' ? 'Logo' : 'Favicon'} updated! Save to apply globally.`);
       } else {
-        toast.error(result.message || "Upload failed");
+        toast.error(result.message || `Upload failed: ${response.statusText}`);
+        if (response.status === 400 && isStaticHost) {
+          toast.error("Note: This host does not support file uploads.");
+        }
       }
-    } catch (err) {
-      toast.error("Upload failed: Connection error");
+    } catch (err: any) {
+      toast.error(`Upload failed: ${err.message || "Connection error"}`);
     } finally {
       setIsUploading(null);
       if (e.target) e.target.value = '';
@@ -159,6 +167,22 @@ const AdminSettings = () => {
 
         {/* Content Area */}
         <div className="flex-grow">
+          {isStaticHost && (
+            <div className="bg-amber-50 border border-amber-200 rounded-3xl p-6 mb-8 flex items-start gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="bg-amber-100 p-3 rounded-2xl text-amber-600">
+                <Info className="h-6 w-6" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-black text-amber-900">Static Hosting Detected</h4>
+                <p className="text-sm text-amber-800 leading-relaxed">
+                  You are currently viewing this app on a static host (like Cloudflare Pages). 
+                  <strong> Local file uploads are not supported here.</strong> 
+                  Please use the official deployment link or configure a cloud storage service to enable uploads.
+                </p>
+              </div>
+            </div>
+          )}
+
           {activeSection === 'general' && (
             <div className="space-y-6">
           <div className="bg-white rounded-3xl p-8 border border-primary/5 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
