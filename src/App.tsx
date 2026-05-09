@@ -95,49 +95,7 @@ const MainHeader = () => {
   const [isSearchFocused, setIsSearchFocused] = React.useState(false);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = React.useState(false);
   const [selectedIndex, setSelectedIndex] = React.useState(-1);
-  const [isDrawerCheckout, setIsDrawerCheckout] = React.useState(false);
-  const [isProcessingOrder, setIsProcessingOrder] = React.useState(false);
-  const [formData, setFormData] = React.useState({
-    name: '',
-    phone: '',
-    address: ''
-  });
   const navigate = useNavigate();
-
-  const handleDrawerOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name || !formData.phone || !formData.address) {
-      toast.error("Please fill in all required information");
-      return;
-    }
-
-    setIsProcessingOrder(true);
-    try {
-      const order = await orderService.createOrder({
-        customerName: formData.name,
-        customerPhone: formData.phone,
-        customerAddress: formData.address,
-        items: cart,
-        total: cartTotal + 80, // Adding basic delivery charge
-        deposit: 0,
-        status: 'pending',
-        paymentStatus: 'unpaid'
-      });
-
-      if (order) {
-        toast.success("Order placed successfully!");
-        clearCart();
-        setIsDrawerCheckout(false);
-        setFormData({ name: '', phone: '', address: '' });
-        navigate(`/track?id=${order.id.replace('#', '')}`);
-        document.body.click(); // Close sheet
-      }
-    } catch (err) {
-      toast.error("Order failed. Please try again.");
-    } finally {
-      setIsProcessingOrder(false);
-    }
-  };
 
   React.useEffect(() => {
     if (itemCount === 0) return;
@@ -384,69 +342,14 @@ const MainHeader = () => {
             <SheetContent className="w-full sm:max-w-md flex flex-col p-0 gap-0 overflow-hidden">
               <SheetHeader className="p-4 md:p-6 border-b shrink-0 flex flex-row items-center justify-between">
                 <SheetTitle className="text-xl font-bold flex items-center gap-3">
-                  {isDrawerCheckout ? (
-                    <>
-                      <BadgeCheck className="h-6 w-6 text-primary" /> Checkout Info
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="h-6 w-6 text-primary" /> My cart ({itemCount})
-                    </>
-                  )}
+                  <ShoppingCart className="h-6 w-6 text-primary" /> My cart ({itemCount})
                 </SheetTitle>
-                {isDrawerCheckout && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-[10px] font-bold uppercase"
-                    onClick={() => setIsDrawerCheckout(false)}
-                  >
-                    Back to Cart
-                  </Button>
-                )}
               </SheetHeader>
               <ScrollArea className="flex-grow min-h-0 p-4 md:p-6">
                 {cart.length === 0 ? (
                   <div className="h-60 flex flex-col items-center justify-center text-muted-foreground gap-4">
                     <ShoppingBag className="h-16 w-16 opacity-10" />
                     <p className="text-sm font-bold">Your cart is empty</p>
-                  </div>
-                ) : isDrawerCheckout ? (
-                  <div className="space-y-6 py-2">
-                    <div className="space-y-4">
-                       <div className="space-y-2">
-                         <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Full Name</Label>
-                         <Input 
-                           placeholder="Enter your name" 
-                           className="h-12 rounded-xl bg-secondary/50 border-none px-4"
-                           value={formData.name}
-                           onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
-                         />
-                       </div>
-                       <div className="space-y-2">
-                         <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Mobile Number</Label>
-                         <Input 
-                           placeholder="017XXXXXXXX" 
-                           className="h-12 rounded-xl bg-secondary/50 border-none px-4"
-                           value={formData.phone}
-                           onChange={e => setFormData(p => ({ ...p, phone: e.target.value }))}
-                         />
-                       </div>
-                       <div className="space-y-2">
-                         <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">Shipping Address</Label>
-                         <Input 
-                           placeholder="House, Road, Area..." 
-                           className="h-12 rounded-xl bg-secondary/50 border-none px-4"
-                           value={formData.address}
-                           onChange={e => setFormData(p => ({ ...p, address: e.target.value }))}
-                         />
-                       </div>
-                    </div>
-                    
-                    <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10">
-                       <p className="text-[10px] font-bold text-primary mb-1 uppercase tracking-wider">Note:</p>
-                       <p className="text-xs text-muted-foreground">Cash on Delivery (COD) is the default payment method for quick checkout. Delivery charge ৳80 added.</p>
-                    </div>
                   </div>
                 ) : (
                   <div className="space-y-6 pb-4">
@@ -467,7 +370,7 @@ const MainHeader = () => {
                           <h4 className="font-bold text-sm truncate">{item.name}</h4>
                           <p className="text-primary font-bold mt-1">৳ {item.price.toLocaleString()}</p>
                           <div className="flex items-center gap-3 mt-3">
-                            <Link to={`/product/${item.id}`}>
+                            <Link to={`/product/${item.id}`} onClick={() => document.body.click()}>
                               <Button variant="outline" size="sm" className="h-7 md:h-8 rounded-lg text-[9px] md:text-[10px] font-bold">View product</Button>
                             </Link>
                           </div>
@@ -479,40 +382,29 @@ const MainHeader = () => {
               </ScrollArea>
               <SheetFooter className="p-4 md:p-6 pb-6 md:pb-8 border-t bg-secondary/30 flex flex-col gap-2 md:gap-4 mt-0 shrink-0">
                 <div className="flex justify-between items-center font-bold text-base md:text-xl mb-1">
-                  <span>{isDrawerCheckout ? "Total Payable" : "Subtotal"}</span>
-                  <span className="text-primary">৳ {(isDrawerCheckout ? cartTotal + 80 : cartTotal).toLocaleString()}</span>
+                  <span>Subtotal</span>
+                  <span className="text-primary">৳ {cartTotal.toLocaleString()}</span>
                 </div>
-                {!isDrawerCheckout ? (
-                  <div className="grid grid-cols-1 gap-2">
-                    <Link to="/cart" className="block w-full" onClick={() => setIsSearchFocused(false)}>
-                      <Button variant="outline" className="h-10 md:h-12 w-full text-[10px] font-bold uppercase rounded-xl border-2 hover:bg-secondary transition-all shadow-sm">
-                        View Full Cart
-                      </Button>
-                    </Link>
-                    <Button 
-                      className="h-11 md:h-14 w-full text-sm font-bold uppercase rounded-xl md:rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-95 transition-all" 
-                      disabled={cart.length === 0}
-                      onClick={() => setIsDrawerCheckout(true)}
-                    >
-                      Proceed to checkout
+                <div className="grid grid-cols-1 gap-2">
+                  <Link to="/cart" className="block w-full" onClick={() => {
+                    setIsSearchFocused(false);
+                    document.body.click();
+                  }}>
+                    <Button variant="outline" className="h-10 md:h-12 w-full text-[10px] font-bold uppercase rounded-xl border-2 hover:bg-secondary transition-all shadow-sm">
+                      View Full Cart
                     </Button>
-                  </div>
-                ) : (
+                  </Link>
                   <Button 
-                    className="h-12 md:h-14 w-full text-sm font-bold uppercase rounded-xl md:rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2"
-                    disabled={isProcessingOrder}
-                    onClick={handleDrawerOrder}
+                    className="h-11 md:h-14 w-full text-sm font-bold uppercase rounded-xl md:rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-95 transition-all" 
+                    disabled={cart.length === 0}
+                    onClick={() => {
+                      document.body.click();
+                      navigate('/checkout');
+                    }}
                   >
-                    {isProcessingOrder ? (
-                      <>
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>Confirm & Place Order</>
-                    )}
+                    Proceed to checkout
                   </Button>
-                )}
+                </div>
                 <p className="hidden md:block text-[9px] md:text-[10px] text-center font-bold text-muted-foreground uppercase tracking-widest mt-1">Secure checkout via SSL</p>
               </SheetFooter>
             </SheetContent>
