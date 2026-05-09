@@ -35,11 +35,17 @@ export const productService = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(product)
       });
-      if (!response.ok) throw new Error('Failed to add product');
-      return await response.json();
-    } catch (error) {
+      const text = await response.text();
+      let data;
+      try { data = JSON.parse(text); } catch (e) { data = { message: text }; }
+
+      if (!response.ok) {
+        throw new Error(data.message || `Add Failed (${response.status})`);
+      }
+      return data;
+    } catch (error: any) {
       console.error('Error adding product:', error);
-      return null;
+      throw error;
     }
   },
 
@@ -64,18 +70,20 @@ export const productService = {
         body: JSON.stringify(product)
       });
       
+      const text = await response.text();
+      let data;
+      try { data = JSON.parse(text); } catch (e) { data = { message: text }; }
+
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Product update failed with status ${response.status}: ${errorText}`);
-        throw new Error(`Failed to update product: ${errorText || response.statusText}`);
+        console.error(`Product update failed with status ${response.status}:`, data);
+        throw new Error(data.message || `Update Failed (${response.status})`);
       }
       
-      const data = await response.json();
       console.log('Product updated successfully:', data);
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating product:', error);
-      return null;
+      throw error;
     }
   },
 

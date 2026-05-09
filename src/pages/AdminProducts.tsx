@@ -76,45 +76,50 @@ const AdminProducts = () => {
     }
 
     setIsSubmitting(true);
-    const price = parseFloat(newProduct.price);
-    const stock = parseInt(newProduct.stock) || 0;
+    try {
+      const price = parseFloat(newProduct.price);
+      const stock = parseInt(newProduct.stock) || 0;
 
-    const galleryArray = newProduct.gallery 
-      ? newProduct.gallery.split('\n').filter(url => url.trim() !== '') 
-      : [];
-    
-    const images = [
-      newProduct.mainImage || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800',
-      ...galleryArray
-    ];
+      const galleryArray = newProduct.gallery 
+        ? newProduct.gallery.split('\n').filter(url => url.trim() !== '') 
+        : [];
+      
+      const images = [
+        newProduct.mainImage || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800',
+        ...galleryArray
+      ];
 
-    const added = await productService.addProduct({
-      name: newProduct.name,
-      nameBn: newProduct.nameBn || newProduct.name,
-      price,
-      stock,
-      category: newProduct.category || 'Uncategorized',
-      description: newProduct.description,
-      images
-    });
-
-    setIsSubmitting(false);
-    if (added) {
-      toast.success("Product added successfully!");
-      setIsAddOpen(false);
-      setNewProduct({ 
-        name: '', 
-        nameBn: '', 
-        price: '', 
-        stock: '', 
-        category: '', 
-        description: '',
-        mainImage: '',
-        gallery: ''
+      const added = await productService.addProduct({
+        name: newProduct.name,
+        nameBn: newProduct.nameBn || newProduct.name,
+        price,
+        stock,
+        category: newProduct.category || 'Uncategorized',
+        description: newProduct.description,
+        images
       });
-      fetchProducts();
-    } else {
-      toast.error("Could not add product");
+
+      setIsSubmitting(false);
+      if (added) {
+        toast.success("Product added successfully!");
+        setIsAddOpen(false);
+        setNewProduct({ 
+          name: '', 
+          nameBn: '', 
+          price: '', 
+          stock: '', 
+          category: '', 
+          description: '',
+          mainImage: '',
+          gallery: ''
+        });
+        fetchProducts();
+      } else {
+        toast.error("Could not add product. Please check server logs or database settings.");
+      }
+    } catch (err: any) {
+      setIsSubmitting(false);
+      toast.error(`Add Error: ${err.message || 'Unknown error'}`);
     }
   };
 
@@ -122,15 +127,20 @@ const AdminProducts = () => {
     if (!editingProduct) return;
     
     setIsSubmitting(true);
-    const updated = await productService.updateProduct(editingProduct.id, editingProduct);
-    
-    setIsSubmitting(false);
-    if (updated) {
-      toast.success("Product updated successfully!");
-      setIsEditOpen(false);
-      fetchProducts();
-    } else {
-      toast.error("Could not update product");
+    try {
+      const updated = await productService.updateProduct(editingProduct.id, editingProduct);
+      
+      setIsSubmitting(false);
+      if (updated) {
+        toast.success("Product updated successfully!");
+        setIsEditOpen(false);
+        fetchProducts();
+      } else {
+        toast.error("Could not update product. Check if database is connected.");
+      }
+    } catch (err: any) {
+      setIsSubmitting(false);
+      toast.error(`Update Error: ${err.message || 'Unknown error'}`);
     }
   };
 

@@ -535,12 +535,15 @@ async function startServer() {
       ...productData,
       id: newId,
       images: productData.images || ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800'],
-      nameBn: productData.nameBn || productData.name
+      nameBn: productData.nameBn || productData.name,
+      price: parseFloat(productData.price) || 0,
+      stock: parseInt(productData.stock) || 0
     };
 
-    console.log(`Creating product: ${newId} - ${newProduct.name}`);
+    console.log(`[POST] Creating product: ${newId} - ${newProduct.name}`);
 
     // Try D1
+    let d1Error = null;
     try {
       const d1Result = await queryD1(
         "INSERT INTO products (id, name, nameBn, price, oldPrice, category, images, stock, isFeatured, stars, description, specs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -552,14 +555,23 @@ async function startServer() {
           newProduct.description || '', JSON.stringify(newProduct.specs || {})
         ]
       );
-      if (d1Result) console.log("Product inserted into D1 successfully");
-    } catch (err) {
-      console.error("Error inserting product into D1:", err);
+      if (d1Result && d1Result.success !== false) {
+        console.log("[POST] Product inserted into D1 successfully");
+      } else if (d1Result && d1Result.success === false) {
+        d1Error = `D1 failed: ${JSON.stringify(d1Result.errors || 'Unknown D1 error')}`;
+      }
+    } catch (err: any) {
+      console.error("[POST] Error inserting product into D1:", err);
+      d1Error = err.message || String(err);
     }
 
     // Fallback/Sync memory
     PRODUCTS.push(newProduct);
     
+    if (d1Error && process.env.CLOUDFLARE_API_TOKEN) {
+      return res.status(500).json({ success: false, message: d1Error });
+    }
+
     res.status(201).json(newProduct);
   });
 
@@ -587,7 +599,7 @@ async function startServer() {
   app.patch("/api/products/:id", async (req, res) => {
     const id = req.params.id;
     const updates = req.body;
-    console.log(`[PATCH] Updating product: ${id}`);
+    console.log(`[PATCH] Updating product: ${id}`, updates);
     
     try {
       // 1. Find existing product (Memory or D1)
@@ -617,40 +629,74 @@ async function startServer() {
         return res.status(404).json({ success: false, message: "Product not found" });
       }
 
-      const merged = { ...existingProduct, ...updates };
-      console.log(`[PATCH] Merged data for ${id}:`, JSON.stringify(merged).substring(0, 100) + "...");
+      // Merge data carefully
+      const merged = { 
+        ...existingProduct, 
+        ...updates,
+        // Ensure price is number
+        price: typeof updates.price !== 'undefined' ? parseFloat(updates.price) : existingProduct.price,
+        stock: typeof updates.stock !== 'undefined' ? parseInt(updates.stock) : existingProduct.stock
+      };
+      
+      console.log(`[PATCH] Merged data for ${id} ready for DB`);
 
-      // 2. Update D1 (if credentials exist)
-      let d1Success = false;
+      // 2. Update D1
+      let d1Error = null;
       try {
         const d1Result = await queryD1(
           "UPDATE products SET name = ?, nameBn = ?, price = ?, oldPrice = ?, category = ?, images = ?, stock = ?, isFeatured = ?, stars = ?, description = ?, specs = ? WHERE id = ?",
           [
-            merged.name, merged.nameBn || merged.name, merged.price || 0, merged.oldPrice || 0,
-            merged.category || 'Uncategorized', JSON.stringify(merged.images || []), merged.stock || 0, 
-            merged.isFeatured ? 1 : 0, merged.stars || 0, merged.description || '',
-            JSON.stringify(merged.specs || {}), id
+            merged.name || '', 
+            merged.nameBn || merged.name || '', 
+            merged.price || 0, 
+            merged.oldPrice || 0,
+            merged.category || 'Uncategorized', 
+            JSON.stringify(merged.images || []), 
+            merged.stock || 0, 
+            merged.isFeatured ? 1 : 0, 
+            merged.stars || 0, 
+            merged.description || '',
+            JSON.stringify(merged.specs || {}), 
+            id
           ]
         );
-        if (d1Result) {
-          console.log(`[PATCH] D1 Update successful for ${id}`);
-          d1Success = true;
+        
+        if (!d1Result) {
+          d1Error = "D1 query returned no response (likely auth or config error)";
+        } else if (d1Result.success === false) {
+          d1Error = `D1 update failed: ${JSON.stringify(d1Result.errors || d1Result.error || 'Unknown D1 error')}`;
+        } else {
+          console.log(`[PATCH] D1 Update confirmed success for ${id}`);
         }
-      } catch (err) {
-        console.error(`[PATCH] D1 Update failed for ${id}:`, err);
+      } catch (err: any) {
+        console.error(`[PATCH] D1 Update exception for ${id}:`, err);
+        d1Error = err.message || String(err);
       }
 
-      // 3. Update Memory
+      // 3. Update Memory (Fallback / Sync)
       const index = PRODUCTS.findIndex(p => p.id === id);
       if (index !== -1) {
         PRODUCTS[index] = merged;
-        console.log(`[PATCH] Memory Update successful for ${id}`);
+      } else {
+        // If it wasn't in memory but is in D1, we might want to add it to memory 
+        // to keep them semi-synced, or just let it stay in D1.
+        // For simplicity, we just keep current PRODUCTS as is.
+      }
+
+      if (d1Error) {
+        console.warn(`[PATCH] Product updated in memory but D1 failed: ${d1Error}`);
+        // If D1 failed but it worked in memory (for dev), we might still want to return success 
+        // OR return a 500 if we HARD require D1.
+        // Since this is a "deep fix", let's be strict if D1 is configured.
+        if (process.env.CLOUDFLARE_API_TOKEN) {
+          return res.status(500).json({ success: false, message: d1Error });
+        }
       }
 
       return res.json(merged);
     } catch (globalErr: any) {
-      console.error("[PATCH] Global Error:", globalErr);
-      return res.status(500).json({ success: false, message: globalErr.message });
+      console.error("[PATCH] Fatal Error:", globalErr);
+      return res.status(500).json({ success: false, message: globalErr.message || "Server Error" });
     }
   });
 
@@ -803,7 +849,10 @@ async function startServer() {
         "ALTER TABLE products ADD COLUMN oldPrice REAL DEFAULT 0",
         "ALTER TABLE products ADD COLUMN stars REAL DEFAULT 0",
         "ALTER TABLE products ADD COLUMN specs TEXT DEFAULT '{}'",
-        "ALTER TABLE products ADD COLUMN description TEXT DEFAULT ''"
+        "ALTER TABLE products ADD COLUMN description TEXT DEFAULT ''",
+        "ALTER TABLE products ADD COLUMN isFeatured INTEGER DEFAULT 0",
+        "ALTER TABLE products ADD COLUMN stock INTEGER DEFAULT 0",
+        "ALTER TABLE products ADD COLUMN category TEXT DEFAULT 'Uncategorized'"
       ];
 
       for (const sql of columnFixes) {
