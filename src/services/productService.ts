@@ -57,13 +57,22 @@ export const productService = {
 
   async updateProduct(id: string, product: Partial<Product>): Promise<Product | null> {
     try {
+      console.log(`Sending PATCH request for product ${id}`, product);
       const response = await fetch(`/api/products/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(product)
       });
-      if (!response.ok) throw new Error('Failed to update product');
-      return await response.json();
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Product update failed with status ${response.status}: ${errorText}`);
+        throw new Error(`Failed to update product: ${errorText || response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Product updated successfully:', data);
+      return data;
     } catch (error) {
       console.error('Error updating product:', error);
       return null;

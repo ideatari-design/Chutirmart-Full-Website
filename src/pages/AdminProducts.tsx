@@ -220,17 +220,31 @@ const AdminProducts = () => {
               </div>
               <div className="col-span-2 space-y-2">
                 <Label htmlFor="category" className="font-bold">Category</Label>
-                <select 
-                  id="category" 
-                  className="w-full h-12 rounded-xl border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
-                  value={newProduct.category}
-                  onChange={e => setNewProduct(p => ({ ...p, category: e.target.value }))}
-                >
-                   <option value="">Select Category</option>
-                   {categories.filter(c => c !== 'All').map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                   ))}
-                </select>
+                <div className="relative">
+                  <Input 
+                    id="category" 
+                    placeholder="Type or select category" 
+                    className="rounded-xl h-12 pr-10" 
+                    value={newProduct.category}
+                    onChange={e => setNewProduct(p => ({ ...p, category: e.target.value }))}
+                  />
+                  {categories.length > 1 && (
+                    <select 
+                      className="absolute right-2 top-2 h-8 rounded-lg border bg-background text-xs outline-none"
+                      onChange={e => {
+                        if (e.target.value) {
+                          setNewProduct(p => ({ ...p, category: e.target.value }));
+                        }
+                      }}
+                      value=""
+                    >
+                      <option value="" disabled>Presets</option>
+                      {categories.filter(c => c !== 'All').map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
               </div>
               <div className="col-span-2 space-y-2">
                 <div className="flex items-center justify-between">
@@ -313,15 +327,30 @@ const AdminProducts = () => {
                     </div>
                     <div className="col-span-2 space-y-2">
                        <Label className="font-bold">Category</Label>
-                       <select 
-                          className="w-full h-12 rounded-xl border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
-                          value={editingProduct.category}
-                          onChange={e => setEditingProduct({...editingProduct, category: e.target.value})}
-                       >
-                          {categories.filter(c => c !== 'All').map(cat => (
-                             <option key={cat} value={cat}>{cat}</option>
-                          ))}
-                       </select>
+                       <div className="relative">
+                          <Input 
+                             value={editingProduct.category}
+                             onChange={e => setEditingProduct({...editingProduct, category: e.target.value})}
+                             className="h-12 rounded-xl pr-10"
+                             placeholder="Type or select category"
+                          />
+                          {categories.length > 1 && (
+                             <select 
+                                className="absolute right-2 top-2 h-8 rounded-lg border bg-background text-xs outline-none"
+                                onChange={e => {
+                                   if (e.target.value) {
+                                      setEditingProduct({...editingProduct, category: e.target.value});
+                                   }
+                                }}
+                                value=""
+                             >
+                                <option value="" disabled>Presets</option>
+                                {categories.filter(c => c !== 'All').map(cat => (
+                                   <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                             </select>
+                          )}
+                       </div>
                     </div>
                     <div className="col-span-2 space-y-2">
                        <div className="flex items-center justify-between">

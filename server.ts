@@ -587,59 +587,71 @@ async function startServer() {
   app.patch("/api/products/:id", async (req, res) => {
     const id = req.params.id;
     const updates = req.body;
-    console.log(`Updating product: ${id}`);
+    console.log(`[PATCH] Updating product: ${id}`);
     
-    // 1. Find existing product (Memory or D1)
-    let existingProduct = PRODUCTS.find(p => p.id === id);
-    
-    if (!existingProduct) {
+    try {
+      // 1. Find existing product (Memory or D1)
+      let existingProduct = PRODUCTS.find(p => p.id === id);
+      
+      if (!existingProduct) {
+        console.log(`[PATCH] Product ${id} not in memory, checking D1...`);
+        try {
+          const d1Res = await queryD1("SELECT * FROM products WHERE id = ?", [id]);
+          if (d1Res && d1Res.results && d1Res.results.length > 0) {
+            const p = d1Res.results[0];
+            existingProduct = {
+              ...p,
+              images: typeof p.images === 'string' ? JSON.parse(p.images) : (p.images || []),
+              specs: typeof p.specs === 'string' ? JSON.parse(p.specs) : (p.specs || {}),
+              isFeatured: Boolean(p.isFeatured)
+            };
+            console.log(`[PATCH] Found product ${id} in D1`);
+          }
+        } catch (err) {
+          console.error(`[PATCH] Error fetching product ${id} from D1:`, err);
+        }
+      }
+
+      if (!existingProduct) {
+        console.warn(`[PATCH] Product ${id} not found anywhere`);
+        return res.status(404).json({ success: false, message: "Product not found" });
+      }
+
+      const merged = { ...existingProduct, ...updates };
+      console.log(`[PATCH] Merged data for ${id}:`, JSON.stringify(merged).substring(0, 100) + "...");
+
+      // 2. Update D1 (if credentials exist)
+      let d1Success = false;
       try {
-        const d1Res = await queryD1("SELECT * FROM products WHERE id = ?", [id]);
-        if (d1Res && d1Res.results && d1Res.results.length > 0) {
-          const p = d1Res.results[0];
-          existingProduct = {
-            ...p,
-            images: JSON.parse(p.images || "[]"),
-            specs: JSON.parse(p.specs || "{}"),
-            isFeatured: Boolean(p.isFeatured)
-          };
+        const d1Result = await queryD1(
+          "UPDATE products SET name = ?, nameBn = ?, price = ?, oldPrice = ?, category = ?, images = ?, stock = ?, isFeatured = ?, stars = ?, description = ?, specs = ? WHERE id = ?",
+          [
+            merged.name, merged.nameBn || merged.name, merged.price || 0, merged.oldPrice || 0,
+            merged.category || 'Uncategorized', JSON.stringify(merged.images || []), merged.stock || 0, 
+            merged.isFeatured ? 1 : 0, merged.stars || 0, merged.description || '',
+            JSON.stringify(merged.specs || {}), id
+          ]
+        );
+        if (d1Result) {
+          console.log(`[PATCH] D1 Update successful for ${id}`);
+          d1Success = true;
         }
       } catch (err) {
-        console.error("Error fetching existing product for update:", err);
+        console.error(`[PATCH] D1 Update failed for ${id}:`, err);
       }
+
+      // 3. Update Memory
+      const index = PRODUCTS.findIndex(p => p.id === id);
+      if (index !== -1) {
+        PRODUCTS[index] = merged;
+        console.log(`[PATCH] Memory Update successful for ${id}`);
+      }
+
+      return res.json(merged);
+    } catch (globalErr: any) {
+      console.error("[PATCH] Global Error:", globalErr);
+      return res.status(500).json({ success: false, message: globalErr.message });
     }
-
-    if (!existingProduct) {
-      console.warn(`Product ${id} not found for update`);
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    const merged = { ...existingProduct, ...updates };
-
-    // 2. Update D1
-    let d1Success = false;
-    try {
-      const d1Result = await queryD1(
-        "UPDATE products SET name = ?, nameBn = ?, price = ?, oldPrice = ?, category = ?, images = ?, stock = ?, isFeatured = ?, stars = ?, description = ?, specs = ? WHERE id = ?",
-        [
-          merged.name, merged.nameBn || merged.name, merged.price, merged.oldPrice || 0,
-          merged.category, JSON.stringify(merged.images || []), merged.stock, 
-          merged.isFeatured ? 1 : 0, merged.stars || 0, merged.description || '',
-          JSON.stringify(merged.specs || {}), id
-        ]
-      );
-      if (d1Result) d1Success = true;
-    } catch (err) {
-      console.error("Error updating D1 product:", err);
-    }
-
-    // 3. Update Memory
-    const index = PRODUCTS.findIndex(p => p.id === id);
-    if (index !== -1) {
-      PRODUCTS[index] = merged;
-    }
-
-    res.json(merged);
   });
 
   // Create order
@@ -742,8 +754,75 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  app.listen(PORT, "0.0.0.0", async () => {
     console.log(`Server running on http://localhost:${PORT}`);
+    
+    // Auto-init DB tables on start
+    console.log("Attempting auto-initialization of DB tables...");
+    const initSql = `
+      CREATE TABLE IF NOT EXISTS products (
+        id TEXT PRIMARY KEY,
+        name TEXT,
+        nameBn TEXT,
+        price REAL,
+        oldPrice REAL,
+        category TEXT,
+        images TEXT,
+        stock INTEGER,
+        isFeatured INTEGER,
+        stars REAL,
+        description TEXT,
+        specs TEXT
+      );
+      CREATE TABLE IF NOT EXISTS orders (
+        id TEXT PRIMARY KEY,
+        customerName TEXT,
+        customerPhone TEXT,
+        customerAddress TEXT,
+        total REAL,
+        items TEXT,
+        status TEXT,
+        createdAt TEXT
+      );
+    `;
+    try {
+      // Split and run separately for better compatibility
+      await queryD1(`CREATE TABLE IF NOT EXISTS products (
+        id TEXT PRIMARY KEY, name TEXT, nameBn TEXT, price REAL, oldPrice REAL, 
+        category TEXT, images TEXT, stock INTEGER, isFeatured INTEGER, 
+        stars REAL, description TEXT, specs TEXT
+      )`);
+      await queryD1(`CREATE TABLE IF NOT EXISTS orders (
+        id TEXT PRIMARY KEY, customerName TEXT, customerPhone TEXT, 
+        customerAddress TEXT, total REAL, items TEXT, status TEXT, createdAt TEXT
+      )`);
+
+      // Ensure necessary columns exist (for existing tables)
+      const columnFixes = [
+        "ALTER TABLE products ADD COLUMN nameBn TEXT",
+        "ALTER TABLE products ADD COLUMN oldPrice REAL DEFAULT 0",
+        "ALTER TABLE products ADD COLUMN stars REAL DEFAULT 0",
+        "ALTER TABLE products ADD COLUMN specs TEXT DEFAULT '{}'",
+        "ALTER TABLE products ADD COLUMN description TEXT DEFAULT ''"
+      ];
+
+      for (const sql of columnFixes) {
+        try {
+          await queryD1(sql);
+          console.log(`Executed: ${sql}`);
+        } catch (e: any) {
+          // Ignore "duplicate column" errors
+          const msg = e.message?.toLowerCase() || "";
+          if (!msg.includes("duplicate column") && !msg.includes("already exists")) {
+            console.warn(`Column check failed for: ${sql}`, e.message);
+          }
+        }
+      }
+
+      console.log("Auto-init complete.");
+    } catch (err) {
+      console.error("Auto-init failed (likely credentials not set):", err);
+    }
   });
 }
 
