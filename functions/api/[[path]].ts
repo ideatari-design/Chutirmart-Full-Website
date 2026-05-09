@@ -152,22 +152,49 @@ export async function onRequest(context) {
         return jsonResponse(PRODUCTS);
       }
 
-      const { results } = await env.DB.prepare("SELECT * FROM products").all();
+      let results;
+      try {
+        const d1Res = await env.DB.prepare("SELECT * FROM products").all();
+        results = d1Res.results;
+      } catch (e) {
+        console.error("Query failed, likely table doesn't exist yet:", e);
+        return jsonResponse(PRODUCTS);
+      }
       
+      // Auto-Seed if DB is empty
       if (!results || results.length === 0) {
-        return jsonResponse(PRODUCTS); // Fallback if DB empty
+        console.log("DB is empty, seeding default products...");
+        for (const p of PRODUCTS) {
+          try {
+            await env.DB.prepare(`
+              INSERT OR IGNORE INTO products (id, name, nameBn, price, oldPrice, category, images, stock, isFeatured, stars, description, specs)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `).bind(
+              p.id, p.name, p.nameBn || p.name, p.price, p.oldPrice || 0, p.category, 
+              JSON.stringify(p.images), p.stock, p.isFeatured ? 1 : 0, 
+              p.stars || 0, p.description || '', JSON.stringify(p.specs || {})
+            ).run();
+          } catch (e) {
+            console.error("Seed failed for", p.id, e);
+          }
+        }
+        // Fetch again after seed
+        const refreshed = await env.DB.prepare("SELECT * FROM products").all();
+        results = refreshed.results || [];
       }
 
       const parsedResults = results.map(p => ({
         ...p,
-        images: JSON.parse(p.images || "[]"),
-        specs: JSON.parse(p.specs || "{}"),
+        images: typeof p.images === 'string' ? JSON.parse(p.images || "[]") : (p.images || []),
+        specs: typeof p.specs === 'string' ? JSON.parse(p.specs || "{}") : (p.specs || {}),
         isFeatured: Boolean(p.isFeatured)
       }));
       return jsonResponse(parsedResults);
     }
 
     if (path === "/api/products" && method === "POST") {
+      if (!env.DB) return jsonResponse({ error: "Database not connected. Please bind Cloudflare D1 in Pages Dashboard." }, 500);
+      
       const data = await request.json();
       const id = String(Date.now());
       const newProduct = {
@@ -194,20 +221,14 @@ export async function onRequest(context) {
     }
 
     if (path.startsWith("/api/products/") && method === "PATCH") {
+      if (!env.DB) return jsonResponse({ error: "Database not connected. Please bind Cloudflare D1 in Pages Dashboard." }, 500);
+
       const id = path.split("/").pop();
       const updates = await request.json();
       
-      let existing;
-      if (env.DB) {
-        existing = await env.DB.prepare("SELECT * FROM products WHERE id = ?").bind(id).first();
-      }
+      const existing = await env.DB.prepare("SELECT * FROM products WHERE id = ?").bind(id).first();
 
-      if (!existing) {
-        // Check memory fallback
-        existing = PRODUCTS.find(p => p.id === id);
-      }
-
-      if (!existing) return jsonResponse({ error: "Product not found" }, 404);
+      if (!existing) return jsonResponse({ error: "Product not found in Database" }, 404);
 
       const merged = { ...existing, ...updates };
       // Ensure specific types
@@ -215,27 +236,25 @@ export async function onRequest(context) {
       const stock = typeof updates.stock !== 'undefined' ? parseInt(updates.stock) : existing.stock;
       const isFeatured = typeof updates.isFeatured !== 'undefined' ? (updates.isFeatured ? 1 : 0) : (existing.isFeatured ? 1 : 0);
 
-      if (env.DB) {
-        await env.DB.prepare(`
-          UPDATE products SET 
-            name = ?, nameBn = ?, price = ?, oldPrice = ?, category = ?, 
-            images = ?, stock = ?, isFeatured = ?, stars = ?, description = ?, specs = ? 
-          WHERE id = ?
-        `).bind(
-          merged.name || '', 
-          merged.nameBn || merged.name || '', 
-          price, 
-          merged.oldPrice || 0,
-          merged.category || 'Uncategorized',
-          JSON.stringify(typeof merged.images === 'string' ? JSON.parse(merged.images) : (merged.images || [])),
-          stock,
-          isFeatured,
-          merged.stars || 0,
-          merged.description || '',
-          JSON.stringify(typeof merged.specs === 'string' ? JSON.parse(merged.specs) : (merged.specs || {})),
-          id
-        ).run();
-      }
+      await env.DB.prepare(`
+        UPDATE products SET 
+          name = ?, nameBn = ?, price = ?, oldPrice = ?, category = ?, 
+          images = ?, stock = ?, isFeatured = ?, stars = ?, description = ?, specs = ? 
+        WHERE id = ?
+      `).bind(
+        merged.name || '', 
+        merged.nameBn || merged.name || '', 
+        price, 
+        merged.oldPrice || 0,
+        merged.category || 'Uncategorized',
+        JSON.stringify(typeof merged.images === 'string' ? JSON.parse(merged.images || "[]") : (merged.images || [])),
+        stock,
+        isFeatured,
+        merged.stars || 0,
+        merged.description || '',
+        JSON.stringify(typeof merged.specs === 'string' ? JSON.parse(merged.specs || "{}") : (merged.specs || {})),
+        id
+      ).run();
 
       return jsonResponse({ ...merged, price, stock, isFeatured: Boolean(isFeatured) });
     }
@@ -451,7 +470,12 @@ export async function onRequest(context) {
     }
 
     if (path === "/api/health") {
-      return jsonResponse({ status: "ok", environment: "Cloudflare Pages" });
+      return jsonResponse({ 
+        status: "ok", 
+        environment: "Cloudflare Pages",
+        databaseConnected: !!env.DB,
+        timestamp: new Date().toISOString()
+      });
     }
 
     return jsonResponse({ error: "Route not found", path }, 404);
