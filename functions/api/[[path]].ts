@@ -291,6 +291,66 @@ export async function onRequest(context) {
       return jsonResponse(parsedProduct);
     }
 
+    // --- Banners API ---
+    if (path === "/api/banners" && method === "GET") {
+      if (!env.DB) {
+        return jsonResponse([
+          { id: '1', title: 'Banner 1', image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600', link: '/products', type: 'hero', status: 'active' },
+          { id: '2', title: 'Banner 2', image: 'https://images.unsplash.com/photo-1441984969813-91c709148f06?w=1600', link: '/products', type: 'hero', status: 'active' }
+        ]);
+      }
+      const { results } = await env.DB.prepare("SELECT * FROM banners ORDER BY createdAt DESC").all();
+      
+      // Auto-Seed banners if empty
+      if (!results || results.length === 0) {
+        const defaultBanners = [
+          { id: '1', title: 'Banner 1', image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1600', link: '/products', type: 'hero', status: 'active' },
+          { id: '2', title: 'Banner 2', image: 'https://images.unsplash.com/photo-1441984969813-91c709148f06?auto=format&fit=crop&q=80&w=1600', link: '/products', type: 'hero', status: 'active' },
+          { id: '3', title: 'Banner 3', image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&q=80&w=1600', link: '/products', type: 'hero', status: 'active' }
+        ];
+        for (const b of defaultBanners) {
+          await env.DB.prepare("INSERT INTO banners (id, title, image, link, type, status, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)")
+            .bind(b.id, b.title, b.image, b.link, b.type, b.status, new Date().toISOString()).run();
+        }
+        return jsonResponse(defaultBanners);
+      }
+      
+      return jsonResponse(results);
+    }
+
+    if (path === "/api/banners" && method === "POST") {
+      const data = await request.json();
+      const id = String(Date.now());
+      const createdAt = new Date().toISOString();
+      if (env.DB) {
+        await env.DB.prepare("INSERT INTO banners (id, title, image, link, type, status, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)")
+          .bind(id, data.title || '', data.image, data.link || '', data.type || 'hero', data.status || 'active', createdAt).run();
+      }
+      return jsonResponse({ ...data, id, createdAt }, 201);
+    }
+
+    if (path.startsWith("/api/banners/") && method === "PATCH") {
+      const id = path.split("/").pop();
+      const updates = await request.json();
+      if (env.DB) {
+        const fields = Object.keys(updates);
+        if (fields.length > 0) {
+          const setClause = fields.map(f => `${f} = ?`).join(", ");
+          const values = Object.values(updates);
+          await env.DB.prepare(`UPDATE banners SET ${setClause} WHERE id = ?`).bind(...values, id).run();
+        }
+      }
+      return jsonResponse({ success: true });
+    }
+
+    if (path.startsWith("/api/banners/") && method === "DELETE") {
+      const id = path.split("/").pop();
+      if (env.DB) {
+        await env.DB.prepare("DELETE FROM banners WHERE id = ?").bind(id).run();
+      }
+      return new Response(null, { status: 204 });
+    }
+
     // --- Orders API ---
     if (path === "/api/orders" && method === "GET") {
       if (!env.DB) return jsonResponse([]);
@@ -393,6 +453,18 @@ export async function onRequest(context) {
             customerAddress TEXT,
             total REAL,
             items TEXT,
+            status TEXT,
+            createdAt TEXT
+          )
+        `).run();
+
+        await env.DB.prepare(`
+          CREATE TABLE IF NOT EXISTS banners (
+            id TEXT PRIMARY KEY,
+            title TEXT,
+            image TEXT,
+            link TEXT,
+            type TEXT,
             status TEXT,
             createdAt TEXT
           )

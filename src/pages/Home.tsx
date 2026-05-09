@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import ProductCard from '@/components/ProductCard';
 import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import { bannerService, Banner } from '@/services/bannerService';
 
 const Features = () => (
   <div className="bg-background py-12 border-b">
@@ -164,76 +165,179 @@ const FlashDeals = () => {
 
 const BannerSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const slides = [
-    {
-      id: 1,
-      image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1600",
-    },
-    {
-      id: 2,
-      image: "https://images.unsplash.com/photo-1441984969813-91c709148f06?auto=format&fit=crop&q=80&w=1600",
-    },
-    {
-      id: 3,
-      image: "https://images.unsplash.com/photo-1441986236893-3b3ef3967d6a?auto=format&fit=crop&q=80&w=1600",
-    },
-    {
-      id: 4,
-      image: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&q=80&w=1600",
-    }
-  ];
+  const [slides, setSlides] = useState<Banner[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [direction, setDirection] = useState(0);
 
   useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const data = await bannerService.getAllBanners();
+        setSlides(data.filter(b => b.status === 'active' && b.type === 'hero'));
+      } catch (err) {
+        console.error("Failed to fetch banners");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBanners();
+  }, []);
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
     const timer = setInterval(() => {
+      setDirection(1);
       setCurrentSlide(prev => (prev + 1) % slides.length);
-    }, 4000); // Faster slide for image-only show
+    }, 6000); // Slower interval for better reading
     return () => clearInterval(timer);
-  }, [slides.length]);
+  }, [slides.length, currentSlide]); // Added currentSlide to reset timer on manual move
+
+  const paginate = (newDirection: number) => {
+    setDirection(newDirection);
+    if (newDirection === 1) {
+      setCurrentSlide(prev => (prev + 1) % slides.length);
+    } else {
+      setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
+    }
+  };
+
+  const swipeConfidenceThreshold = 10000;
+  const swipePower = (offset: number, velocity: number) => {
+    return Math.abs(offset) * velocity;
+  };
+
+  const variants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? '100%' : '-100%',
+      opacity: 0,
+      scale: 1.1
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1,
+      scale: 1
+    },
+    exit: (direction: number) => ({
+      zIndex: 0,
+      x: direction < 0 ? '100%' : '-100%',
+      opacity: 0,
+      scale: 0.9
+    })
+  };
+
+  if (loading) {
+    return <div className="h-full w-full bg-secondary/20 animate-pulse rounded-[1.5rem]" />;
+  }
+
+  if (slides.length === 0) {
+    return (
+      <div className="h-full w-full bg-secondary/20 flex items-center justify-center rounded-[1.5rem] border-2 border-dashed border-border">
+        <div className="text-center">
+          <ShoppingBag className="h-10 w-10 mx-auto mb-4 text-muted-foreground/30" />
+          <p className="text-muted-foreground font-bold text-sm">No active banners to show</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-[1.5rem] group bg-secondary/20 shadow-xl">
-      <AnimatePresence mode="wait">
+    <div className="relative h-full w-full overflow-hidden rounded-[1.5rem] group bg-secondary shadow-2xl">
+      <AnimatePresence initial={false} custom={direction} mode="popLayout">
         <motion.div
           key={currentSlide}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1 }}
-          className="absolute inset-0"
+          custom={direction}
+          variants={variants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{
+            x: { type: "spring", stiffness: 350, damping: 35 },
+            opacity: { duration: 0.4 },
+            scale: { duration: 0.5 }
+          }}
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={1}
+          onDragEnd={(e, { offset, velocity }) => {
+            const swipe = swipePower(offset.x, velocity.x);
+
+            if (swipe < -swipeConfidenceThreshold) {
+              paginate(1);
+            } else if (swipe > swipeConfidenceThreshold) {
+              paginate(-1);
+            }
+          }}
+          className="absolute inset-0 cursor-grab active:cursor-grabbing touch-pan-y"
         >
-          <img 
-            src={slides[currentSlide].image} 
-            alt={`Slide ${currentSlide + 1}`}
-            className="w-full h-full object-cover" 
-            loading="lazy"
-          />
+          {slides[currentSlide].link ? (
+            <Link to={slides[currentSlide].link} className="block w-full h-full">
+              <img 
+                src={slides[currentSlide].image} 
+                alt={slides[currentSlide].title}
+                className="w-full h-full object-cover select-none pointer-events-none" 
+                loading="eager"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&q=80&w=1600'; // Generic high quality store image
+                }}
+              />
+            </Link>
+          ) : (
+            <img 
+              src={slides[currentSlide].image} 
+              alt={slides[currentSlide].title}
+              className="w-full h-full object-cover select-none pointer-events-none" 
+              loading="eager"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&q=80&w=1600';
+              }}
+            />
+          )}
+          
+          {/* Subtle Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
         </motion.div>
       </AnimatePresence>
 
       {/* Navigation Dots */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrentSlide(i)}
-            className={`h-1.5 rounded-full transition-all duration-300 ${i === currentSlide ? 'w-8 bg-white' : 'w-1.5 bg-white/40'}`}
-          />
-        ))}
-      </div>
+      {slides.length > 1 && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                setDirection(i > currentSlide ? 1 : -1);
+                setCurrentSlide(i);
+              }}
+              className={`h-2 rounded-full transition-all duration-500 shadow-sm ${
+                i === currentSlide 
+                ? 'w-10 bg-white' 
+                : 'w-2 bg-white/40 hover:bg-white/60'
+              }`}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Arrows */}
-      <button 
-        onClick={() => setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length)}
-        className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-black/40 z-30"
-      >
-        <ChevronLeft className="h-6 w-6" />
-      </button>
-      <button 
-        onClick={() => setCurrentSlide(prev => (prev + 1) % slides.length)}
-        className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-black/40 z-30"
-      >
-        <ChevronRight className="h-6 w-6" />
-      </button>
+      {slides.length > 1 && (
+        <>
+          <button 
+            onClick={(e) => { e.stopPropagation(); paginate(-1); }}
+            className="absolute left-6 top-1/2 -translate-y-1/2 h-14 w-14 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-white/20 z-30 border border-white/20"
+          >
+            <ChevronLeft className="h-8 w-8" />
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); paginate(1); }}
+            className="absolute right-6 top-1/2 -translate-y-1/2 h-14 w-14 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-white/20 z-30 border border-white/20"
+          >
+            <ChevronRight className="h-8 w-8" />
+          </button>
+        </>
+      )}
     </div>
   );
 };

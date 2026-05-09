@@ -14,7 +14,12 @@ import {
   MessageSquare,
   Send,
   User,
-  CheckCircle2
+  CheckCircle2,
+  Minus,
+  Plus,
+  Facebook,
+  Twitter,
+  Instagram
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -49,6 +54,10 @@ const ProductDetail = () => {
 
   // Tab state
   const [activeTab, setActiveTab] = useState<'description' | 'additional' | 'reviews'>('description');
+  const [quantity, setQuantity] = useState(1);
+
+  const incrementQty = () => setQuantity(prev => prev + 1);
+  const decrementQty = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -101,7 +110,7 @@ const ProductDetail = () => {
 
   const handleAddToCart = (directBuy = false) => {
     if (!product) return;
-    addToCart(product);
+    addToCart(product, quantity);
     if (directBuy) {
       navigate('/checkout');
     } else {
@@ -278,6 +287,31 @@ const ProductDetail = () => {
                 {product.description}
               </p>
             </div>
+
+            <div className="pt-4 space-y-4">
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-bold text-slate-500 uppercase">Quantity:</span>
+                <div className="flex items-center bg-secondary/50 rounded-2xl p-1.5 border border-border/50 shadow-inner">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-10 w-10 rounded-xl hover:bg-white transition-all active:scale-90"
+                    onClick={decrementQty}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="w-12 text-center font-black text-lg">{quantity}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-10 w-10 rounded-xl hover:bg-white transition-all active:scale-90"
+                    onClick={incrementQty}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="mt-8 space-y-4">
@@ -328,14 +362,15 @@ const ProductDetail = () => {
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Share:</span>
                 <div className="flex gap-4">
-                  {['facebook', 'twitter', 'instagram'].map((social) => (
-                    <button key={social} className="text-muted-foreground hover:text-primary transition-colors">
-                      <div className="h-4 w-4 bg-muted-foreground/10 rounded-full flex items-center justify-center p-0.5">
-                         <span className="sr-only">{social}</span>
-                         <div className="w-full h-full bg-current rounded-full opacity-20" />
-                      </div>
-                    </button>
-                  ))}
+                  <button className="text-muted-foreground hover:text-[#1877F2] transition-colors">
+                    <Facebook className="h-5 w-5" />
+                  </button>
+                  <button className="text-muted-foreground hover:text-[#1DA1F2] transition-colors">
+                    <Twitter className="h-5 w-5" />
+                  </button>
+                  <button className="text-muted-foreground hover:text-[#E4405F] transition-colors">
+                    <Instagram className="h-5 w-5" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -346,8 +381,8 @@ const ProductDetail = () => {
                   <Truck className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="font-bold text-[11px]">Fast shipping</p>
-                  <p className="text-[10px] text-muted-foreground font-bold">3-5 days nationwide</p>
+                  <p className="font-bold text-[11px]">Cash on Delivery</p>
+                  <p className="text-[10px] text-muted-foreground font-bold">Fast nationwide shipping</p>
                 </div>
               </div>
               <div className="flex items-center gap-5 p-5 bg-secondary rounded-[1.5rem] border border-border group hover:bg-background hover:shadow-xl transition-all">
@@ -542,27 +577,19 @@ const ProductDetail = () => {
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (
-        <section className="mt-40 pb-20 border-t pt-24">
+        <section className="mt-40 pb-20 border-t pt-24 max-w-[1140px] mx-auto px-0 sm:px-4">
            <div className="text-center mb-16 space-y-4">
               <h3 className="text-4xl font-bold text-foreground">Related Products</h3>
               <p className="text-muted-foreground font-medium">These products may also interest to you!</p>
            </div>
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 px-4 sm:px-0">
               {loading ? (
                 [...Array(4)].map((_, i) => (
                   <ProductCardSkeleton key={i} />
                 ))
               ) : (
-                relatedProducts.slice(0, 4).map((p, i) => (
-                  <motion.div 
-                    key={p.id}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    whileHover={{ y: -10 }}
-                    transition={{ duration: 0.5, delay: i * 0.1 }}
-                  >
-                    <ProductCard product={p} />
-                  </motion.div>
+                relatedProducts.slice(0, 4).map((p) => (
+                  <ProductCard key={p.id} product={p} />
                 ))
               )}
            </div>

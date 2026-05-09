@@ -215,6 +215,12 @@ let REVIEWS: any[] = [
   { id: '2', productId: '1', userName: 'Sara', rating: 4, comment: 'Useful for office.', createdAt: new Date().toISOString() },
 ];
 
+let BANNERS: any[] = [
+  { id: '1', title: 'Banner 1', image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1600', link: '/products', type: 'hero', status: 'active' },
+  { id: '2', title: 'Banner 2', image: 'https://images.unsplash.com/photo-1441984969813-91c709148f06?auto=format&fit=crop&q=80&w=1600', link: '/products', type: 'hero', status: 'active' },
+  { id: '3', title: 'Banner 3', image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&q=80&w=1600', link: '/products', type: 'hero', status: 'active' }
+];
+
 // --- Cloudflare D1 Helper ---
 async function queryD1(sql: string, params: any[] = []) {
   const accountId = (process.env.CLOUDFLARE_ACCOUNT_ID || "").trim();
@@ -345,16 +351,29 @@ async function startServer() {
       )
     `;
 
+    const createBannersTable = `
+      CREATE TABLE IF NOT EXISTS banners (
+        id TEXT PRIMARY KEY,
+        title TEXT,
+        image TEXT,
+        link TEXT,
+        type TEXT,
+        status TEXT,
+        createdAt TEXT
+      )
+    `;
+
     try {
       const pResult = await queryD1(createProductsTable);
       const oResult = await queryD1(createOrdersTable);
+      const bResult = await queryD1(createBannersTable);
 
-      if (pResult && oResult) {
+      if (pResult && oResult && bResult) {
         return res.json({ success: true, message: "Tables created successfully!" });
       } else {
         return res.status(500).json({ 
           success: false, 
-          message: "Failed to create tables. Check server logs for Authentication or ID errors." 
+          message: "Failed to create tables. Check server logs." 
         });
       }
     } catch (err) {
@@ -368,6 +387,7 @@ async function startServer() {
     try {
       await queryD1("DROP TABLE IF EXISTS products");
       await queryD1("DROP TABLE IF EXISTS orders");
+      await queryD1("DROP TABLE IF EXISTS banners");
       
       const createProductsTable = `
         CREATE TABLE products (
@@ -399,11 +419,24 @@ async function startServer() {
         )
       `;
 
+      const createBannersTable = `
+        CREATE TABLE banners (
+          id TEXT PRIMARY KEY,
+          title TEXT,
+          image TEXT,
+          link TEXT,
+          type TEXT,
+          status TEXT,
+          createdAt TEXT
+        )
+      `;
+
       const pResult = await queryD1(createProductsTable);
       const oResult = await queryD1(createOrdersTable);
+      const bResult = await queryD1(createBannersTable);
 
-      if (pResult && oResult) {
-        return res.json({ success: true, message: "Database reset and recreated successfully! Now run /api/admin/seed to fill data." });
+      if (pResult && oResult && bResult) {
+        return res.json({ success: true, message: "Database reset and recreated successfully!" });
       }
       res.status(500).json({ success: false, message: "Failed logic during recreation." });
     } catch (err) {
@@ -511,6 +544,75 @@ async function startServer() {
     if (!product) return res.status(404).json({ message: "Product not found" });
     const productReviews = REVIEWS.filter(r => r.productId === req.params.id);
     res.json({ ...product, reviews: productReviews });
+  });
+
+  // --- Banners API ---
+  app.get("/api/banners", async (req, res) => {
+    try {
+      const d1Result = await queryD1("SELECT * FROM banners ORDER BY createdAt DESC");
+      if (d1Result && d1Result.results && d1Result.results.length > 0) {
+        return res.json(d1Result.results);
+      }
+      res.json(BANNERS);
+    } catch (err) {
+      res.json(BANNERS);
+    }
+  });
+
+  app.post("/api/banners", async (req, res) => {
+    const data = req.body;
+    const id = String(Date.now());
+    const createdAt = new Date().toISOString();
+    const newBanner = { ...data, id, createdAt };
+
+    try {
+      await queryD1(
+        "INSERT INTO banners (id, title, image, link, type, status, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [id, data.title || '', data.image, data.link || '', data.type || 'hero', data.status || 'active', createdAt]
+      );
+    } catch (err) {
+      console.error("D1 Banner insert failed:", err);
+    }
+
+    BANNERS.push(newBanner);
+    res.status(201).json(newBanner);
+  });
+
+  app.patch("/api/banners/:id", async (req, res) => {
+    const id = req.params.id;
+    const updates = req.body;
+    
+    try {
+      const fields = Object.keys(updates);
+      if (fields.length > 0) {
+        const setClause = fields.map(f => `${f} = ?`).join(", ");
+        const values = Object.values(updates);
+        await queryD1(`UPDATE banners SET ${setClause} WHERE id = ?`, [...values, id]);
+      }
+    } catch (err) {
+      console.error("D1 Banner update failed:", err);
+    }
+
+    const index = BANNERS.findIndex(b => b.id === id);
+    if (index !== -1) {
+      BANNERS[index] = { ...BANNERS[index], ...updates };
+    }
+    res.json({ success: true });
+  });
+
+  app.delete("/api/banners/:id", async (req, res) => {
+    const id = req.params.id;
+    try {
+      await queryD1("DELETE FROM banners WHERE id = ?", [id]);
+    } catch (err) {
+      console.error("D1 Banner delete failed:", err);
+    }
+
+    const index = BANNERS.findIndex(b => b.id === id);
+    if (index !== -1) {
+      BANNERS.splice(index, 1);
+    }
+    res.status(204).send();
   });
 
   app.post("/api/products/:id/reviews", (req, res) => {
@@ -841,6 +943,9 @@ async function startServer() {
       await queryD1(`CREATE TABLE IF NOT EXISTS orders (
         id TEXT PRIMARY KEY, customerName TEXT, customerPhone TEXT, 
         customerAddress TEXT, total REAL, items TEXT, status TEXT, createdAt TEXT
+      )`);
+      await queryD1(`CREATE TABLE IF NOT EXISTS banners (
+        id TEXT PRIMARY KEY, title TEXT, image TEXT, link TEXT, type TEXT, status TEXT, createdAt TEXT
       )`);
 
       // Ensure necessary columns exist (for existing tables)

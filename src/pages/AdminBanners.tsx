@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Image as ImageIcon, 
   Plus, 
@@ -10,7 +10,8 @@ import {
   Eye,
   CheckCircle2,
   XCircle,
-  Move
+  Move,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,47 +26,81 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { bannerService, Banner } from '@/services/bannerService';
 
 const AdminBanners = () => {
-  const [banners, setBanners] = useState([
-    { id: '1', title: 'Summer Collection 2024', image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=1200', link: '/products?category=Fashion', type: 'hero', status: 'active' },
-    { id: '2', title: 'Eid Mubarak Sale', image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=1200', link: '/offers', type: 'hero', status: 'inactive' },
-    { id: '3', title: 'Gadgets promo', image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=1200', link: '/products?category=Gadgets', type: 'promo', status: 'active' },
-  ]);
-
-  const [newBanner, setNewBanner] = useState({ title: '', image: '', link: '', type: 'hero', status: 'active' });
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newBanner, setNewBanner] = useState({ title: '', image: '', link: '', type: 'hero', status: 'active' as const });
   const [isOpen, setIsOpen] = useState(false);
-  const [editingBanner, setEditingBanner] = useState<any>(null);
+  const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  const handleAdd = () => {
+  useEffect(() => {
+    fetchBanners();
+  }, []);
+
+  const fetchBanners = async () => {
+    try {
+      setLoading(true);
+      const data = await bannerService.getAllBanners();
+      setBanners(data);
+    } catch (err) {
+      toast.error("Failed to load banners");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAdd = async () => {
     if (!newBanner.image) return;
-    setBanners([...banners, { ...newBanner, id: Math.random().toString(36).substr(2, 9) }]);
-    setNewBanner({ title: '', image: '', link: '', type: 'hero', status: 'active' });
-    setIsOpen(false);
-    toast.success("Banner added successfully!");
+    try {
+      await bannerService.addBanner(newBanner);
+      setNewBanner({ title: '', image: '', link: '', type: 'hero', status: 'active' });
+      setIsOpen(false);
+      fetchBanners();
+      toast.success("Banner added successfully!");
+    } catch (err) {
+      toast.error("Failed to add banner");
+    }
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!editingBanner || !editingBanner.image) return;
-    setBanners(banners.map(b => b.id === editingBanner.id ? editingBanner : b));
-    setIsEditOpen(false);
-    toast.success("Banner updated successfully!");
+    try {
+      const { id, ...updates } = editingBanner;
+      await bannerService.updateBanner(id, updates);
+      setIsEditOpen(false);
+      fetchBanners();
+      toast.success("Banner updated successfully!");
+    } catch (err) {
+      toast.error("Failed to update banner");
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setBanners(banners.filter(b => b.id !== id));
-    toast.success("Banner removed");
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to remove this banner?")) return;
+    try {
+      await bannerService.deleteBanner(id);
+      fetchBanners();
+      toast.success("Banner removed");
+    } catch (err) {
+      toast.error("Failed to delete banner");
+    }
   };
 
-  const toggleStatus = (id: string) => {
-    setBanners(banners.map(b => 
-      b.id === id ? { ...b, status: b.status === 'active' ? 'inactive' : 'active' } : b
-    ));
-    toast.success("Status updated");
+  const toggleStatus = async (banner: Banner) => {
+    try {
+      const newStatus = banner.status === 'active' ? 'inactive' : 'active';
+      await bannerService.updateBanner(banner.id, { status: newStatus });
+      fetchBanners();
+      toast.success("Status updated");
+    } catch (err) {
+      toast.error("Failed to update status");
+    }
   };
 
-  const openEdit = (banner: any) => {
+  const openEdit = (banner: Banner) => {
     setEditingBanner({...banner});
     setIsEditOpen(true);
   };
@@ -108,6 +143,7 @@ const AdminBanners = () => {
                       value={newBanner.image}
                       onChange={e => setNewBanner({...newBanner, image: e.target.value})}
                     />
+                    <p className="text-[10px] text-muted-foreground ml-1">Must be a full URL (e.g. from Unsplash or Imgur)</p>
                  </div>
                  <div className="space-y-2">
                     <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">Link URL (Optional)</Label>
@@ -139,8 +175,19 @@ const AdminBanners = () => {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-         {banners.map((banner) => (
-           <div key={banner.id} className="group relative bg-white rounded-3xl overflow-hidden shadow-sm border border-primary/5 p-4 flex flex-col md:flex-row gap-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500">
+          {loading ? (
+            <div className="col-span-full h-64 flex flex-col items-center justify-center text-muted-foreground bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+               <Loader2 className="h-10 w-10 animate-spin mb-4 text-primary/40" />
+               <p className="font-bold uppercase text-[10px] tracking-widest text-slate-400">Loading Banners...</p>
+            </div>
+          ) : banners.length === 0 ? (
+            <div className="col-span-full h-64 flex flex-col items-center justify-center text-muted-foreground bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+               <ImageIcon className="h-10 w-10 mb-4 text-slate-300" />
+               <p className="font-bold uppercase text-[10px] tracking-widest text-slate-400">No banners found</p>
+            </div>
+          ) : (
+            banners.map((banner) => (
+              <div key={banner.id} className="group relative bg-white rounded-3xl overflow-hidden shadow-sm border border-primary/5 p-4 flex flex-col md:flex-row gap-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500">
               <div className="md:w-48 h-32 rounded-2xl overflow-hidden shadow-inner border border-slate-100 flex-shrink-0 relative">
                  <img src={banner.image} alt={banner.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                  <div className="absolute inset-0 bg-black/10 transition-opacity opacity-0 group-hover:opacity-100 flex items-center justify-center">
@@ -162,7 +209,7 @@ const AdminBanners = () => {
                  
                  <div className="flex items-center justify-between mt-4">
                     <button 
-                      onClick={() => toggleStatus(banner.id)}
+                      onClick={() => toggleStatus(banner)}
                       className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase transition-all ${
                         banner.status === 'active' 
                         ? 'bg-green-50 text-green-600 hover:bg-green-100' 
@@ -187,7 +234,8 @@ const AdminBanners = () => {
                  </div>
               </div>
            </div>
-         ))}
+          ))
+         )}
          
          <div 
            className="bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 p-8 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-100 hover:border-slate-300 transition-all cursor-pointer group"

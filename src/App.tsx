@@ -370,6 +370,25 @@ const MainHeader = () => {
                           <h4 className="font-bold text-sm truncate">{item.name}</h4>
                           <p className="text-primary font-bold mt-1">৳ {item.price.toLocaleString()}</p>
                           <div className="flex items-center gap-3 mt-3">
+                            <div className="flex items-center bg-secondary rounded-lg p-0.5 border">
+                               <Button 
+                                 variant="ghost" 
+                                 size="icon" 
+                                 className="h-6 w-6 rounded-md hover:bg-white"
+                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                               >
+                                 <Minus className="h-3 w-3" />
+                               </Button>
+                               <span className="w-8 text-center font-bold text-xs">{item.quantity}</span>
+                               <Button 
+                                 variant="ghost" 
+                                 size="icon" 
+                                 className="h-6 w-6 rounded-md hover:bg-white"
+                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                               >
+                                 <Plus className="h-3 w-3" />
+                               </Button>
+                            </div>
                             <Link to={`/product/${item.id}`} onClick={() => document.body.click()}>
                               <Button variant="outline" size="sm" className="h-7 md:h-8 rounded-lg text-[9px] md:text-[10px] font-bold">View product</Button>
                             </Link>
