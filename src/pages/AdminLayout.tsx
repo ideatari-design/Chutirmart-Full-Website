@@ -6,6 +6,7 @@ import {
   ShoppingCart, 
   Users, 
   Settings, 
+  Store,
   LogOut,
   CreditCard,
   Tags,
@@ -15,7 +16,8 @@ import {
   Image as ImageIcon,
   AlertCircle,
   LayoutDashboard,
-  Menu
+  Menu,
+  ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -95,7 +97,14 @@ const SidebarContent = ({ pathname, onLinkClick }: { pathname: string, onLinkCli
         ))}
       </nav>
     </ScrollArea>
-    <div className="p-4 border-t bg-white">
+    <div className="p-4 border-t bg-white space-y-2">
+       <Link to="/" className="block" onClick={onLinkClick}>
+         <Button variant="ghost" className="w-full justify-start gap-3 text-primary hover:text-primary hover:bg-primary/5 rounded-lg h-11 border border-primary/10">
+            <Store className="h-5 w-5" />
+            <span className="font-bold text-sm">Visit Store</span>
+            <ExternalLink className="h-3 w-3 ml-auto opacity-50" />
+         </Button>
+       </Link>
        <Link to="/" className="block">
          <Button variant="ghost" className="w-full justify-start gap-3 text-slate-600 hover:text-destructive hover:bg-destructive/5 rounded-lg h-11">
             <LogOut className="h-5 w-5" />
@@ -126,9 +135,9 @@ const AdminLayout = () => {
            </Link>
            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger nativeButton={false} render={
-                <Button variant="ghost" size="icon" className="-mr-2">
+                <div className="lg:hidden p-2 cursor-pointer -mr-2 text-slate-600 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors">
                   <Menu className="h-6 w-6" />
-                </Button>
+                </div>
               } />
               <SheetContent side="left" className="p-0 w-72 flex flex-col">
                  <SidebarContent 

@@ -520,7 +520,7 @@ const MainHeader = () => {
 
           {/* Mobile Menu Trigger */}
           <Sheet>
-            <SheetTrigger nativeButton={true} render={<Button variant="ghost" size="icon" className="lg:hidden h-10 w-10" />}>
+            <SheetTrigger nativeButton={false} render={<div className="lg:hidden h-10 w-10 flex items-center justify-center cursor-pointer hover:bg-secondary rounded-lg transition-colors" />}>
               <Menu className="h-7 w-7" />
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] p-0 flex flex-col">
