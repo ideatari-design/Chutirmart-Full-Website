@@ -351,6 +351,27 @@ export async function onRequest(context) {
       return new Response(null, { status: 204 });
     }
 
+    // --- Settings API ---
+    if (path === "/api/settings" && method === "GET") {
+      if (!env.DB) return jsonResponse({});
+      const { results } = await env.DB.prepare("SELECT * FROM settings").all();
+      const settings = {};
+      (results || []).forEach(s => {
+        settings[s.key] = s.value;
+      });
+      return jsonResponse(settings);
+    }
+
+    if (path === "/api/settings" && method === "PATCH") {
+      if (!env.DB) return jsonResponse({ error: "DB missing" }, 500);
+      const updates = await request.json();
+      for (const [key, value] of Object.entries(updates)) {
+        await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value, updatedAt) VALUES (?, ?, ?)")
+          .bind(key, String(value), new Date().toISOString()).run();
+      }
+      return jsonResponse({ success: true });
+    }
+
     // --- Orders API ---
     if (path === "/api/orders" && method === "GET") {
       if (!env.DB) return jsonResponse([]);
@@ -467,6 +488,14 @@ export async function onRequest(context) {
             type TEXT,
             status TEXT,
             createdAt TEXT
+          )
+        `).run();
+
+        await env.DB.prepare(`
+          CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT,
+            updatedAt TEXT
           )
         `).run();
 

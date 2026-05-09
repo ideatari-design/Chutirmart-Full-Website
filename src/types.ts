@@ -18,6 +18,9 @@ export interface Product {
   images: string[];
   stock: number;
   isFeatured?: boolean;
+  isFlashSale?: boolean;
+  isNewArrival?: boolean;
+  isBestSelling?: boolean;
   specs?: Record<string, string>;
   stars?: number;
   reviews?: Review[];

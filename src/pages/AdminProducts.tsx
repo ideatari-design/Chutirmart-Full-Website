@@ -19,7 +19,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
-  ExternalLink
+  ExternalLink,
+  Zap,
+  Sparkles,
+  Trophy
 } from 'lucide-react';
 import {
   Dialog,
@@ -30,6 +33,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { productService } from '@/services/productService';
 import { Product } from '@/types';
 import { toast } from 'sonner';
@@ -51,7 +55,10 @@ const AdminProducts = () => {
     category: '',
     description: '',
     mainImage: '',
-    gallery: ''
+    gallery: '',
+    isFlashSale: false,
+    isNewArrival: false,
+    isBestSelling: false
   });
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -96,6 +103,9 @@ const AdminProducts = () => {
         stock,
         category: newProduct.category || 'Uncategorized',
         description: newProduct.description,
+        isFlashSale: newProduct.isFlashSale,
+        isNewArrival: newProduct.isNewArrival,
+        isBestSelling: newProduct.isBestSelling,
         images
       });
 
@@ -111,7 +121,10 @@ const AdminProducts = () => {
           category: '', 
           description: '',
           mainImage: '',
-          gallery: ''
+          gallery: '',
+          isFlashSale: false,
+          isNewArrival: false,
+          isBestSelling: false
         });
         fetchProducts();
       } else {
@@ -291,6 +304,41 @@ const AdminProducts = () => {
                   onChange={e => setNewProduct(p => ({ ...p, description: e.target.value }))}
                 />
               </div>
+              <div className="col-span-2 space-y-4 pt-2">
+                <Label className="font-bold">Homepage Sections</Label>
+                <div className="flex flex-wrap gap-6 bg-secondary/20 p-4 rounded-2xl">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="flashsale" 
+                      checked={newProduct.isFlashSale} 
+                      onCheckedChange={(checked) => setNewProduct(p => ({ ...p, isFlashSale: checked === true }))}
+                    />
+                    <label htmlFor="flashsale" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-1 cursor-pointer">
+                      <Zap className="h-3 w-3 text-orange-500" /> Flash Sale
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="newarrival" 
+                      checked={newProduct.isNewArrival} 
+                      onCheckedChange={(checked) => setNewProduct(p => ({ ...p, isNewArrival: checked === true }))}
+                    />
+                    <label htmlFor="newarrival" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-1 cursor-pointer">
+                      <Sparkles className="h-3 w-3 text-blue-500" /> New Arrival
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="bestselling" 
+                      checked={newProduct.isBestSelling} 
+                      onCheckedChange={(checked) => setNewProduct(p => ({ ...p, isBestSelling: checked === true }))}
+                    />
+                    <label htmlFor="bestselling" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-1 cursor-pointer">
+                      <Trophy className="h-3 w-3 text-yellow-500" /> Best Selling
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
             <DialogFooter className="gap-2">
               <Button variant="outline" className="rounded-xl h-12" onClick={() => setIsAddOpen(false)}>Cancel</Button>
@@ -401,6 +449,41 @@ const AdminProducts = () => {
                           className="w-full h-32 rounded-xl border px-3 py-2 text-sm"
                        />
                     </div>
+                    <div className="col-span-2 space-y-4 pt-2">
+                       <Label className="font-bold">Homepage Sections</Label>
+                       <div className="flex flex-wrap gap-6 bg-secondary/20 p-4 rounded-2xl">
+                          <div className="flex items-center space-x-2">
+                             <Checkbox 
+                                id="edit-flashsale" 
+                                checked={editingProduct.isFlashSale} 
+                                onCheckedChange={(checked) => setEditingProduct({...editingProduct, isFlashSale: checked === true})}
+                             />
+                             <label htmlFor="edit-flashsale" className="text-sm font-medium leading-none flex items-center gap-1 cursor-pointer">
+                                <Zap className="h-3 w-3 text-orange-500" /> Flash Sale
+                             </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                             <Checkbox 
+                                id="edit-newarrival" 
+                                checked={editingProduct.isNewArrival} 
+                                onCheckedChange={(checked) => setEditingProduct({...editingProduct, isNewArrival: checked === true})}
+                             />
+                             <label htmlFor="edit-newarrival" className="text-sm font-medium leading-none flex items-center gap-1 cursor-pointer">
+                                <Sparkles className="h-3 w-3 text-blue-500" /> New Arrival
+                             </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                             <Checkbox 
+                                id="edit-bestselling" 
+                                checked={editingProduct.isBestSelling} 
+                                onCheckedChange={(checked) => setEditingProduct({...editingProduct, isBestSelling: checked === true})}
+                             />
+                             <label htmlFor="edit-bestselling" className="text-sm font-medium leading-none flex items-center gap-1 cursor-pointer">
+                                <Trophy className="h-3 w-3 text-yellow-500" /> Best Selling
+                             </label>
+                          </div>
+                       </div>
+                    </div>
                  </div>
               )}
               <DialogFooter>
@@ -439,29 +522,30 @@ const AdminProducts = () => {
 
       <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-primary/5">
         <Table>
-          <TableHeader className="bg-secondary/30">
+          <TableHeader className="bg-secondary/10 border-b">
             <TableRow className="hover:bg-transparent border-none">
-              <TableHead className="w-20 pl-6 font-bold text-primary">Image</TableHead>
-              <TableHead className="font-bold text-primary">Name</TableHead>
-              <TableHead className="font-bold text-primary">Category</TableHead>
-              <TableHead className="font-bold text-primary">Price</TableHead>
-              <TableHead className="font-bold text-primary text-center">Stock</TableHead>
-              <TableHead className="font-bold text-primary text-right pr-6">Action</TableHead>
+              <TableHead className="w-20 pl-6 font-bold text-primary uppercase text-[10px] tracking-wider">Image</TableHead>
+              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Name</TableHead>
+              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Category</TableHead>
+              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Date Added</TableHead>
+              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Price</TableHead>
+              <TableHead className="font-bold text-primary text-center uppercase text-[10px] tracking-wider">Stock</TableHead>
+              <TableHead className="font-bold text-primary text-right pr-6 uppercase text-[10px] tracking-wider">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
                <TableRow>
-                  <TableCell colSpan={6} className="py-20 text-center font-medium italic opacity-50">Loading products...</TableCell>
+                  <TableCell colSpan={7} className="py-20 text-center font-medium italic opacity-50">Loading products...</TableCell>
                </TableRow>
             ) : currentProducts.length === 0 ? (
                <TableRow>
-                  <TableCell colSpan={6} className="py-20 text-center font-medium italic opacity-50">No products found.</TableCell>
+                  <TableCell colSpan={7} className="py-20 text-center font-medium italic opacity-50">No products found.</TableCell>
                </TableRow>
             ) : currentProducts.map((p) => (
-              <TableRow key={p.id} className="hover:bg-secondary/10 transition-colors border-b-primary/5">
-                <TableCell className="pl-6">
-                  <div className="w-12 h-12 bg-secondary rounded-lg overflow-hidden border">
+              <TableRow key={p.id} className="hover:bg-secondary/5 transition-colors border-b border-secondary/20">
+                <TableCell className="pl-6 py-4">
+                  <div className="w-12 h-12 bg-secondary/30 rounded-xl overflow-hidden border border-secondary/50 shadow-sm transition-transform hover:scale-105">
                     <img 
                       src={p.images && p.images.length > 0 ? p.images[0] : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200'} 
                       alt={p.name} 
@@ -474,14 +558,19 @@ const AdminProducts = () => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <p className="font-bold text-sm">{p.name}</p>
+                  <p className="font-bold text-sm text-slate-700">{p.name}</p>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary" className="bg-primary/5 text-primary hover:bg-primary/5">{p.category}</Badge>
+                  <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 border-none transition-colors px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">{p.category}</Badge>
                 </TableCell>
-                <TableCell className="font-bold">৳ {p.price.toLocaleString()}</TableCell>
+                <TableCell>
+                   <p className="text-xs font-bold text-slate-500">{p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'Initial'}</p>
+                </TableCell>
+                <TableCell className="font-black text-primary">৳ {p.price.toLocaleString()}</TableCell>
                 <TableCell className="text-center">
-                   <span className={`font-bold ${p.stock < 5 ? 'text-destructive' : 'text-foreground'}`}>{p.stock}</span>
+                   <div className="inline-flex items-center justify-center p-1.5 bg-secondary/20 rounded-lg min-w-[40px]">
+                      <span className={`font-black text-xs ${p.stock < 5 ? 'text-destructive animate-pulse' : 'text-slate-600'}`}>{p.stock}</span>
+                   </div>
                 </TableCell>
                 <TableCell className="text-right pr-6">
                   <div className="flex items-center justify-end gap-2">

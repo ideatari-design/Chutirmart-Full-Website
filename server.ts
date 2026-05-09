@@ -3,11 +3,44 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
+import fs from "fs";
+import multer from "multer";
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// --- Multer Configuration for File Uploads ---
+const uploadDir = path.join(process.cwd(), "public", "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
+  }
+});
+
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|ico|svg|webp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    if (extname && mimetype) {
+      return cb(null, true);
+    }
+    cb(new Error("Invalid file type. Only JPEG, PNG, GIF, ICO, SVG and WebP are allowed."));
+  }
+});
 
 // --- Simple In-Memory "Database" ---
 const PRODUCTS = [
@@ -21,6 +54,9 @@ const PRODUCTS = [
     images: ['https://images.unsplash.com/photo-1544787210-2213d28929c1?auto=format&fit=crop&q=80&w=800'], 
     stock: 10, 
     isFeatured: true, 
+    isFlashSale: true,
+    isNewArrival: true,
+    isBestSelling: false,
     stars: 4.8,
     description: 'Mini portable blender for students and office workers.',
     specs: {
@@ -35,10 +71,13 @@ const PRODUCTS = [
     nameBn: 'নেক ফ্যান', 
     price: 1500, 
     oldPrice: 2000,
-    category: 'Gadgets', 
+    category: 'Smartphone', 
     images: ['https://images.unsplash.com/photo-1622541929213-167c6d45100d?auto=format&fit=crop&q=80&w=800'], 
     stock: 15, 
     isFeatured: true, 
+    isFlashSale: false,
+    isNewArrival: true,
+    isBestSelling: true,
     stars: 4.5,
     description: 'Bladeless portable neck fan for outdoor activities.',
     specs: {
@@ -56,6 +95,9 @@ const PRODUCTS = [
     images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=800'], 
     stock: 5, 
     isFeatured: true, 
+    isFlashSale: true,
+    isNewArrival: false,
+    isBestSelling: true,
     stars: 5.0,
     description: 'RGB Gaming headset with noise cancelling mic.',
     specs: {
@@ -73,6 +115,9 @@ const PRODUCTS = [
     images: ['https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?auto=format&fit=crop&q=80&w=800'], 
     stock: 8, 
     isFeatured: true, 
+    isFlashSale: false,
+    isNewArrival: true,
+    isBestSelling: false,
     stars: 4.7,
     description: '60% Compact mechanical keyboard with RGB.',
     specs: {
@@ -86,10 +131,13 @@ const PRODUCTS = [
     nameBn: 'স্মার্ট মিরর', 
     price: 2500, 
     oldPrice: 3500,
-    category: 'Makeup', 
+    category: 'Beauty', 
     images: ['https://images.unsplash.com/photo-1522335789203-aabd1fc53bb7?auto=format&fit=crop&q=80&w=800'], 
     stock: 12, 
     isFeatured: true, 
+    isFlashSale: true,
+    isNewArrival: true,
+    isBestSelling: true,
     stars: 4.9,
     description: 'LED smart makeup mirror with dimmable lights.',
     specs: {
@@ -278,6 +326,28 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+  app.use("/uploads", express.static(uploadDir));
+
+  // --- Upload API ---
+  app.post("/api/upload", (req, res, next) => {
+    upload.single("file")(req, res, (err) => {
+      if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ success: false, message: "File too large (Max 5MB)" });
+        }
+        return res.status(400).json({ success: false, message: err.message });
+      } else if (err) {
+        return res.status(400).json({ success: false, message: err.message });
+      }
+      
+      if (!req.file) {
+        return res.status(400).json({ success: false, message: "No file chosen" });
+      }
+      
+      const fileUrl = `/uploads/${req.file.filename}`;
+      res.json({ success: true, url: fileUrl });
+    });
+  });
 
   // --- Troubleshooting Endpoints ---
 
@@ -332,9 +402,13 @@ async function startServer() {
         images TEXT,
         stock INTEGER,
         isFeatured INTEGER,
+        isFlashSale INTEGER,
+        isNewArrival INTEGER,
+        isBestSelling INTEGER,
         stars REAL,
         description TEXT,
-        specs TEXT
+        specs TEXT,
+        createdAt TEXT
       )
     `;
 
@@ -363,12 +437,25 @@ async function startServer() {
       )
     `;
 
+    const createSettingsTable = `
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT,
+        updatedAt TEXT
+      )
+    `;
+
     try {
       const pResult = await queryD1(createProductsTable);
       const oResult = await queryD1(createOrdersTable);
       const bResult = await queryD1(createBannersTable);
+      const sResult = await queryD1(createSettingsTable);
 
-      if (pResult && oResult && bResult) {
+      if (pResult && oResult && bResult && sResult) {
+        // Seed default settings if not exists
+        await queryD1("INSERT OR IGNORE INTO settings (key, value, updatedAt) VALUES (?, ?, ?)", ["logo", "https://i.postimg.cc/QMcPhy7D/logo-chutirmart.png", new Date().toISOString()]);
+        await queryD1("INSERT OR IGNORE INTO settings (key, value, updatedAt) VALUES (?, ?, ?)", ["favicon", "https://i.postimg.cc/tJnHzvD2/favicon-chutirmart.png", new Date().toISOString()]);
+        await queryD1("INSERT OR IGNORE INTO settings (key, value, updatedAt) VALUES (?, ?, ?)", ["shopName", "CHUTIRMART", new Date().toISOString()]);
         return res.json({ success: true, message: "Tables created successfully!" });
       } else {
         return res.status(500).json({ 
@@ -388,6 +475,7 @@ async function startServer() {
       await queryD1("DROP TABLE IF EXISTS products");
       await queryD1("DROP TABLE IF EXISTS orders");
       await queryD1("DROP TABLE IF EXISTS banners");
+      await queryD1("DROP TABLE IF EXISTS settings");
       
       const createProductsTable = `
         CREATE TABLE products (
@@ -400,9 +488,13 @@ async function startServer() {
           images TEXT,
           stock INTEGER,
           isFeatured INTEGER,
+          isFlashSale INTEGER,
+          isNewArrival INTEGER,
+          isBestSelling INTEGER,
           stars REAL,
           description TEXT,
-          specs TEXT
+          specs TEXT,
+          createdAt TEXT
         )
       `;
 
@@ -452,13 +544,15 @@ async function startServer() {
     for (const p of PRODUCTS) {
       try {
         const sql = `
-          INSERT OR REPLACE INTO products (id, name, nameBn, price, oldPrice, category, images, stock, isFeatured, stars, description, specs)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT OR REPLACE INTO products (id, name, nameBn, price, oldPrice, category, images, stock, isFeatured, isFlashSale, isNewArrival, isBestSelling, stars, description, specs, createdAt)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
         const params = [
           p.id, p.name, p.nameBn, p.price, p.oldPrice, p.category, 
-          JSON.stringify(p.images), p.stock, p.isFeatured ? 1 : 0, p.stars, 
-          p.description, JSON.stringify(p.specs)
+          JSON.stringify(p.images), p.stock, 
+          p.isFeatured ? 1 : 0, p.isFlashSale ? 1 : 0, p.isNewArrival ? 1 : 0, p.isBestSelling ? 1 : 0,
+          p.stars, p.description, JSON.stringify(p.specs),
+          new Date().toISOString()
         ];
         
         const result = await queryD1(sql, params);
@@ -502,7 +596,10 @@ async function startServer() {
           ...p,
           images: JSON.parse(p.images || "[]"),
           specs: JSON.parse(p.specs || "{}"),
-          isFeatured: Boolean(p.isFeatured)
+          isFeatured: Boolean(p.isFeatured),
+          isFlashSale: Boolean(p.isFlashSale),
+          isNewArrival: Boolean(p.isNewArrival),
+          isBestSelling: Boolean(p.isBestSelling)
         }));
         return res.json(products);
       }
@@ -530,10 +627,15 @@ async function startServer() {
   app.get("/api/products/:id", async (req, res) => {
     const d1Result = await queryD1("SELECT * FROM products WHERE id = ?", [req.params.id]);
     if (d1Result && d1Result.results.length > 0) {
+      const p = d1Result.results[0];
       const product = {
-        ...d1Result.results[0],
-        images: JSON.parse(d1Result.results[0].images || "[]"),
-        specs: JSON.parse(d1Result.results[0].specs || "{}")
+        ...p,
+        images: JSON.parse(p.images || "[]"),
+        specs: JSON.parse(p.specs || "{}"),
+        isFeatured: Boolean(p.isFeatured),
+        isFlashSale: Boolean(p.isFlashSale),
+        isNewArrival: Boolean(p.isNewArrival),
+        isBestSelling: Boolean(p.isBestSelling)
       };
       // For reviews, we can also query D1 or keep them in-memory for now if table doesn't exist
       res.json({ ...product, reviews: REVIEWS.filter(r => r.productId === req.params.id) });
@@ -615,6 +717,40 @@ async function startServer() {
     res.status(204).send();
   });
 
+  // --- Settings API ---
+  app.get("/api/settings", async (req, res) => {
+    try {
+      const d1Result = await queryD1("SELECT * FROM settings");
+      if (d1Result && d1Result.results) {
+        const settings: any = {};
+        d1Result.results.forEach((s: any) => {
+          settings[s.key] = s.value;
+        });
+        return res.json(settings);
+      }
+      res.json({});
+    } catch (err) {
+      console.error("Settings GET failed:", err);
+      res.status(500).json({ success: false });
+    }
+  });
+
+  app.patch("/api/settings", async (req, res) => {
+    const updates = req.body;
+    try {
+      for (const [key, value] of Object.entries(updates)) {
+        await queryD1(
+          "INSERT OR REPLACE INTO settings (key, value, updatedAt) VALUES (?, ?, ?)",
+          [key, String(value), new Date().toISOString()]
+        );
+      }
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Settings PATCH failed:", err);
+      res.status(500).json({ success: false });
+    }
+  });
+
   app.post("/api/products/:id/reviews", (req, res) => {
     const { userName, rating, comment } = req.body;
     const newReview = {
@@ -633,13 +769,15 @@ async function startServer() {
   app.post("/api/products", async (req, res) => {
     const productData = req.body;
     const newId = String(Date.now());
+    const createdAt = new Date().toISOString();
     const newProduct = {
       ...productData,
       id: newId,
       images: productData.images || ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800'],
       nameBn: productData.nameBn || productData.name,
       price: parseFloat(productData.price) || 0,
-      stock: parseInt(productData.stock) || 0
+      stock: parseInt(productData.stock) || 0,
+      createdAt
     };
 
     console.log(`[POST] Creating product: ${newId} - ${newProduct.name}`);
@@ -648,13 +786,18 @@ async function startServer() {
     let d1Error = null;
     try {
       const d1Result = await queryD1(
-        "INSERT INTO products (id, name, nameBn, price, oldPrice, category, images, stock, isFeatured, stars, description, specs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO products (id, name, nameBn, price, oldPrice, category, images, stock, isFeatured, isFlashSale, isNewArrival, isBestSelling, stars, description, specs, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           newId, newProduct.name, newProduct.nameBn, 
           newProduct.price || 0, newProduct.oldPrice || 0, newProduct.category || 'Uncategorized',
           JSON.stringify(newProduct.images), newProduct.stock || 0, 
-          newProduct.isFeatured ? 1 : 0, newProduct.stars || 0,
-          newProduct.description || '', JSON.stringify(newProduct.specs || {})
+          newProduct.isFeatured ? 1 : 0, 
+          newProduct.isFlashSale ? 1 : 0,
+          newProduct.isNewArrival ? 1 : 0,
+          newProduct.isBestSelling ? 1 : 0,
+          newProduct.stars || 0,
+          newProduct.description || '', JSON.stringify(newProduct.specs || {}),
+          createdAt
         ]
       );
       if (d1Result && d1Result.success !== false) {
@@ -717,7 +860,10 @@ async function startServer() {
               ...p,
               images: typeof p.images === 'string' ? JSON.parse(p.images) : (p.images || []),
               specs: typeof p.specs === 'string' ? JSON.parse(p.specs) : (p.specs || {}),
-              isFeatured: Boolean(p.isFeatured)
+              isFeatured: Boolean(p.isFeatured),
+              isFlashSale: Boolean(p.isFlashSale),
+              isNewArrival: Boolean(p.isNewArrival),
+              isBestSelling: Boolean(p.isBestSelling)
             };
             console.log(`[PATCH] Found product ${id} in D1`);
           }
@@ -746,7 +892,7 @@ async function startServer() {
       let d1Error = null;
       try {
         const d1Result = await queryD1(
-          "UPDATE products SET name = ?, nameBn = ?, price = ?, oldPrice = ?, category = ?, images = ?, stock = ?, isFeatured = ?, stars = ?, description = ?, specs = ? WHERE id = ?",
+          "UPDATE products SET name = ?, nameBn = ?, price = ?, oldPrice = ?, category = ?, images = ?, stock = ?, isFeatured = ?, isFlashSale = ?, isNewArrival = ?, isBestSelling = ?, stars = ?, description = ?, specs = ? WHERE id = ?",
           [
             merged.name || '', 
             merged.nameBn || merged.name || '', 
@@ -756,6 +902,9 @@ async function startServer() {
             JSON.stringify(merged.images || []), 
             merged.stock || 0, 
             merged.isFeatured ? 1 : 0, 
+            merged.isFlashSale ? 1 : 0,
+            merged.isNewArrival ? 1 : 0,
+            merged.isBestSelling ? 1 : 0,
             merged.stars || 0, 
             merged.description || '',
             JSON.stringify(merged.specs || {}), 
@@ -946,6 +1095,9 @@ async function startServer() {
       )`);
       await queryD1(`CREATE TABLE IF NOT EXISTS banners (
         id TEXT PRIMARY KEY, title TEXT, image TEXT, link TEXT, type TEXT, status TEXT, createdAt TEXT
+      )`);
+      await queryD1(`CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY, value TEXT, updatedAt TEXT
       )`);
 
       // Ensure necessary columns exist (for existing tables)

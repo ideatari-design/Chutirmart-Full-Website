@@ -17,6 +17,21 @@ export const productService = {
     return products.filter(p => p.isFeatured);
   },
 
+  async getFlashSaleProducts(): Promise<Product[]> {
+    const products = await this.getAllProducts();
+    return products.filter(p => p.isFlashSale);
+  },
+
+  async getNewArrivalProducts(): Promise<Product[]> {
+    const products = await this.getAllProducts();
+    return products.filter(p => p.isNewArrival);
+  },
+
+  async getBestSellingProducts(): Promise<Product[]> {
+    const products = await this.getAllProducts();
+    return products.filter(p => p.isBestSelling);
+  },
+
   async getProductById(id: string): Promise<Product | null> {
     try {
       const response = await fetch(`/api/products/${id}`);

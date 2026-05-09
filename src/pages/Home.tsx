@@ -106,13 +106,10 @@ const CategoryCircles = () => {
   );
 };
 
-const FlashDeals = () => {
+const FlashDeals = ({ products, loading }: { products: Product[], loading: boolean }) => {
   const [timeLeft, setTimeLeft] = useState({ h: 11, m: 41, s: 42 });
-  const [dealProducts, setDealProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    productService.getFeaturedProducts().then(setDealProducts);
-    
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev.s > 0) return { ...prev, s: prev.s - 1 };
@@ -154,9 +151,17 @@ const FlashDeals = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 px-4 sm:px-0">
-        {dealProducts.slice(0, 4).map((p) => (
-          <ProductCard key={p.id} product={p} />
-        ))}
+        {loading ? (
+          [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
+        ) : products.length > 0 ? (
+          products.slice(0, 4).map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))
+        ) : (
+           <div className="col-span-full py-10 text-center">
+             <p className="text-muted-foreground italic">No flash deals at the moment.</p>
+           </div>
+        )}
       </div>
     </div>
   );
@@ -343,8 +348,8 @@ const BannerSlider = () => {
 };
 
 const Home = () => {
-  const [activeTab, setActiveTab] = useState('Fashion');
-  const tabs = ['Fashion', 'Smartphones', 'Home & Decor', 'Beauty'];
+  const [activeTab, setActiveTab] = useState('All');
+  const tabs = ['All', 'Fashion', 'Smartphone', 'Home & Decor', 'Beauty'];
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
@@ -358,6 +363,20 @@ const Home = () => {
     };
     fetchProducts();
   }, []);
+
+  const filteredProducts = React.useMemo(() => {
+    const newArrivals = products.filter(p => p.isNewArrival);
+    if (activeTab === 'All') return newArrivals;
+    return newArrivals.filter(p => p.category === activeTab);
+  }, [products, activeTab]);
+
+  const flashSaleProducts = React.useMemo(() => {
+    return products.filter(p => p.isFlashSale);
+  }, [products]);
+
+  const bestSellingProducts = React.useMemo(() => {
+    return products.filter(p => p.isBestSelling);
+  }, [products]);
 
   return (
     <div className="bg-background">
@@ -382,7 +401,7 @@ const Home = () => {
          </div>
       </div>
 
-      <FlashDeals />
+      <FlashDeals products={flashSaleProducts} loading={loading} />
       
       {/* New Arrivals */}
       <section className="py-20 max-w-[1140px] mx-auto px-0 sm:px-4 border-t">
@@ -410,9 +429,32 @@ const Home = () => {
            {loading ? (
              [...Array(8)].map((_, i) => <ProductCardSkeleton key={i} />)
            ) : (
-             products.slice(0, 8).map((p) => (
-               <ProductCard key={p.id} product={p} />
-             ))
+             <AnimatePresence mode="popLayout">
+               {filteredProducts.slice(0, 8).map((p) => (
+                 <motion.div
+                   key={p.id}
+                   layout
+                   initial={{ opacity: 0, scale: 0.9 }}
+                   animate={{ opacity: 1, scale: 1 }}
+                   exit={{ opacity: 0, scale: 0.9 }}
+                   transition={{ duration: 0.3 }}
+                 >
+                   <ProductCard product={p} />
+                 </motion.div>
+               ))}
+               {filteredProducts.length === 0 && !loading && (
+                 <motion.div 
+                   initial={{ opacity: 0 }}
+                   animate={{ opacity: 1 }}
+                   className="col-span-full py-20 text-center"
+                 >
+                   <div className="bg-secondary/30 rounded-3xl p-12 inline-block">
+                     <ShoppingBag className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+                     <p className="text-muted-foreground font-bold">No products found in this category</p>
+                   </div>
+                 </motion.div>
+               )}
+             </AnimatePresence>
            )}
         </div>
       </section>
@@ -427,10 +469,14 @@ const Home = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 px-4 sm:px-0">
                {loading ? (
                  [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
-               ) : (
-                 products.slice(0, 4).map((p) => (
+               ) : bestSellingProducts.length > 0 ? (
+                 bestSellingProducts.slice(0, 4).map((p) => (
                    <ProductCard key={p.id} product={p} />
                  ))
+               ) : (
+                  <div className="col-span-full py-10 text-center">
+                    <p className="text-muted-foreground italic">No best selling products at the moment.</p>
+                  </div>
                )}
             </div>
          </div>

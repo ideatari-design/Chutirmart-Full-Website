@@ -34,6 +34,7 @@ import AdminCMS from '@/pages/AdminCMS';
 import AdminBanners from '@/pages/AdminBanners';
 import AdminSettings from '@/pages/AdminSettings';
 import AdminCoupons from '@/pages/AdminCoupons';
+import { useSettings } from '@/context/SettingsContext';
 
 const menuItems = [
   { label: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" />, path: '/admin' },
@@ -62,14 +63,26 @@ const menuItems = [
   { label: 'Settings', icon: <Settings className="h-5 w-5" />, path: '/admin/settings' },
 ];
 
-const SidebarContent = ({ pathname, onLinkClick }: { pathname: string, onLinkClick?: () => void }) => (
-  <>
-    <div className="p-8 border-b bg-white/50 backdrop-blur-md sticky top-0 z-10">
-       <Link to="/admin" className="text-2xl font-black text-primary flex items-center group">
-         OJALA <span className="text-accent ml-1 italic font-light group-hover:translate-x-1 transition-transform">SHOP</span>
-       </Link>
-       <p className="text-[10px] uppercase font-bold text-muted-foreground mt-1">Admin Control Panel</p>
-    </div>
+const SidebarContent = ({ pathname, onLinkClick }: { pathname: string, onLinkClick?: () => void }) => {
+  const { settings } = useSettings();
+  return (
+    <>
+      <div className="p-8 border-b bg-white/50 backdrop-blur-md sticky top-0 z-10">
+         <Link to="/admin" className="flex items-center shrink-0 transition-transform active:scale-95 group">
+           {settings.logo ? (
+             <img 
+               src={settings.logo} 
+               alt="Logo" 
+               className="h-10 w-auto object-contain" 
+             />
+           ) : (
+             <div className="text-2xl font-black text-primary flex items-center group uppercase">
+               {settings.shopName?.split(' ')[0] || 'OJALA'} <span className="text-accent ml-1 italic font-light group-hover:translate-x-1 transition-transform">{settings.shopName?.split(' ')[1] || 'SHOP'}</span>
+             </div>
+           )}
+         </Link>
+         <p className="text-[10px] uppercase font-bold text-muted-foreground mt-1">Admin Control Panel</p>
+      </div>
     <ScrollArea className="flex-grow">
       <nav className="p-4 space-y-1">
         {menuItems.map((item, i) => (
@@ -113,10 +126,12 @@ const SidebarContent = ({ pathname, onLinkClick }: { pathname: string, onLinkCli
        </Link>
     </div>
   </>
-);
+  );
+};
 
 const AdminLayout = () => {
   const location = useLocation();
+  const { settings } = useSettings();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   
   return (
@@ -130,8 +145,14 @@ const AdminLayout = () => {
       <div className="flex-grow flex flex-col min-w-0">
         {/* Mobile Top Header */}
         <header className="lg:hidden h-16 bg-white border-b flex items-center justify-between px-6 sticky top-0 z-30 shadow-sm">
-           <Link to="/admin" className="text-xl font-black text-primary">
-              OJALA<span className="text-accent italic font-light">SHOP</span> <span className="text-[8px] text-muted-foreground uppercase ml-1">Admin</span>
+           <Link to="/admin" className="flex items-center">
+              {settings.logo ? (
+                <img src={settings.logo} alt="Logo" className="h-8 w-auto object-contain" />
+              ) : (
+                <div className="text-xl font-black text-primary uppercase">
+                  {settings.shopName || 'OJALA SHOP'} <span className="text-[8px] text-muted-foreground uppercase ml-1">Admin</span>
+                </div>
+              )}
            </Link>
            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger nativeButton={false} render={

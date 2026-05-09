@@ -53,6 +53,7 @@ import Cart from '@/pages/Cart';
 import { useCart } from '@/context/CartContext';
 import { Toaster } from '@/components/ui/sonner';
 import { useWishlist } from '@/context/WishlistContext';
+import { useSettings } from '@/context/SettingsContext';
 import { orderService } from '@/services/orderService';
 import { productService } from '@/services/productService';
 import { Product } from '@/types';
@@ -89,6 +90,7 @@ const TopHeader = () => (
 const MainHeader = () => {
   const { itemCount, cartTotal, cart, removeFromCart, updateQuantity, clearCart } = useCart();
   const { wishlist, removeFromWishlist } = useWishlist();
+  const { settings } = useSettings();
   const [isBumping, setIsBumping] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [suggestions, setSuggestions] = React.useState<Product[]>([]);
@@ -165,9 +167,19 @@ const MainHeader = () => {
   return (
     <div className="bg-background border-b py-5 sticky top-0 z-50 shadow-sm">
       <div className="max-w-[1140px] mx-auto px-4 flex items-center justify-between gap-4 md:gap-8">
-        <Link to="/" className="text-2xl md:text-3xl font-black flex items-center text-primary shrink-0 transition-transform active:scale-95">
-          OJALA
-          <span className="w-1.5 h-1.5 bg-accent rounded-full ml-1 self-end mb-1 md:mb-1.5" />
+        <Link to="/" className="flex items-center shrink-0 transition-transform active:scale-95 group">
+          {settings.logo ? (
+            <img 
+              src={settings.logo} 
+              alt={settings.shopName || "Logo"} 
+              className="h-10 md:h-12 w-auto object-contain" 
+            />
+          ) : (
+            <div className="text-2xl md:text-3xl font-black flex items-center text-primary uppercase">
+              {settings.shopName || 'OJALA'}
+              <span className="w-1.5 h-1.5 bg-accent rounded-full ml-1 self-end mb-1 md:mb-1.5" />
+            </div>
+          )}
         </Link>
         
         <div className="flex-grow max-w-2xl hidden md:block relative" ref={searchRef}>
@@ -436,8 +448,15 @@ const MainHeader = () => {
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] p-0 flex flex-col">
               <SheetHeader className="p-6 border-b text-left">
-                <SheetTitle className="text-2xl font-black flex items-center text-primary">
-                  OJALA<span className="w-1.5 h-1.5 bg-accent rounded-full ml-1 self-end mb-1" />
+                <SheetTitle className="text-2xl font-black flex items-center text-primary uppercase">
+                  {settings.logo ? (
+                    <img src={settings.logo} alt="Logo" className="h-8 w-auto object-contain" />
+                  ) : (
+                    <>
+                      {settings.shopName || 'OJALA'}
+                      <span className="w-1.5 h-1.5 bg-accent rounded-full ml-1 self-end mb-1" />
+                    </>
+                  )}
                 </SheetTitle>
               </SheetHeader>
               <div className="p-4 border-b">
@@ -589,13 +608,24 @@ const Features = () => (
   </div>
 );
 
-const Footer = () => (
-  <footer className="bg-[#111] text-white pt-20 pb-10">
-    <div className="max-w-[1140px] mx-auto px-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-20">
-        <div className="lg:col-span-2">
-          <h2 className="text-4xl font-black mb-8 text-primary">OJALA<span className="w-2 h-2 bg-accent inline-block rounded-full ml-1" /></h2>
-          <div className="space-y-4 text-sm text-muted-foreground">
+const Footer = () => {
+  const { settings } = useSettings();
+  return (
+    <footer className="bg-[#111] text-white pt-20 pb-10">
+      <div className="max-w-[1140px] mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-20">
+          <div className="lg:col-span-2">
+            <Link to="/">
+              {settings.logo ? (
+                <img src={settings.logo} alt="Logo" className="h-12 w-auto object-contain mb-8 brightness-0 invert" />
+              ) : (
+                <h2 className="text-4xl font-black mb-8 text-primary uppercase">
+                  {settings.shopName || 'OJALA'}
+                  <span className="w-2 h-2 bg-accent inline-block rounded-full ml-1" />
+                </h2>
+              )}
+            </Link>
+            <div className="space-y-4 text-sm text-muted-foreground">
             <div className="flex gap-3">
               <MapPin className="h-5 w-5 text-muted-foreground/60 shrink-0" />
               <span>Dhaka, Bangladesh</span>
@@ -673,7 +703,7 @@ const Footer = () => (
       </div>
       
       <div className="flex flex-col sm:flex-row justify-between items-center mt-12 gap-6 text-[10px] text-muted-foreground uppercase font-bold border-t border-border pt-10">
-        <p>Copyright © 2024 OJALA SHOP. All rights reserved.</p>
+        <p>Copyright © {new Date().getFullYear()} {settings.shopName || 'OJALA SHOP'}. All rights reserved.</p>
         <div className="flex items-center gap-4">
            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="Paypal" className="h-4 opacity-30 grayscale hover:grayscale-0 transition-all cursor-pointer dark:invert" />
            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-4 opacity-30 grayscale hover:grayscale-0 transition-all cursor-pointer dark:invert" />
@@ -682,7 +712,8 @@ const Footer = () => (
       </div>
     </div>
   </footer>
-);
+  );
+};
 
 export default function App() {
   const location = useLocation();

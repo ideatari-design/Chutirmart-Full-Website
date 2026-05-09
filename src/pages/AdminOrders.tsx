@@ -85,21 +85,21 @@ const AdminOrders = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'pending': return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 uppercase text-[10px] font-bold">Pending</Badge>;
-      case 'processing': return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 uppercase text-[10px] font-bold">Processing</Badge>;
-      case 'delivered': return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 uppercase text-[10px] font-bold">Delivered</Badge>;
-      case 'cancelled': return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 uppercase text-[10px] font-bold">Cancelled</Badge>;
-      case 'shipped': return <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 uppercase text-[10px] font-bold">Shipped</Badge>;
-      default: return <Badge variant="outline" className="uppercase text-[10px] font-bold">{status}</Badge>;
+      case 'pending': return <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-200 px-3 py-1 rounded-full uppercase text-[10px] font-black tracking-widest shadow-sm">Pending</Badge>;
+      case 'processing': return <Badge variant="outline" className="bg-sky-100 text-sky-700 border-sky-200 px-3 py-1 rounded-full uppercase text-[10px] font-black tracking-widest shadow-sm">Processing</Badge>;
+      case 'delivered': return <Badge variant="outline" className="bg-emerald-100 text-emerald-700 border-emerald-200 px-3 py-1 rounded-full uppercase text-[10px] font-black tracking-widest shadow-sm">Delivered</Badge>;
+      case 'cancelled': return <Badge variant="outline" className="bg-rose-100 text-rose-700 border-rose-200 px-3 py-1 rounded-full uppercase text-[10px] font-black tracking-widest shadow-sm">Cancelled</Badge>;
+      case 'shipped': return <Badge variant="outline" className="bg-violet-100 text-violet-700 border-violet-200 px-3 py-1 rounded-full uppercase text-[10px] font-black tracking-widest shadow-sm">Shipped</Badge>;
+      default: return <Badge variant="outline" className="px-3 py-1 rounded-full uppercase text-[10px] font-black tracking-widest shadow-sm">{status}</Badge>;
     }
   };
 
   const getPaymentBadge = (status: string) => {
      switch (status) {
-       case 'paid': return <Badge className="bg-green-500 hover:bg-green-600 uppercase text-[10px] font-bold">Paid</Badge>;
-       case 'partially_paid': return <Badge className="bg-accent hover:bg-accent/90 uppercase text-[10px] font-bold">Partial</Badge>;
-       case 'unpaid': return <Badge variant="destructive" className="uppercase text-[10px] font-bold">Unpaid</Badge>;
-       default: return <Badge className="uppercase text-[10px] font-bold">{status}</Badge>;
+       case 'paid': return <Badge className="bg-emerald-500 hover:bg-emerald-600 px-3 py-1 rounded-full uppercase text-[10px] font-black tracking-widest shadow-lg shadow-emerald-500/20">Paid</Badge>;
+       case 'partially_paid': return <Badge className="bg-primary hover:bg-primary/90 px-3 py-1 rounded-full uppercase text-[10px] font-black tracking-widest shadow-lg shadow-primary/20">Partial</Badge>;
+       case 'unpaid': return <Badge variant="destructive" className="px-3 py-1 rounded-full uppercase text-[10px] font-black tracking-widest shadow-lg shadow-destructive/20">Unpaid</Badge>;
+       default: return <Badge className="px-3 py-1 rounded-full uppercase text-[10px] font-black tracking-widest shadow-sm">{status}</Badge>;
      }
   };
 
@@ -131,35 +131,64 @@ const AdminOrders = () => {
 
       <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-primary/5">
         <Table>
-          <TableHeader className="bg-secondary/30">
+          <TableHeader className="bg-secondary/10 border-b">
             <TableRow className="hover:bg-transparent border-none">
-              <TableHead className="pl-6 font-bold text-primary">Order ID</TableHead>
-              <TableHead className="font-bold text-primary">Customer</TableHead>
-              <TableHead className="font-bold text-primary">Payment</TableHead>
-              <TableHead className="font-bold text-primary">Status</TableHead>
-              <TableHead className="font-bold text-primary">Total Price</TableHead>
-              <TableHead className="font-bold text-primary text-right pr-6">Action</TableHead>
+              <TableHead className="pl-6 font-bold text-primary uppercase text-[10px] tracking-wider">Product</TableHead>
+              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Order ID</TableHead>
+              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Date</TableHead>
+              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Customer</TableHead>
+              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Payment</TableHead>
+              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Status</TableHead>
+              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Total</TableHead>
+              <TableHead className="font-bold text-primary text-right pr-6 uppercase text-[10px] tracking-wider">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
                <TableRow>
-                  <TableCell colSpan={6} className="py-20 text-center font-medium italic opacity-50">Loading orders...</TableCell>
+                  <TableCell colSpan={8} className="py-20 text-center font-medium italic opacity-50">Loading orders...</TableCell>
                </TableRow>
             ) : currentOrders.length === 0 ? (
                <TableRow>
-                  <TableCell colSpan={6} className="py-20 text-center font-medium italic opacity-50">No orders found.</TableCell>
+                  <TableCell colSpan={8} className="py-20 text-center font-medium italic opacity-50">No orders found.</TableCell>
                </TableRow>
             ) : currentOrders.map((o) => (
-              <TableRow key={o.id} className="hover:bg-secondary/10 transition-colors border-b-primary/5">
-                <TableCell className="pl-6 font-bold text-primary">{o.id}</TableCell>
+              <TableRow key={o.id} className="hover:bg-secondary/5 transition-colors border-b border-secondary/20">
+                <TableCell className="pl-6 py-4">
+                  <div className="flex -space-x-4">
+                    {o.items && o.items.length > 0 ? (
+                       o.items.slice(0, 3).map((item, idx) => (
+                         <div key={idx} className="w-10 h-10 rounded-full border-2 border-white bg-secondary flex items-center justify-center overflow-hidden shadow-sm relative z-[10]">
+                            <img 
+                              src={item.images && item.images.length > 0 ? item.images[0] : 'https://via.placeholder.com/40'} 
+                              alt={item.name} 
+                              className="w-full h-full object-cover" 
+                            />
+                         </div>
+                       ))
+                    ) : (
+                      <div className="w-10 h-10 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-slate-400">
+                        <Package className="h-4 w-4" />
+                      </div>
+                    )}
+                    {o.items && o.items.length > 3 && (
+                      <div className="w-10 h-10 rounded-full border-2 border-white bg-primary text-white flex items-center justify-center text-[10px] font-bold z-[5]">
+                        +{o.items.length - 3}
+                      </div>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="font-bold text-primary text-xs">{o.id}</TableCell>
                 <TableCell>
-                  <p className="font-bold text-sm">{o.customerName}</p>
-                  <p className="text-xs text-muted-foreground">{o.customerPhone}</p>
+                  <p className="text-xs font-bold text-slate-600">{new Date(o.createdAt).toLocaleDateString()}</p>
+                </TableCell>
+                <TableCell>
+                  <p className="font-bold text-sm text-slate-700">{o.customerName}</p>
+                  <p className="text-[10px] text-muted-foreground">{o.customerPhone}</p>
                 </TableCell>
                 <TableCell>{getPaymentBadge(o.paymentStatus)}</TableCell>
                 <TableCell>{getStatusBadge(o.status)}</TableCell>
-                <TableCell className="font-bold">৳ {o.total.toLocaleString()}</TableCell>
+                <TableCell className="font-black text-primary">৳ {o.total.toLocaleString()}</TableCell>
                 <TableCell className="text-right pr-6">
                   <Dialog>
                     <DialogTrigger nativeButton={true} render={
@@ -192,7 +221,7 @@ const AdminOrders = () => {
                                       <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
                                          <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 bg-white rounded-lg border flex items-center justify-center text-[10px] font-bold text-slate-400 overflow-hidden">
-                                               {item.image ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" /> : <Package className="h-4 w-4" />}
+                                               {item.images && item.images.length > 0 ? <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover" /> : <Package className="h-4 w-4" />}
                                             </div>
                                             <div>
                                                <p className="text-sm font-bold leading-tight">{item.name}</p>
