@@ -18,7 +18,8 @@ import {
   MoreVertical,
   ChevronLeft,
   ChevronRight,
-  Filter
+  Filter,
+  ExternalLink
 } from 'lucide-react';
 import {
   Dialog,
@@ -232,7 +233,12 @@ const AdminProducts = () => {
                 </select>
               </div>
               <div className="col-span-2 space-y-2">
-                <Label htmlFor="mainImage" className="font-bold">Main Image URL</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="mainImage" className="font-bold">Main Image URL</Label>
+                  <a href="https://postimages.org/" target="_blank" rel="noreferrer" className="text-[10px] text-primary hover:underline font-bold flex items-center gap-1">
+                    <ExternalLink className="h-3 w-3" /> Upload to get URL
+                  </a>
+                </div>
                 <Input 
                   id="mainImage" 
                   placeholder="https://images.unsplash.com/..." 
@@ -314,7 +320,12 @@ const AdminProducts = () => {
                        />
                     </div>
                     <div className="col-span-2 space-y-2">
-                       <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">Main Image URL</Label>
+                       <div className="flex items-center justify-between">
+                          <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">Main Image URL</Label>
+                          <a href="https://postimages.org/" target="_blank" rel="noreferrer" className="text-[10px] text-primary hover:underline font-bold flex items-center gap-1">
+                             <ExternalLink className="h-3 w-3" /> Get URL
+                          </a>
+                       </div>
                        <Input 
                           placeholder="https://..." 
                           className="h-12 rounded-xl" 
