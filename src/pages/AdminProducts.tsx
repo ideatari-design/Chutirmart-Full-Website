@@ -313,11 +313,15 @@ const AdminProducts = () => {
                     </div>
                     <div className="col-span-2 space-y-2">
                        <Label className="font-bold">Category</Label>
-                       <Input 
+                       <select 
+                          className="w-full h-12 rounded-xl border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
                           value={editingProduct.category}
                           onChange={e => setEditingProduct({...editingProduct, category: e.target.value})}
-                          className="h-12 rounded-xl"
-                       />
+                       >
+                          {categories.filter(c => c !== 'All').map(cat => (
+                             <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                       </select>
                     </div>
                     <div className="col-span-2 space-y-2">
                        <div className="flex items-center justify-between">

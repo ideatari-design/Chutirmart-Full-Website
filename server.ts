@@ -528,35 +528,118 @@ async function startServer() {
   });
 
   // Create product
-  app.post("/api/products", (req, res) => {
+  app.post("/api/products", async (req, res) => {
     const productData = req.body;
+    const newId = String(Date.now());
     const newProduct = {
       ...productData,
-      id: String(PRODUCTS.length + 1),
-      images: productData.images || ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800']
+      id: newId,
+      images: productData.images || ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800'],
+      nameBn: productData.nameBn || productData.name
     };
+
+    console.log(`Creating product: ${newId} - ${newProduct.name}`);
+
+    // Try D1
+    try {
+      const d1Result = await queryD1(
+        "INSERT INTO products (id, name, nameBn, price, oldPrice, category, images, stock, isFeatured, stars, description, specs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          newId, newProduct.name, newProduct.nameBn, 
+          newProduct.price || 0, newProduct.oldPrice || 0, newProduct.category || 'Uncategorized',
+          JSON.stringify(newProduct.images), newProduct.stock || 0, 
+          newProduct.isFeatured ? 1 : 0, newProduct.stars || 0,
+          newProduct.description || '', JSON.stringify(newProduct.specs || {})
+        ]
+      );
+      if (d1Result) console.log("Product inserted into D1 successfully");
+    } catch (err) {
+      console.error("Error inserting product into D1:", err);
+    }
+
+    // Fallback/Sync memory
     PRODUCTS.push(newProduct);
+    
     res.status(201).json(newProduct);
   });
 
   // Delete product
-  app.delete("/api/products/:id", (req, res) => {
-    const index = PRODUCTS.findIndex(p => p.id === req.params.id);
-    if (index === -1) return res.status(404).json({ message: "Product not found" });
-    PRODUCTS.splice(index, 1);
+  app.delete("/api/products/:id", async (req, res) => {
+    const id = req.params.id;
+    console.log(`Deleting product: ${id}`);
+    
+    // Try D1
+    try {
+      await queryD1("DELETE FROM products WHERE id = ?", [id]);
+    } catch (err) {
+      console.error("Error deleting product from D1:", err);
+    }
+
+    const index = PRODUCTS.findIndex(p => p.id === id);
+    if (index !== -1) {
+      PRODUCTS.splice(index, 1);
+    }
+    
     res.status(204).send();
   });
 
   // Update product
-  app.patch("/api/products/:id", (req, res) => {
-    const index = PRODUCTS.findIndex(p => p.id === req.params.id);
-    if (index === -1) return res.status(404).json({ message: "Product not found" });
+  app.patch("/api/products/:id", async (req, res) => {
+    const id = req.params.id;
+    const updates = req.body;
+    console.log(`Updating product: ${id}`);
     
-    PRODUCTS[index] = {
-      ...PRODUCTS[index],
-      ...req.body
-    };
-    res.json(PRODUCTS[index]);
+    // 1. Find existing product (Memory or D1)
+    let existingProduct = PRODUCTS.find(p => p.id === id);
+    
+    if (!existingProduct) {
+      try {
+        const d1Res = await queryD1("SELECT * FROM products WHERE id = ?", [id]);
+        if (d1Res && d1Res.results && d1Res.results.length > 0) {
+          const p = d1Res.results[0];
+          existingProduct = {
+            ...p,
+            images: JSON.parse(p.images || "[]"),
+            specs: JSON.parse(p.specs || "{}"),
+            isFeatured: Boolean(p.isFeatured)
+          };
+        }
+      } catch (err) {
+        console.error("Error fetching existing product for update:", err);
+      }
+    }
+
+    if (!existingProduct) {
+      console.warn(`Product ${id} not found for update`);
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const merged = { ...existingProduct, ...updates };
+
+    // 2. Update D1
+    let d1Success = false;
+    try {
+      const d1Result = await queryD1(
+        "UPDATE products SET name = ?, nameBn = ?, price = ?, oldPrice = ?, category = ?, images = ?, stock = ?, isFeatured = ?, stars = ?, description = ?, specs = ? WHERE id = ?",
+        [
+          merged.name, merged.nameBn || merged.name, merged.price, merged.oldPrice || 0,
+          merged.category, JSON.stringify(merged.images || []), merged.stock, 
+          merged.isFeatured ? 1 : 0, merged.stars || 0, merged.description || '',
+          JSON.stringify(merged.specs || {}), id
+        ]
+      );
+      if (d1Result) d1Success = true;
+    } catch (err) {
+      console.error("Error updating D1 product:", err);
+    }
+
+    // 3. Update Memory
+    const index = PRODUCTS.findIndex(p => p.id === id);
+    if (index !== -1) {
+      PRODUCTS[index] = merged;
+    }
+
+    res.json(merged);
   });
 
   // Create order
