@@ -167,6 +167,87 @@ export async function onRequest(context) {
       return jsonResponse(parsedResults);
     }
 
+    if (path === "/api/products" && method === "POST") {
+      const data = await request.json();
+      const id = String(Date.now());
+      const newProduct = {
+        ...data,
+        id,
+        images: data.images || [],
+        price: parseFloat(data.price) || 0,
+        stock: parseInt(data.stock) || 0,
+        isFeatured: data.isFeatured ? 1 : 0
+      };
+
+      if (env.DB) {
+        await env.DB.prepare(`
+          INSERT INTO products (id, name, nameBn, price, oldPrice, category, images, stock, isFeatured, stars, description, specs)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          id, newProduct.name || '', newProduct.nameBn || newProduct.name || '',
+          newProduct.price, data.oldPrice || 0, newProduct.category || 'Uncategorized',
+          JSON.stringify(newProduct.images), newProduct.stock, newProduct.isFeatured,
+          data.stars || 0, data.description || '', JSON.stringify(data.specs || {})
+        ).run();
+      }
+      return jsonResponse(newProduct, 201);
+    }
+
+    if (path.startsWith("/api/products/") && method === "PATCH") {
+      const id = path.split("/").pop();
+      const updates = await request.json();
+      
+      let existing;
+      if (env.DB) {
+        existing = await env.DB.prepare("SELECT * FROM products WHERE id = ?").bind(id).first();
+      }
+
+      if (!existing) {
+        // Check memory fallback
+        existing = PRODUCTS.find(p => p.id === id);
+      }
+
+      if (!existing) return jsonResponse({ error: "Product not found" }, 404);
+
+      const merged = { ...existing, ...updates };
+      // Ensure specific types
+      const price = typeof updates.price !== 'undefined' ? parseFloat(updates.price) : existing.price;
+      const stock = typeof updates.stock !== 'undefined' ? parseInt(updates.stock) : existing.stock;
+      const isFeatured = typeof updates.isFeatured !== 'undefined' ? (updates.isFeatured ? 1 : 0) : (existing.isFeatured ? 1 : 0);
+
+      if (env.DB) {
+        await env.DB.prepare(`
+          UPDATE products SET 
+            name = ?, nameBn = ?, price = ?, oldPrice = ?, category = ?, 
+            images = ?, stock = ?, isFeatured = ?, stars = ?, description = ?, specs = ? 
+          WHERE id = ?
+        `).bind(
+          merged.name || '', 
+          merged.nameBn || merged.name || '', 
+          price, 
+          merged.oldPrice || 0,
+          merged.category || 'Uncategorized',
+          JSON.stringify(typeof merged.images === 'string' ? JSON.parse(merged.images) : (merged.images || [])),
+          stock,
+          isFeatured,
+          merged.stars || 0,
+          merged.description || '',
+          JSON.stringify(typeof merged.specs === 'string' ? JSON.parse(merged.specs) : (merged.specs || {})),
+          id
+        ).run();
+      }
+
+      return jsonResponse({ ...merged, price, stock, isFeatured: Boolean(isFeatured) });
+    }
+
+    if (path.startsWith("/api/products/") && method === "DELETE") {
+      const id = path.split("/").pop();
+      if (env.DB) {
+        await env.DB.prepare("DELETE FROM products WHERE id = ?").bind(id).run();
+      }
+      return new Response(null, { status: 204 });
+    }
+
     if (path.startsWith("/api/products/") && method === "GET") {
       const id = path.split("/").pop();
       
@@ -267,37 +348,61 @@ export async function onRequest(context) {
     if (path === "/api/admin/setup" && method === "GET") {
       console.log("Setting up D1 tables...");
       
-      await env.DB.prepare(`
-        CREATE TABLE IF NOT EXISTS products (
-          id TEXT PRIMARY KEY,
-          name TEXT,
-          nameBn TEXT,
-          price REAL,
-          oldPrice REAL,
-          category TEXT,
-          images TEXT,
-          stock INTEGER,
-          isFeatured INTEGER,
-          stars REAL,
-          description TEXT,
-          specs TEXT
-        )
-      `).run();
+      try {
+        await env.DB.prepare(`
+          CREATE TABLE IF NOT EXISTS products (
+            id TEXT PRIMARY KEY,
+            name TEXT,
+            nameBn TEXT,
+            price REAL,
+            oldPrice REAL,
+            category TEXT,
+            images TEXT,
+            stock INTEGER,
+            isFeatured INTEGER,
+            stars REAL,
+            description TEXT,
+            specs TEXT
+          )
+        `).run();
 
-      await env.DB.prepare(`
-        CREATE TABLE IF NOT EXISTS orders (
-          id TEXT PRIMARY KEY,
-          customerName TEXT,
-          customerPhone TEXT,
-          customerAddress TEXT,
-          total REAL,
-          items TEXT,
-          status TEXT,
-          createdAt TEXT
-        )
-      `).run();
+        await env.DB.prepare(`
+          CREATE TABLE IF NOT EXISTS orders (
+            id TEXT PRIMARY KEY,
+            customerName TEXT,
+            customerPhone TEXT,
+            customerAddress TEXT,
+            total REAL,
+            items TEXT,
+            status TEXT,
+            createdAt TEXT
+          )
+        `).run();
 
-      return jsonResponse({ success: true, message: "Tables created (if not existed). Now use Cloudflare D1 console to import data or we can add a seed endpoint." });
+        // Add columns if they migrated from earlier version
+        const columns = [
+          "ALTER TABLE products ADD COLUMN nameBn TEXT",
+          "ALTER TABLE products ADD COLUMN oldPrice REAL DEFAULT 0",
+          "ALTER TABLE products ADD COLUMN stars REAL DEFAULT 0",
+          "ALTER TABLE products ADD COLUMN specs TEXT DEFAULT '{}'",
+          "ALTER TABLE products ADD COLUMN description TEXT DEFAULT ''",
+          "ALTER TABLE products ADD COLUMN isFeatured INTEGER DEFAULT 0",
+          "ALTER TABLE products ADD COLUMN stock INTEGER DEFAULT 0",
+          "ALTER TABLE products ADD COLUMN category TEXT DEFAULT 'Uncategorized'"
+        ];
+
+        for (const sql of columns) {
+          try {
+            await env.DB.prepare(sql).run();
+          } catch (e) {
+            // Ignore duplicate column errors
+          }
+        }
+
+        return jsonResponse({ success: true, message: "Tables and columns verified successfully!" });
+      } catch (err) {
+        return jsonResponse({ success: false, error: err.message }, 500);
+      }
     }
 
     if (path === "/api/admin/seed" && method === "GET") {
