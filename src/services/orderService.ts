@@ -50,5 +50,17 @@ export const orderService = {
       console.error('Error updating status:', error);
       return false;
     }
+  },
+
+  async deleteOrder(id: string): Promise<boolean> {
+    try {
+      const response = await fetch(`/api/orders/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      return false;
+    }
   }
 };

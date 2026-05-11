@@ -1102,13 +1102,44 @@ async function startServer() {
   });
 
   // Update order status
-  app.patch("/api/orders/:id/status", (req, res) => {
+  app.patch("/api/orders/:id/status", async (req, res) => {
     const { status } = req.body;
-    const orderIndex = ORDERS.findIndex(o => o.id === req.params.id);
-    if (orderIndex === -1) return res.status(404).json({ message: "Order not found" });
+    const id = req.params.id;
+
+    try {
+      await queryD1("UPDATE orders SET status = ? WHERE id = ?", [status, id]);
+    } catch (err) {
+      console.error("D1 Order status update failed:", err);
+    }
+
+    const orderIndex = ORDERS.findIndex(o => o.id === id);
+    if (orderIndex !== -1) {
+      ORDERS[orderIndex].status = status;
+      return res.json(ORDERS[orderIndex]);
+    }
     
-    ORDERS[orderIndex].status = status;
-    res.json(ORDERS[orderIndex]);
+    // If not in memory but was in D1 (or we can't find it in memory)
+    // We should ideally fetch it from D1 and return it, but for simplicity:
+    res.json({ id, status, success: true });
+  });
+
+  // Delete order
+  app.delete("/api/orders/:id", async (req, res) => {
+    const id = req.params.id;
+    console.log(`Deleting order: ${id}`);
+
+    try {
+      await queryD1("DELETE FROM orders WHERE id = ?", [id]);
+    } catch (err) {
+      console.error("Error deleting order from D1:", err);
+    }
+
+    const index = ORDERS.findIndex(o => o.id === id);
+    if (index !== -1) {
+      ORDERS.splice(index, 1);
+    }
+
+    res.status(204).send();
   });
 
   // uddoktapay mock

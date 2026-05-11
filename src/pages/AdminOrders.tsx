@@ -19,6 +19,7 @@ import {
   XCircle,
   FileText,
   Package,
+  Trash2,
 } from "lucide-react";
 import {
   Dialog,
@@ -41,6 +42,8 @@ const AdminOrders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [filterStatus, setFilterStatus] = useState("All");
+  const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   React.useEffect(() => {
     fetchOrders();
@@ -60,6 +63,20 @@ const AdminOrders = () => {
       fetchOrders();
     } else {
       toast.error("Could not update order status");
+    }
+  };
+
+  const handleDeleteOrder = async () => {
+    if (!orderToDelete) return;
+
+    const success = await orderService.deleteOrder(orderToDelete);
+    if (success) {
+      toast.success("Order deleted successfully");
+      setOrders((prev) => prev.filter((o) => o.id !== orderToDelete));
+      setIsDeleteOpen(false);
+      setOrderToDelete(null);
+    } else {
+      toast.error("Failed to delete order");
     }
   };
 
@@ -362,142 +379,154 @@ const AdminOrders = () => {
                     Source: FB
                   </TableCell>
                   <TableCell className="text-right pr-6">
-                    <Dialog>
-                      <DialogTrigger
-                        nativeButton={true}
-                        render={
-                          <button className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-[#ecfdfa] text-[#0db39e] cursor-pointer hover:bg-[#d1f7f1] transition-colors border-none outline-none">
-                            <Eye className="h-4 w-4" />
-                          </button>
-                        }
-                      />
-                      <DialogContent className="max-w-xl">
-                        <DialogHeader>
-                          <DialogTitle>Order Details ({o.id})</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-6 py-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="p-4 bg-secondary/30 rounded-2xl">
-                              <p className="text-xs text-muted-foreground font-bold uppercase mb-1">
-                                Customer Info
-                              </p>
-                              <p className="font-bold">{o.customerName}</p>
-                              <p className="text-sm">{o.customerPhone}</p>
-                            </div>
-                            <div className="p-4 bg-secondary/30 rounded-2xl">
-                              <p className="text-xs text-muted-foreground font-bold uppercase mb-1">
-                                Order Date
-                              </p>
-                              <p className="font-bold">
-                                {new Date(o.createdAt).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="space-y-3">
-                            <h4 className="font-bold text-sm uppercase text-muted-foreground">
-                              Order Items
-                            </h4>
-                            <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
-                              {o.items && o.items.length > 0 ? (
-                                o.items.map((item, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100"
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-10 h-10 bg-white rounded-lg border flex items-center justify-center text-[10px] font-bold text-slate-400 overflow-hidden">
-                                        {item.images &&
-                                        item.images.length > 0 ? (
-                                          <img
-                                            src={item.images[0]}
-                                            alt={item.name}
-                                            className="w-full h-full object-cover"
-                                          />
-                                        ) : (
-                                          <Package className="h-4 w-4" />
-                                        )}
-                                      </div>
-                                      <div>
-                                        <p className="text-sm font-bold leading-tight">
-                                          {item.name}
-                                        </p>
-                                        <p className="text-[10px] text-muted-foreground">
-                                          Qty: {item.quantity}
-                                        </p>
-                                      </div>
-                                    </div>
-                                    <p className="text-sm font-bold text-primary">
-                                      ৳{" "}
-                                      {(
-                                        item.price * item.quantity
-                                      ).toLocaleString()}
-                                    </p>
-                                  </div>
-                                ))
-                              ) : (
-                                <p className="text-sm italic text-muted-foreground p-4 bg-slate-50 rounded-xl text-center border border-dashed">
-                                  No items found in this order
+                    <div className="flex items-center justify-end gap-2">
+                      <Dialog>
+                        <DialogTrigger
+                          nativeButton={true}
+                          render={
+                            <button className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-[#ecfdfa] text-[#0db39e] cursor-pointer hover:bg-[#d1f7f1] transition-colors border-none outline-none">
+                              <Eye className="h-4 w-4" />
+                            </button>
+                          }
+                        />
+                        <DialogContent className="max-w-xl">
+                          <DialogHeader>
+                            <DialogTitle>Order Details ({o.id})</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-6 py-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="p-4 bg-secondary/30 rounded-2xl">
+                                <p className="text-xs text-muted-foreground font-bold uppercase mb-1">
+                                  Customer Info
                                 </p>
-                              )}
+                                <p className="font-bold">{o.customerName}</p>
+                                <p className="text-sm">{o.customerPhone}</p>
+                              </div>
+                              <div className="p-4 bg-secondary/30 rounded-2xl">
+                                <p className="text-xs text-muted-foreground font-bold uppercase mb-1">
+                                  Order Date
+                                </p>
+                                <p className="font-bold">
+                                  {new Date(o.createdAt).toLocaleDateString()}
+                                </p>
+                              </div>
                             </div>
-                            <div className="flex justify-between items-center p-4 bg-primary/5 rounded-2xl border border-primary/10">
-                              <span className="font-bold text-sm">
-                                Total Amount
-                              </span>
-                              <span className="font-black text-lg text-primary">
-                                ৳ {o.total.toLocaleString()}
-                              </span>
-                            </div>
-                          </div>
 
-                          <div className="space-y-3">
-                            <h4 className="font-bold text-sm">
-                              Update Order Status
-                            </h4>
-                            <div className="flex flex-wrap gap-2">
-                              <Button
-                                variant={
-                                  o.status === "delivered"
-                                    ? "default"
-                                    : "outline"
-                                }
-                                size="sm"
-                                className="rounded-lg gap-2"
-                                onClick={() => updateStatus(o.id, "delivered")}
-                              >
-                                <CheckCircle2 className="h-3 w-3" /> Delivered
-                              </Button>
-                              <Button
-                                variant={
-                                  o.status === "shipped" ? "default" : "outline"
-                                }
-                                size="sm"
-                                className="rounded-lg gap-2"
-                                onClick={() => updateStatus(o.id, "shipped")}
-                              >
-                                <Truck className="h-3 w-3" /> Shipped
-                              </Button>
-                              <Button
-                                variant={
-                                  o.status === "cancelled"
-                                    ? "default"
-                                    : "outline"
-                                }
-                                size="sm"
-                                className="rounded-lg gap-2 text-destructive hover:bg-destructive/10"
-                                onClick={() => updateStatus(o.id, "cancelled")}
-                              >
-                                <XCircle className="h-3 w-3" /> Cancel
-                              </Button>
+                            <div className="space-y-3">
+                              <h4 className="font-bold text-sm uppercase text-muted-foreground">
+                                Order Items
+                              </h4>
+                              <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+                                {o.items && o.items.length > 0 ? (
+                                  o.items.map((item, idx) => (
+                                    <div
+                                      key={idx}
+                                      className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100"
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-white rounded-lg border flex items-center justify-center text-[10px] font-bold text-slate-400 overflow-hidden">
+                                          {item.images &&
+                                          item.images.length > 0 ? (
+                                            <img
+                                              src={item.images[0]}
+                                              alt={item.name}
+                                              className="w-full h-full object-cover"
+                                            />
+                                          ) : (
+                                            <Package className="h-4 w-4" />
+                                          )}
+                                        </div>
+                                        <div>
+                                          <p className="text-sm font-bold leading-tight">
+                                            {item.name}
+                                          </p>
+                                          <p className="text-[10px] text-muted-foreground">
+                                            Qty: {item.quantity}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <p className="text-sm font-bold text-primary">
+                                        ৳{" "}
+                                        {(
+                                          item.price * item.quantity
+                                        ).toLocaleString()}
+                                      </p>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <p className="text-sm italic text-muted-foreground p-4 bg-slate-50 rounded-xl text-center border border-dashed">
+                                    No items found in this order
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex justify-between items-center p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                                <span className="font-bold text-sm">
+                                  Total Amount
+                                </span>
+                                <span className="font-black text-lg text-primary">
+                                  ৳ {o.total.toLocaleString()}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="space-y-3">
+                              <h4 className="font-bold text-sm">
+                                Update Order Status
+                              </h4>
+                              <div className="flex flex-wrap gap-2">
+                                <Button
+                                  variant={
+                                    o.status === "delivered"
+                                      ? "default"
+                                      : "outline"
+                                  }
+                                  size="sm"
+                                  className="rounded-lg gap-2"
+                                  onClick={() => updateStatus(o.id, "delivered")}
+                                >
+                                  <CheckCircle2 className="h-3 w-3" /> Delivered
+                                </Button>
+                                <Button
+                                  variant={
+                                    o.status === "shipped" ? "default" : "outline"
+                                  }
+                                  size="sm"
+                                  className="rounded-lg gap-2"
+                                  onClick={() => updateStatus(o.id, "shipped")}
+                                >
+                                  <Truck className="h-3 w-3" /> Shipped
+                                </Button>
+                                <Button
+                                  variant={
+                                    o.status === "cancelled"
+                                      ? "default"
+                                      : "outline"
+                                  }
+                                  size="sm"
+                                  className="rounded-lg gap-2 text-destructive hover:bg-destructive/10"
+                                  onClick={() => updateStatus(o.id, "cancelled")}
+                                >
+                                  <XCircle className="h-3 w-3" /> Cancel
+                                </Button>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <DialogFooter>
-                          <Button className="w-full">Print Invoice</Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
+                          <DialogFooter>
+                            <Button className="w-full">Print Invoice</Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+
+                      <button
+                        onClick={() => {
+                          setOrderToDelete(o.id);
+                          setIsDeleteOpen(true);
+                        }}
+                        className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-rose-50 text-rose-500 cursor-pointer hover:bg-rose-100 transition-colors border-none outline-none"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -513,6 +542,38 @@ const AdminOrders = () => {
           itemsPerPage={itemsPerPage}
         />
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-rose-600">
+              <Trash2 className="h-5 w-5" /> Confirm Deletion
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 text-center">
+            <p className="text-slate-600">
+              Are you sure you want to delete order <span className="font-bold text-slate-900">{orderToDelete}</span>? This action cannot be undone.
+            </p>
+          </div>
+          <DialogFooter className="grid grid-cols-2 gap-3 sm:space-x-0">
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteOpen(false)}
+              className="rounded-xl h-11"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteOrder}
+              className="rounded-xl h-11 bg-rose-600 hover:bg-rose-700"
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
