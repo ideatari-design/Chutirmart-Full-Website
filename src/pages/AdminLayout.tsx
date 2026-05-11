@@ -47,15 +47,15 @@ const menuItems = [
   { label: 'Incomplete Orders', icon: <AlertCircle className="h-5 w-5" />, path: '/admin/incomplete-orders' },
   { label: 'Payments', icon: <CreditCard className="h-5 w-5" />, path: '/admin/payments' },
   { 
-    label: 'Product Management', 
+    label: 'Products Managements', 
     isHeader: true 
   },
   { label: 'All Products', icon: <Package className="h-5 w-5" />, path: '/admin/products' },
   { label: 'Categories', icon: <Tags className="h-5 w-5" />, path: '/admin/categories' },
   { label: 'Coupons', icon: <Ticket className="h-5 w-5" />, path: '/admin/coupons' },
-  { label: 'Delivery Zones', icon: <Truck className="h-5 w-5" />, path: '/admin/delivery-zones' },
+  { label: 'Delivery Zone', icon: <Truck className="h-5 w-5" />, path: '/admin/delivery-zones' },
   { 
-    label: 'Store Content', 
+    label: 'Store Settings', 
     isHeader: true 
   },
   { label: 'Customers', icon: <Users className="h-5 w-5" />, path: '/admin/customers' },
@@ -67,67 +67,63 @@ const menuItems = [
 const SidebarContent = ({ pathname, onLinkClick }: { pathname: string, onLinkClick?: () => void }) => {
   const { settings } = useSettings();
   return (
-    <>
-      <div className="p-8 border-b bg-white/50 backdrop-blur-md sticky top-0 z-10">
-         <Link to="/admin" className="flex items-center shrink-0 transition-transform active:scale-95 group">
+    <div className="flex flex-col h-full bg-white">
+      <div className="p-6 sticky top-0 bg-white z-10 mb-4">
+         <Link to="/admin" className="flex items-center shrink-0">
            {settings.logo ? (
              <img 
                src={convertGoogleDriveLink(settings.logo)} 
                alt="Logo" 
-               className="h-10 w-auto object-contain" 
+               className="h-14 w-auto object-contain" 
                referrerPolicy="no-referrer"
              />
            ) : (
              <div className="text-2xl font-black text-primary flex items-center group uppercase">
-               {settings.shopName?.split(' ')[0] || 'OJALA'} <span className="text-accent ml-1 italic font-light group-hover:translate-x-1 transition-transform">{settings.shopName?.split(' ')[1] || 'SHOP'}</span>
+               {settings.shopName?.split(' ')[0] || 'CHUTIR'} <span className="text-accent ml-1 uppercase">{settings.shopName?.split(' ')[1] || 'MART'}</span>
              </div>
            )}
          </Link>
-         <p className="text-[10px] uppercase font-bold text-muted-foreground mt-1">Admin Control Panel</p>
       </div>
-    <ScrollArea className="flex-grow">
-      <nav className="p-4 space-y-1">
-        {menuItems.map((item, i) => (
-          item.isHeader ? (
-            <p key={i} className="text-[10px] font-bold uppercase text-muted-foreground px-4 pt-4 pb-2">
-              {item.label}
-            </p>
-          ) : (
-            <Link 
-              key={i} 
-              to={item.path!} 
-              onClick={onLinkClick}
-              className="block"
-            >
-              <div className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 group ${
-                (item.path === '/admin' ? pathname === '/admin' || pathname === '/admin/' : pathname.startsWith(item.path)) ? 'bg-primary text-white shadow-md shadow-primary/20' : 'text-slate-600 hover:bg-primary/5 hover:text-primary'
-              }`}>
-                <div className={`${(item.path === '/admin' ? pathname === '/admin' || pathname === '/admin/' : pathname.startsWith(item.path)) ? 'text-white' : 'text-slate-400 group-hover:text-primary'}`}>
-                  {item.icon}
+
+      <ScrollArea className="flex-grow px-4">
+        <nav className="space-y-1 pb-10">
+          {menuItems.map((item, i) => (
+            item.isHeader ? (
+              <p key={i} className="text-[11px] font-medium text-slate-500 px-3 pt-6 pb-2">
+                {item.label}
+              </p>
+            ) : (
+              <Link 
+                key={i} 
+                to={item.path!} 
+                onClick={onLinkClick}
+                className="block"
+              >
+                <div className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${
+                  (item.path === '/admin' ? pathname === '/admin' || pathname === '/admin/' : pathname.startsWith(item.path)) 
+                    ? 'bg-[#00458e] text-white shadow-lg shadow-blue-900/10' 
+                    : 'text-slate-600 hover:bg-slate-50'
+                }`}>
+                  <div className={`${(item.path === '/admin' ? pathname === '/admin' || pathname === '/admin/' : pathname.startsWith(item.path)) ? 'text-white' : 'text-slate-500 group-hover:text-slate-700'}`}>
+                    {item.icon}
+                  </div>
+                  <span className="font-medium text-sm">{item.label}</span>
                 </div>
-                <span className="font-semibold text-sm">{item.label}</span>
-              </div>
-            </Link>
-          )
-        ))}
-      </nav>
-    </ScrollArea>
-    <div className="p-4 border-t bg-white space-y-2">
-       <Link to="/" className="block" onClick={onLinkClick}>
-         <Button variant="ghost" className="w-full justify-start gap-3 text-primary hover:text-primary hover:bg-primary/5 rounded-lg h-11 border border-primary/10">
-            <Store className="h-5 w-5" />
-            <span className="font-bold text-sm">Visit Store</span>
-            <ExternalLink className="h-3 w-3 ml-auto opacity-50" />
-         </Button>
-       </Link>
-       <Link to="/" className="block">
-         <Button variant="ghost" className="w-full justify-start gap-3 text-slate-600 hover:text-destructive hover:bg-destructive/5 rounded-lg h-11">
-            <LogOut className="h-5 w-5" />
-            <span className="font-bold text-sm">Exit Admin</span>
-         </Button>
-       </Link>
+              </Link>
+            )
+          ))}
+        </nav>
+      </ScrollArea>
+
+      <div className="p-4 border-t mt-auto">
+         <Link to="/" className="block">
+           <Button variant="ghost" className="w-full justify-start gap-3 text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg h-11">
+              <LogOut className="h-5 w-5 -rotate-180" />
+              <span className="font-medium text-sm">Exit Admin</span>
+           </Button>
+         </Link>
+      </div>
     </div>
-  </>
   );
 };
 
@@ -137,14 +133,36 @@ const AdminLayout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   
   return (
-    <div className="flex min-h-screen w-full bg-slate-50 relative">
+    <div className="flex min-h-screen w-full bg-[#f8fafa] relative">
       {/* Sidebar for Desktop */}
-      <aside className="w-72 bg-white border-r hidden lg:flex flex-col sticky top-0 h-screen shadow-sm z-20">
+      <aside className="w-64 bg-white border-r hidden lg:flex flex-col sticky top-0 h-screen z-20">
         <SidebarContent pathname={location.pathname} />
       </aside>
 
       {/* Main Content Area */}
       <div className="flex-grow flex flex-col min-w-0">
+        {/* Desktop Header */}
+        <header className="hidden lg:flex h-16 bg-transparent items-center justify-end px-10 pt-4">
+           <div className="flex items-center gap-6">
+              <button className="text-slate-400 hover:text-slate-600 transition-colors">
+                <div className="w-6 h-6 rounded-full bg-slate-200/50 flex items-center justify-center text-[10px] font-bold text-slate-500">?</div>
+              </button>
+              <button className="text-slate-400 hover:text-slate-600 transition-colors relative">
+                <div className="w-2 h-2 bg-rose-500 rounded-full absolute top-0 right-0 border-2 border-[#f8fafa]"></div>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+              </button>
+              <div className="flex items-center gap-3 ml-2">
+                 <div className="text-right">
+                    <p className="text-sm font-bold text-slate-900 leading-none">Katie Pena</p>
+                    <p className="text-[10px] text-slate-500 font-medium mt-1">Admin</p>
+                 </div>
+                 <div className="w-9 h-9 rounded-full bg-[#1a1a1a] overflow-hidden flex items-center justify-center border-2 border-white shadow-sm">
+                    <img src="https://i.pravatar.cc/150?u=katie" alt="User" className="w-full h-full object-cover" />
+                 </div>
+              </div>
+           </div>
+        </header>
+
         {/* Mobile Top Header */}
         <header className="lg:hidden h-16 bg-white border-b flex items-center justify-between px-6 sticky top-0 z-30 shadow-sm">
            <Link to="/admin" className="flex items-center">

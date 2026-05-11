@@ -51,79 +51,91 @@ const AdminCustomers = () => {
   }, [search]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-           <h2 className="text-3xl font-black flex items-center gap-3">
-              <Users className="h-8 w-8 text-primary" />
-              Customer Management
-           </h2>
-           <p className="text-muted-foreground font-medium">View and manage your loyal customer base</p>
+    <div className="space-y-8 pb-20">
+      <div className="flex flex-col space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-slate-900">Customers</h1>
+          <Button className="h-10 bg-[#00458e] hover:bg-blue-800 text-white rounded-lg font-semibold text-xs px-5 flex items-center gap-2">
+            <UserPlus className="h-4 w-4" /> Add Customer
+          </Button>
         </div>
-        <Button className="rounded-xl h-12 px-6 gap-2 bg-primary font-bold">
-           <UserPlus className="h-5 w-5" /> Add Customer
-        </Button>
+
+        {/* Filters Row */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3">
+             <div className="flex items-center">
+                <select className="h-10 px-4 pr-10 border border-slate-200 rounded-lg text-sm font-medium bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                  <option>Bulk Action</option>
+                </select>
+                <div className="pointer-events-none -ml-8 flex items-center px-2 text-slate-400">
+                  <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
+                </div>
+                <Button className="h-10 ml-3 bg-[#00458e] hover:bg-blue-800 text-white px-6 rounded-lg font-semibold text-xs">Apply</Button>
+             </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+             <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <Input 
+                  placeholder="Search Customers..." 
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-10 h-10 w-[300px] border-slate-200 rounded-lg text-sm bg-white" 
+                />
+             </div>
+          </div>
+        </div>
       </div>
 
-      <div className="flex items-center gap-4 py-4 px-6 bg-white rounded-2xl shadow-sm border border-primary/5">
-        <div className="relative flex-grow">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search by name, email or phone..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 rounded-xl bg-secondary/20 border-none" 
-          />
-        </div>
-      </div>
-
-      <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-primary/5">
+      <div className="bg-white rounded-xl overflow-hidden border border-[#0db39e]/20 shadow-sm">
         <Table>
-          <TableHeader className="bg-secondary/30">
+          <TableHeader className="bg-[#ecfdfa]">
             <TableRow className="hover:bg-transparent border-none">
-              <TableHead className="pl-6 font-bold text-primary">Customer Name</TableHead>
-              <TableHead className="font-bold text-primary">Contact info</TableHead>
-              <TableHead className="font-bold text-primary">Location</TableHead>
-              <TableHead className="font-bold text-primary text-center">Orders</TableHead>
-              <TableHead className="font-bold text-primary">Total Spent</TableHead>
-              <TableHead className="font-bold text-primary text-right pr-6">Join Date</TableHead>
+              <TableHead className="pl-6 w-12"><div className="w-4 h-4 border border-[#0db39e] rounded bg-[#0db39e]/10"></div></TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Avatar</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Customer Name</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Contact Info</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Location</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600 text-center">Orders</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Total Spent</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600 text-right pr-6">Join Date</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {currentCustomers.map((customer) => (
-              <TableRow key={customer.id} className="hover:bg-secondary/10 transition-colors border-b-primary/5">
-                <TableCell className="pl-6 py-5">
-                   <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-black text-sm uppercase">
-                         {customer.name.substring(0, 2)}
-                      </div>
-                      <p className="font-bold text-primary">{customer.name}</p>
-                   </div>
+              <TableRow key={customer.id} className="hover:bg-slate-50 transition-colors border-b border-slate-100 h-16">
+                <TableCell className="pl-6"><div className="w-4 h-4 border border-slate-200 rounded"></div></TableCell>
+                <TableCell>
+                  <div className="w-10 h-10 rounded-full bg-[#00458e]/10 text-[#00458e] flex items-center justify-center font-bold text-xs">
+                     {customer.name.substring(0, 2).toUpperCase()}
+                  </div>
                 </TableCell>
                 <TableCell>
-                   <div className="space-y-0.5">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                         <Mail className="h-3 w-3" /> {customer.email}
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground font-bold">
-                         <Phone className="h-3 w-3" /> {customer.phone}
-                      </div>
-                   </div>
+                  <span className="text-[13px] font-semibold text-slate-900">{customer.name}</span>
                 </TableCell>
                 <TableCell>
-                   <div className="flex items-center gap-1 text-sm font-medium">
-                      <MapPin className="h-3.5 w-3.5 text-accent" /> {customer.location}
-                   </div>
+                  <div className="flex flex-col">
+                    <span className="text-[12px] text-slate-600 font-medium">{customer.email}</span>
+                    <span className="text-[11px] text-slate-400">{customer.phone}</span>
+                  </div>
                 </TableCell>
-                <TableCell className="text-center font-bold text-primary">
-                   <Badge variant="outline" className="rounded-full bg-slate-50 border-slate-200">{customer.orders}</Badge>
+                <TableCell>
+                  <div className="flex items-center gap-1.5 text-[12px] font-medium text-slate-600">
+                    <MapPin className="h-3 w-3 text-slate-400" />
+                    {customer.location}
+                  </div>
                 </TableCell>
-                <TableCell className="font-black text-primary">৳ {customer.totalSpent.toLocaleString()}</TableCell>
+                <TableCell className="text-center">
+                  <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-[11px] font-bold text-slate-600">
+                    {customer.orders}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span className="text-[13px] font-semibold text-[#0db39e]">৳ {customer.totalSpent.toLocaleString()}</span>
+                </TableCell>
                 <TableCell className="text-right pr-6">
-                   <div className="flex items-center justify-end gap-3 text-xs text-muted-foreground">
-                      {customer.joinDate}
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg"><MoreVertical className="h-4 w-4" /></Button>
-                   </div>
+                  <span className="text-[12px] text-slate-500 font-medium">{customer.joinDate}</span>
                 </TableCell>
               </TableRow>
             ))}

@@ -93,157 +93,176 @@ const AdminIncompleteOrders = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-           <h2 className="text-3xl font-bold flex items-center gap-3">
-              <AlertCircle className="h-8 w-8 text-destructive" />
-              Incomplete Orders
-           </h2>
-           <p className="text-muted-foreground font-medium">Orders that are pending completion or payment</p>
-        </div>
-        <div className="flex gap-2">
-           <Button variant="outline" className="rounded-xl h-12 px-6 gap-2 border-primary/20 hover:bg-primary/5">
+    <div className="space-y-8 pb-20">
+      <div className="flex flex-col space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+             Incomplete Orders
+             <span className="px-2 py-0.5 rounded-md bg-red-50 text-red-600 text-[10px] font-bold border border-red-100">Review Required</span>
+          </h1>
+          <Button variant="outline" className="h-10 rounded-lg text-xs font-bold flex items-center gap-2">
              <FileText className="h-4 w-4" /> Export Report
-           </Button>
+          </Button>
+        </div>
+
+        {/* Filters Row */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3">
+             <div className="flex items-center">
+                <select 
+                  className="h-10 px-4 pr-10 border border-slate-200 rounded-lg text-sm font-medium bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  value={filterPayment}
+                  onChange={(e) => setFilterPayment(e.target.value)}
+                >
+                  <option value="All">All Incomplete</option>
+                  <option value="unpaid">Unpaid Only</option>
+                  <option value="partially_paid">Partial Only</option>
+                </select>
+                <div className="pointer-events-none -ml-8 flex items-center px-2 text-slate-400">
+                  <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
+                </div>
+                <Button className="h-10 ml-3 bg-[#00458e] hover:bg-blue-800 text-white px-6 rounded-lg font-semibold text-xs">Filter</Button>
+             </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+             <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <Input 
+                  placeholder="Order ID / Customer..." 
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-10 h-10 w-[300px] border-slate-200 rounded-lg text-sm bg-white" 
+                />
+             </div>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-4 py-4 px-6 bg-white rounded-2xl shadow-sm border border-primary/5">
-        <div className="relative flex-grow">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search by Order ID or mobile..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 rounded-xl bg-secondary/20 border-none" 
-          />
-        </div>
-        <div className="flex items-center gap-2">
-           <span className="hidden sm:block text-xs font-bold text-muted-foreground uppercase">Payment:</span>
-           <select 
-             className="h-10 rounded-xl bg-secondary/20 border-none px-3 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none"
-             value={filterPayment}
-             onChange={(e) => setFilterPayment(e.target.value)}
-           >
-              <option value="All">All Incomplete</option>
-              <option value="unpaid">Unpaid</option>
-              <option value="partially_paid">Partial</option>
-           </select>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-primary/5">
+      <div className="bg-white rounded-xl overflow-hidden border border-red-100 shadow-sm shadow-red-900/5">
         <Table>
-          <TableHeader className="bg-secondary/10 border-b">
+          <TableHeader className="bg-red-50/30">
             <TableRow className="hover:bg-transparent border-none">
-              <TableHead className="pl-6 font-bold text-primary uppercase text-[10px] tracking-wider">Product</TableHead>
-              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Order ID</TableHead>
-              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Date</TableHead>
-              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Customer</TableHead>
-              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Payment</TableHead>
-              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Status</TableHead>
-              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Total</TableHead>
-              <TableHead className="font-bold text-primary text-right pr-6 uppercase text-[10px] tracking-wider">Action</TableHead>
+              <TableHead className="pl-6 w-12"><div className="w-4 h-4 border border-red-200 rounded bg-red-50"></div></TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Product</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Order ID</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Customer</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Payment</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Status</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Total</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600 text-right pr-6">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredOrders.length > 0 ? (
               filteredOrders.map((o) => (
-                <TableRow key={o.id} className="hover:bg-secondary/5 transition-colors border-b border-secondary/20">
-                  <TableCell className="pl-6 py-4">
+                <TableRow key={o.id} className="hover:bg-slate-50 transition-colors border-b border-slate-100 h-20">
+                  <TableCell className="pl-6"><div className="w-4 h-4 border border-slate-200 rounded"></div></TableCell>
+                  <TableCell>
                     <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <div className="w-12 h-12 rounded-xl border border-border bg-secondary flex items-center justify-center overflow-hidden shadow-sm">
+                        <div className="w-12 h-12 rounded-lg border border-slate-100 bg-slate-50 overflow-hidden shadow-sm flex items-center justify-center">
                           {o.items && o.items.length > 0 ? (
                              <img 
                                 src={o.items[0].images?.[0] || 'https://via.placeholder.com/48'} 
                                 alt={o.items[0].name} 
                                 className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200';
-                                }}
+                                referrerPolicy="no-referrer"
                              />
                           ) : (
-                            <Package className="h-5 w-5 text-muted-foreground/30" />
+                            <AlertCircle className="h-4 w-4 text-slate-300" />
                           )}
                         </div>
-                        {o.items && o.items.length > 1 && (
-                          <div className="absolute -top-2 -right-2 bg-primary text-white text-[9px] font-bold h-5 w-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm z-10">
-                            +{o.items.length - 1}
-                          </div>
-                        )}
-                      </div>
                     </div>
                   </TableCell>
-                  <TableCell className="font-bold text-primary text-xs">{o.id}</TableCell>
                   <TableCell>
-                    <p className="text-xs font-bold text-slate-600">{new Date(o.createdAt).toLocaleDateString()}</p>
+                    <div className="flex flex-col">
+                      <span className="text-[12px] font-bold text-[#00458e] tracking-tight">{o.id}</span>
+                      <span className="text-[11px] text-slate-400 font-medium">{new Date(o.createdAt).toLocaleDateString()}</span>
+                    </div>
                   </TableCell>
                   <TableCell>
-                    <p className="font-bold text-sm text-slate-700">{o.customerName}</p>
-                    <p className="text-[10px] text-muted-foreground">{o.customerPhone}</p>
+                    <div className="flex flex-col">
+                      <span className="text-[13px] font-semibold text-slate-900">{o.customerName}</span>
+                      <span className="text-[11px] text-slate-500 font-medium">{o.customerPhone}</span>
+                    </div>
                   </TableCell>
-                  <TableCell>{getPaymentBadge(o.paymentStatus)}</TableCell>
-                  <TableCell>{getStatusBadge(o.status)}</TableCell>
-                  <TableCell className="font-black text-primary">৳ {o.total.toLocaleString()}</TableCell>
+                  <TableCell>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                      o.paymentStatus === 'paid' ? 'bg-green-50 text-[#0db39e]' : 
+                      o.paymentStatus === 'partially_paid' ? 'bg-blue-50 text-[#00458e]' : 
+                      'bg-red-50 text-red-600'
+                    }`}>
+                      {o.paymentStatus.replace('_', ' ')}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase border border-slate-200">
+                      {o.status}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-[13px] font-bold text-slate-900 underline decoration-[#0db39e]/30 decoration-2 underline-offset-4">
+                      ৳ {o.total.toLocaleString()}
+                    </span>
+                  </TableCell>
                   <TableCell className="text-right pr-6">
                     <Dialog>
                       <DialogTrigger nativeButton={true} render={
-                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-primary hover:bg-primary/5 rounded-lg">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#00458e] hover:bg-blue-50">
                           <Eye className="h-4 w-4" />
                         </Button>
                       } />
-                      <DialogContent className="max-w-xl rounded-3xl">
+                      <DialogContent className="max-w-xl rounded-xl border-none shadow-2xl">
                          <DialogHeader>
-                            <DialogTitle className="text-xl font-black">Order Details ({o.id})</DialogTitle>
+                            <DialogTitle className="text-xl font-bold text-slate-900">Order Context ({o.id})</DialogTitle>
                          </DialogHeader>
-                         <div className="space-y-6 py-4">
-                            <div className="grid grid-cols-2 gap-4">
-                               <div className="p-4 bg-secondary/30 rounded-2xl">
-                                  <p className="text-[10px] text-muted-foreground font-black uppercase mb-2">Customer Info</p>
-                                  <p className="font-bold">{o.customerName}</p>
-                                  <p className="text-sm font-medium">{o.customerPhone}</p>
-                               </div>
-                               <div className="p-4 bg-secondary/30 rounded-2xl">
-                                  <p className="text-[10px] text-muted-foreground font-black uppercase mb-2">Order Date</p>
-                                  <p className="font-bold">{new Date(o.createdAt).toLocaleDateString()}</p>
-                               </div>
+                         <div className="space-y-8 py-6">
+                            <div className="grid grid-cols-2 gap-6">
+                               <div className="p-5 bg-slate-50 rounded-xl border border-slate-100">
+                                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">Customer Details</p>
+                                  <p className="font-bold text-slate-900">{o.customerName}</p>
+                                  <p className="text-sm font-medium text-slate-600">{o.customerPhone}</p>
+                                </div>
+                                <div className="p-5 bg-slate-50 rounded-xl border border-slate-100">
+                                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">Order Summary</p>
+                                   <p className="text-lg font-black text-[#00458e]">৳ {o.total.toLocaleString()}</p>
+                                   <p className="text-xs text-slate-500 font-medium">{new Date(o.createdAt).toLocaleString()}</p>
+                                </div>
                             </div>
                             
                             <div className="space-y-4">
-                               <h4 className="font-bold text-sm uppercase text-[#666]">Update Order Status</h4>
-                               <div className="flex flex-wrap gap-2">
+                               <h4 className="text-[11px] font-bold uppercase text-slate-400 tracking-widest px-1">Update Status</h4>
+                               <div className="grid grid-cols-3 gap-3">
                                   <Button 
-                                    variant={o.status === 'delivered' ? 'default' : 'outline'} 
-                                    size="sm" 
-                                    className="rounded-xl gap-2 font-bold h-10 px-4"
+                                    variant="outline"
+                                    className="rounded-lg h-24 flex flex-col gap-2 hover:border-[#0db39e] hover:text-[#0db39e] hover:bg-green-50 transition-all font-bold"
                                     onClick={() => updateStatus(o.id, 'delivered')}
                                   >
-                                    <CheckCircle2 className="h-3.5 w-3.5" /> Delivered
+                                    <CheckCircle2 className="h-6 w-6" /> 
+                                    <span className="text-[10px] uppercase">Delivered</span>
                                   </Button>
                                   <Button 
-                                    variant={o.status === 'shipped' ? 'default' : 'outline'} 
-                                    size="sm" 
-                                    className="rounded-xl gap-2 font-bold h-10 px-4"
+                                    variant="outline"
+                                    className="rounded-lg h-24 flex flex-col gap-2 hover:border-[#00458e] hover:text-[#00458e] hover:bg-blue-50 transition-all font-bold"
                                     onClick={() => updateStatus(o.id, 'shipped')}
                                   >
-                                    <Truck className="h-3.5 w-3.5" /> Shipped
+                                    <Truck className="h-6 w-6" />
+                                    <span className="text-[10px] uppercase">Shipped</span>
                                   </Button>
                                   <Button 
-                                    variant={o.status === 'cancelled' ? 'default' : 'outline'} 
-                                    size="sm" 
-                                    className="rounded-xl gap-2 font-bold h-10 px-4 text-destructive hover:bg-destructive/10"
+                                    variant="outline"
+                                    className="rounded-lg h-24 flex flex-col gap-2 hover:border-red-600 hover:text-red-600 hover:bg-red-50 transition-all font-bold"
                                     onClick={() => updateStatus(o.id, 'cancelled')}
                                   >
-                                    <XCircle className="h-3.5 w-3.5" /> Cancel
+                                    <XCircle className="h-6 w-6" />
+                                    <span className="text-[10px] uppercase">Cancel</span>
                                   </Button>
                                </div>
                             </div>
                          </div>
-                         <DialogFooter>
-                            <Button className="w-full h-12 rounded-xl font-bold uppercase text-xs">Print Invoice</Button>
+                         <DialogFooter className="flex gap-3">
+                            <Button variant="outline" className="h-10 rounded-lg text-xs font-bold w-full">Print Invoice</Button>
+                            <Button className="h-10 rounded-lg bg-[#00458e] text-white text-xs font-bold px-8 w-full">Mark as Complete</Button>
                          </DialogFooter>
                       </DialogContent>
                     </Dialog>
@@ -252,10 +271,15 @@ const AdminIncompleteOrders = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="py-20 text-center">
-                   <div className="flex flex-col items-center gap-3">
-                      <AlertCircle className="h-12 w-12 text-muted-foreground opacity-20" />
-                      <p className="text-muted-foreground font-medium italic">No incomplete orders found</p>
+                <TableCell colSpan={8} className="py-32 text-center">
+                   <div className="flex flex-col items-center gap-4 max-w-xs mx-auto">
+                      <div className="p-4 bg-slate-50 rounded-full">
+                        <AlertCircle className="h-10 w-10 text-slate-200" />
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="text-slate-900 font-bold">No Incomplete Orders</h4>
+                        <p className="text-slate-400 text-sm font-medium leading-relaxed">Everything looks healthy! Use filters to see other statuses if needed.</p>
+                      </div>
                    </div>
                 </TableCell>
               </TableRow>

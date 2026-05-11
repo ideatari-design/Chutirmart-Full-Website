@@ -107,40 +107,38 @@ const AdminBanners = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-8 pb-20">
+      <div className="flex items-center justify-between">
         <div>
-           <h2 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2">
-             <ImageIcon className="h-8 w-8 text-primary" /> Banners & sliders
-           </h2>
-           <p className="text-muted-foreground font-medium">Manage promotional images on your store's frontpage</p>
+          <h1 className="text-3xl font-bold text-slate-900">Banners</h1>
+          <p className="text-slate-500 text-sm mt-1">Manage promotional sliders and banners for your homepage</p>
         </div>
         
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
            <DialogTrigger nativeButton={true} render={
-              <Button className="rounded-xl h-12 px-6 gap-2 bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20">
-                <Plus className="h-5 w-5" /> Add New Banner
+              <Button className="h-10 bg-[#00458e] hover:bg-blue-800 text-white rounded-lg font-semibold text-xs px-5 flex items-center gap-2">
+                <Plus className="h-4 w-4" /> Add Banner
               </Button>
            } />
-           <DialogContent className="rounded-3xl sm:max-w-md">
+           <DialogContent className="rounded-xl sm:max-w-md border-none shadow-2xl">
               <DialogHeader>
-                 <DialogTitle className="text-2xl font-black">Add Banner</DialogTitle>
+                 <DialogTitle className="text-xl font-bold text-slate-900">Add New Banner</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4 py-4">
+              <div className="space-y-5 py-4">
                  <div className="space-y-2">
-                    <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">Banner Title</Label>
+                    <Label className="text-[12px] font-semibold text-slate-700">Banner Title</Label>
                     <Input 
                       placeholder="e.g. Summer Sale 2024" 
-                      className="h-12 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all font-medium" 
+                      className="h-11 rounded-lg border-slate-200 focus:ring-2 focus:ring-blue-500/20 transition-all font-medium" 
                       value={newBanner.title}
                       onChange={e => setNewBanner({...newBanner, title: e.target.value})}
                     />
                  </div>
                  <div className="space-y-2">
-                    <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">Banner Image URL</Label>
+                    <Label className="text-[12px] font-semibold text-slate-700">Image URL</Label>
                     <Input 
-                      placeholder="https://..." 
-                      className="h-12 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all font-medium" 
+                      placeholder="Paste link here..." 
+                      className="h-11 rounded-lg border-slate-200 focus:ring-2 focus:ring-blue-500/20 transition-all font-medium" 
                       value={newBanner.image}
                       onChange={e => {
                         const val = e.target.value;
@@ -148,135 +146,136 @@ const AdminBanners = () => {
                         setNewBanner({...newBanner, image: converted});
                       }}
                     />
-                    <p className="text-[10px] text-muted-foreground ml-1">Must be a full URL (e.g. from Unsplash or Imgur)</p>
                  </div>
                  <div className="space-y-2">
-                    <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">Link URL (Optional)</Label>
+                    <Label className="text-[12px] font-semibold text-slate-700">Redirect Link (Optional)</Label>
                     <Input 
-                      placeholder="e.g. /products?q=sale" 
-                      className="h-12 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all font-medium" 
+                      placeholder="e.g. /category/electronics" 
+                      className="h-11 rounded-lg border-slate-200 focus:ring-2 focus:ring-blue-500/20 transition-all font-medium" 
                       value={newBanner.link}
                       onChange={e => setNewBanner({...newBanner, link: e.target.value})}
                     />
                  </div>
                  <div className="space-y-2">
-                    <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">Type</Label>
+                    <Label className="text-[12px] font-semibold text-slate-700">Display Position</Label>
                     <select 
-                      className="w-full h-12 rounded-xl border bg-background px-3 text-sm font-medium focus:ring-4 focus:ring-primary/10 transition-all outline-none"
+                      className="w-full h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium focus:ring-2 focus:ring-blue-500/20 outline-none"
                       value={newBanner.type}
                       onChange={e => setNewBanner({...newBanner, type: e.target.value})}
                     >
                       <option value="hero">Main Hero Slider</option>
-                      <option value="promo">Full Width Promotion Banner</option>
-                      <option value="side">Sidebar Promo (Grid)</option>
+                      <option value="promo">Middle Promo Banner</option>
+                      <option value="side">Grid Section Banner</option>
                     </select>
                  </div>
               </div>
-              <DialogFooter>
-                 <Button className="w-full h-12 rounded-xl font-bold uppercase text-xs tracking-widest bg-primary" onClick={handleAdd}>Upload Banner</Button>
+              <DialogFooter className="flex gap-3">
+                 <Button variant="outline" className="h-11 rounded-lg text-xs font-bold" onClick={() => setIsOpen(false)}>Cancel</Button>
+                 <Button className="h-11 rounded-lg bg-[#00458e] text-white text-xs font-bold px-8" onClick={handleAdd}>Save Banner</Button>
               </DialogFooter>
            </DialogContent>
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
-            <div className="col-span-full h-64 flex flex-col items-center justify-center text-muted-foreground bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-               <Loader2 className="h-10 w-10 animate-spin mb-4 text-primary/40" />
-               <p className="font-bold uppercase text-[10px] tracking-widest text-slate-400">Loading Banners...</p>
+            <div className="col-span-full h-80 flex flex-col items-center justify-center bg-white rounded-xl border border-slate-100 shadow-sm transition-all animate-pulse">
+               <Loader2 className="h-10 w-10 animate-spin mb-4 text-[#00458e]/20" />
+               <p className="font-bold text-xs tracking-widest text-slate-400">LOADING BANNERS...</p>
             </div>
           ) : banners.length === 0 ? (
-            <div className="col-span-full h-64 flex flex-col items-center justify-center text-muted-foreground bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-               <ImageIcon className="h-10 w-10 mb-4 text-slate-300" />
-               <p className="font-bold uppercase text-[10px] tracking-widest text-slate-400">No banners found</p>
+            <div className="col-span-full h-80 flex flex-col items-center justify-center bg-white rounded-xl border border-slate-100 shadow-sm">
+               <ImageIcon className="h-12 w-12 mb-4 text-slate-200" />
+               <p className="font-bold text-xs tracking-widest text-slate-400">NO BANNERS DISCOVERED</p>
+               <Button variant="link" className="text-[#00458e] mt-2 font-bold" onClick={() => setIsOpen(true)}>Create your first banner</Button>
             </div>
           ) : (
             banners.map((banner) => (
-              <div key={banner.id} className="group relative bg-white rounded-3xl overflow-hidden shadow-sm border border-primary/5 p-4 flex flex-col md:flex-row gap-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500">
-              <div className="md:w-48 h-32 rounded-2xl overflow-hidden shadow-inner border border-slate-100 flex-shrink-0 relative">
-                 <img 
-                   src={banner.image} 
-                   alt={banner.title} 
-                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                   referrerPolicy="no-referrer"
-                 />
-                 <div className="absolute inset-0 bg-black/10 transition-opacity opacity-0 group-hover:opacity-100 flex items-center justify-center">
-                    <Eye className="text-white h-8 w-8" />
-                 </div>
+              <div key={banner.id} className="group bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition-all h-[360px] flex flex-col">
+                <div className="h-44 w-full relative overflow-hidden bg-slate-50">
+                   <img 
+                     src={banner.image} 
+                     alt={banner.title} 
+                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                     referrerPolicy="no-referrer"
+                   />
+                   <div className="absolute top-3 right-3 flex gap-2">
+                     <Badge className={`rounded-full px-3 py-1 border-none font-bold text-[10px] uppercase shadow-sm ${
+                        banner.status === 'active' ? 'bg-[#0db39e] text-white' : 'bg-slate-400 text-white'
+                     }`}>
+                        {banner.status}
+                     </Badge>
+                   </div>
+                </div>
+
+                <div className="p-5 flex-grow flex flex-col">
+                   <div className="flex items-start justify-between mb-2">
+                     <h3 className="font-bold text-slate-900 line-clamp-1">{banner.title || 'Untitled Banner'}</h3>
+                   </div>
+                   
+                   <div className="space-y-3 mt-auto">
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 border-b border-slate-50 pb-2">
+                        <span className="font-medium uppercase tracking-wider">Position</span>
+                        <span className="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">{banner.type}</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between gap-1 mt-4">
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50" onClick={() => openEdit(banner)}>
+                             <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50" onClick={() => handleDelete(banner.id)}>
+                             <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        <Button 
+                          onClick={() => toggleStatus(banner)}
+                          className={`h-9 px-4 rounded-lg text-[10px] font-bold uppercase transition-all flex items-center gap-2 ${
+                            banner.status === 'active' 
+                            ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' 
+                            : 'bg-[#0db39e] text-white hover:bg-[#0da08d]'
+                          }`}
+                        >
+                           {banner.status === 'active' ? 'Deactivate' : 'Activate'}
+                        </Button>
+                      </div>
+                   </div>
+                </div>
               </div>
-              <div className="flex-grow flex flex-col justify-between py-1">
-                 <div>
-                    <div className="flex items-center justify-between gap-4">
-                       <h3 className="font-black text-slate-800 truncate">{banner.title}</h3>
-                       <Badge variant="outline" className={`rounded-full px-3 py-0.5 border-none font-black text-[9px] uppercase tracking-tighter ${
-                         banner.type === 'hero' ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'
-                       }`}>
-                          {banner.type}
-                       </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground font-medium mt-1 truncate max-w-[200px]">Link: {banner.link || 'Internal'}</p>
-                 </div>
-                 
-                 <div className="flex items-center justify-between mt-4">
-                    <button 
-                      onClick={() => toggleStatus(banner)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase transition-all ${
-                        banner.status === 'active' 
-                        ? 'bg-green-50 text-green-600 hover:bg-green-100' 
-                        : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
-                      }`}
-                    >
-                       {banner.status === 'active' ? <CheckCircle2 className="h-2.5 w-2.5" /> : <XCircle className="h-2.5 w-2.5" />}
-                       {banner.status}
-                    </button>
-                    
-                    <div className="flex items-center gap-1">
-                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:text-primary hover:bg-primary/5 transition-colors" onClick={() => openEdit(banner)}>
-                          <Edit className="h-4 w-4" />
-                       </Button>
-                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:text-destructive hover:bg-destructive/5 transition-colors" onClick={() => handleDelete(banner.id)}>
-                          <Trash2 className="h-4 w-4" />
-                       </Button>
-                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg cursor-grab active:cursor-grabbing">
-                          <Move className="h-4 w-4" />
-                       </Button>
-                    </div>
-                 </div>
-              </div>
-           </div>
-          ))
-         )}
-         
-         <div 
-           className="bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 p-8 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-100 hover:border-slate-300 transition-all cursor-pointer group"
-           onClick={() => setIsOpen(true)}
-         >
-            <Plus className="h-10 w-10 mb-2 group-hover:scale-125 transition-transform" />
-            <p className="font-bold uppercase text-[10px] tracking-widest">Quick Add Banner</p>
-         </div>
+            ))
+          )}
+          
+          <div 
+            className="group h-[360px] bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:bg-blue-50 hover:border-blue-300 transition-all cursor-pointer"
+            onClick={() => setIsOpen(true)}
+          >
+             <div className="w-12 h-12 rounded-full border-2 border-slate-300 flex items-center justify-center mb-4 group-hover:border-[#00458e] transition-colors">
+               <Plus className="h-6 w-6 group-hover:text-[#00458e]" />
+             </div>
+             <p className="font-bold uppercase text-[10px] tracking-widest group-hover:text-[#00458e]">New Banner</p>
+          </div>
       </div>
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-           <DialogContent className="rounded-3xl sm:max-w-md">
+           <DialogContent className="rounded-xl sm:max-w-md border-none shadow-2xl">
               <DialogHeader>
-                 <DialogTitle className="text-2xl font-black">Edit Banner</DialogTitle>
+                 <DialogTitle className="text-xl font-bold text-slate-900">Edit Banner</DialogTitle>
               </DialogHeader>
               {editingBanner && (
-                 <div className="space-y-4 py-4">
+                 <div className="space-y-5 py-4">
                     <div className="space-y-2">
-                       <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">Banner Title</Label>
+                       <Label className="text-[12px] font-semibold text-slate-700">Banner Title</Label>
                        <Input 
-                         placeholder="e.g. Summer Sale 2024" 
-                         className="h-12 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all font-medium" 
+                         className="h-11 rounded-lg border-slate-200 font-medium" 
                          value={editingBanner.title}
                          onChange={e => setEditingBanner({...editingBanner, title: e.target.value})}
                        />
                     </div>
                     <div className="space-y-2">
-                       <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">Banner Image URL</Label>
+                       <Label className="text-[12px] font-semibold text-slate-700">Image URL</Label>
                        <Input 
-                         placeholder="https://..." 
-                         className="h-12 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all font-medium" 
+                         className="h-11 rounded-lg border-slate-200 font-medium" 
                          value={editingBanner.image}
                          onChange={e => {
                            const val = e.target.value;
@@ -286,30 +285,30 @@ const AdminBanners = () => {
                        />
                     </div>
                     <div className="space-y-2">
-                       <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">Link URL</Label>
+                       <Label className="text-[12px] font-semibold text-slate-700">Link</Label>
                        <Input 
-                         placeholder="e.g. /products?q=sale" 
-                         className="h-12 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all font-medium" 
+                         className="h-11 rounded-lg border-slate-200 font-medium" 
                          value={editingBanner.link}
                          onChange={e => setEditingBanner({...editingBanner, link: e.target.value})}
                        />
                     </div>
                     <div className="space-y-2">
-                       <Label className="font-bold text-xs uppercase text-muted-foreground ml-1">Type</Label>
+                       <Label className="text-[12px] font-semibold text-slate-700">Position</Label>
                        <select 
-                         className="w-full h-12 rounded-xl border bg-background px-3 text-sm font-medium focus:ring-4 focus:ring-primary/10 transition-all outline-none"
+                         className="w-full h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium outline-none"
                          value={editingBanner.type}
                          onChange={e => setEditingBanner({...editingBanner, type: e.target.value})}
                        >
                          <option value="hero">Main Hero Slider</option>
-                         <option value="promo">Full Width Promotion Banner</option>
-                         <option value="side">Sidebar Promo (Grid)</option>
+                         <option value="promo">Middle Promo Banner</option>
+                         <option value="side">Grid Section Banner</option>
                        </select>
                     </div>
                  </div>
               )}
-              <DialogFooter>
-                 <Button className="w-full h-12 rounded-xl font-bold uppercase text-xs tracking-widest bg-primary" onClick={handleUpdate}>Update Banner</Button>
+              <DialogFooter className="flex gap-3">
+                 <Button variant="outline" className="h-11 rounded-lg text-xs font-bold" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+                 <Button className="h-11 rounded-lg bg-[#00458e] text-white text-xs font-bold px-8" onClick={handleUpdate}>Update Changes</Button>
               </DialogFooter>
            </DialogContent>
         </Dialog>

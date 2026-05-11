@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { settingsService } from '@/services/settingsService';
+import { convertGoogleDriveLink } from '@/lib/imageUtils';
 
 interface Settings {
   shopName: string;
@@ -7,6 +8,10 @@ interface Settings {
   logo: string;
   favicon: string;
   maintenanceMode: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  ogImage?: string;
   [key: string]: any;
 }
 
@@ -25,6 +30,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     logo: '',
     favicon: '',
     maintenanceMode: 'false',
+    metaTitle: 'CHUTIRMART | Best Online Shopping in Bangladesh',
+    metaDescription: 'Shop the latest products at CHUTIRMART. High quality, great prices, and fast delivery.',
+    metaKeywords: 'ecommerce, shopping, bangladesh, garments, grocery',
+    ogImage: '',
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -51,6 +60,47 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setIsLoading(false);
     }
   };
+
+  // SEO Side Effect
+  useEffect(() => {
+    if (!isLoading) {
+      // Update Title
+      if (settings.metaTitle) {
+        document.title = settings.metaTitle;
+      }
+
+      const ogImageUrl = settings.ogImage ? convertGoogleDriveLink(settings.ogImage) : '';
+
+      // Update Meta Tags
+      const metaUpdates = [
+        { name: 'description', content: settings.metaDescription },
+        { name: 'keywords', content: settings.metaKeywords },
+        { property: 'og:title', content: settings.metaTitle },
+        { property: 'og:description', content: settings.metaDescription },
+        { property: 'og:image', content: ogImageUrl },
+        { property: 'twitter:title', content: settings.metaTitle },
+        { property: 'twitter:description', content: settings.metaDescription },
+        { property: 'twitter:image', content: ogImageUrl },
+      ];
+
+      metaUpdates.forEach(({ name, property, content }) => {
+        if (!content) return;
+        
+        let element = name 
+          ? document.querySelector(`meta[name="${name}"]`)
+          : document.querySelector(`meta[property="${property}"]`);
+
+        if (!element) {
+          element = document.createElement('meta');
+          if (name) element.setAttribute('name', name);
+          if (property) element.setAttribute('property', property);
+          document.head.appendChild(element);
+        }
+        
+        element.setAttribute('content', content);
+      });
+    }
+  }, [settings.metaTitle, settings.metaDescription, settings.metaKeywords, settings.ogImage, isLoading]);
 
   useEffect(() => {
     fetchSettings();

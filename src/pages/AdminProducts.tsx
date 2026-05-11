@@ -193,19 +193,17 @@ const AdminProducts = () => {
   }, [search]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-           <h2 className="text-3xl font-bold">Products</h2>
-           <p className="text-muted-foreground">Manage your shop's inventory here</p>
-        </div>
-        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-          <DialogTrigger nativeButton={true} render={
-            <Button size="lg" className="rounded-xl gap-2 h-12 px-6">
-              <Plus className="h-4 w-4" /> Add New Product
-            </Button>
-          } />
-          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem]">
+    <div className="space-y-8 pb-20">
+      <div className="flex flex-col space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-slate-900">Products</h1>
+          <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+            <DialogTrigger nativeButton={true} render={
+              <Button className="h-10 bg-[#00458e] hover:bg-blue-800 text-white rounded-lg font-semibold text-xs px-5 flex items-center gap-2">
+                <Plus className="h-4 w-4" /> New Product
+              </Button>
+            } />
+            <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem]">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black">Add New Product</DialogTitle>
             </DialogHeader>
@@ -507,59 +505,92 @@ const AdminProducts = () => {
                  </Button>
               </DialogFooter>
            </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
+        
+        {/* Tabs */}
+        <div className="flex border-b border-slate-200 overflow-x-auto no-scrollbar">
+          <button className={`px-4 py-3 text-xs font-semibold whitespace-nowrap transition-colors relative ${filterCategory === 'All' ? 'text-[#00458e]' : 'text-slate-500 hover:text-slate-700'}`} onClick={() => setFilterCategory('All')}>
+            All (100)
+            {filterCategory === 'All' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00458e]"></div>}
+          </button>
+          <button className="px-4 py-3 text-xs font-semibold text-slate-500 hover:text-slate-700 whitespace-nowrap">
+            Drafts (20)
+          </button>
+          <button className="px-4 py-3 text-xs font-semibold text-slate-500 hover:text-slate-700 whitespace-nowrap">
+            New Arrival (15)
+          </button>
+          <button className="px-4 py-3 text-xs font-semibold text-slate-500 hover:text-slate-700 whitespace-nowrap">
+            Flash Sale (5)
+          </button>
+        </div>
+
+        {/* Filters Row */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3">
+             <div className="flex items-center">
+                <select className="h-10 px-4 pr-10 border border-slate-200 rounded-lg text-sm font-medium bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                  <option>Bulk Action</option>
+                </select>
+                <div className="pointer-events-none -ml-8 flex items-center px-2 text-slate-400">
+                  <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
+                </div>
+                <Button className="h-10 ml-3 bg-[#00458e] hover:bg-blue-800 text-white px-6 rounded-lg font-semibold text-xs">Apply</Button>
+             </div>
+
+             <div className="flex items-center border border-slate-200 rounded-lg bg-white overflow-hidden">
+                <select className="h-10 px-4 pr-10 text-sm font-medium bg-white appearance-none focus:outline-none" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
+                   {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                </select>
+                <div className="pointer-events-none -ml-8 flex items-center px-2 text-slate-400">
+                  <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
+                </div>
+             </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+             <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <Input 
+                  placeholder="Search Product Name..." 
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-10 h-10 w-[250px] border-slate-200 rounded-lg text-sm bg-white" 
+                />
+             </div>
+          </div>
+        </div>
       </div>
 
-      <div className="flex items-center gap-4 py-4 px-6 bg-white rounded-2xl shadow-sm border border-primary/5">
-        <div className="relative flex-grow">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search products..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 rounded-xl bg-secondary/20 border-none" 
-          />
-        </div>
-        <div className="flex items-center gap-2">
-           <Label className="hidden sm:block text-xs font-bold text-muted-foreground uppercase">Filter:</Label>
-           <select 
-             className="h-10 rounded-xl bg-secondary/20 border-none px-3 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none"
-             value={filterCategory}
-             onChange={(e) => setFilterCategory(e.target.value)}
-           >
-              {categories.map(cat => (
-                 <option key={cat} value={cat}>{cat}</option>
-              ))}
-           </select>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-primary/5">
+      <div className="bg-white rounded-xl overflow-hidden border border-[#0db39e]/20 shadow-sm">
         <Table>
-          <TableHeader className="bg-secondary/10 border-b">
+          <TableHeader className="bg-[#ecfdfa]">
             <TableRow className="hover:bg-transparent border-none">
-              <TableHead className="w-20 pl-6 font-bold text-primary uppercase text-[10px] tracking-wider">Image</TableHead>
-              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Name</TableHead>
-              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Category</TableHead>
-              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Date Added</TableHead>
-              <TableHead className="font-bold text-primary uppercase text-[10px] tracking-wider">Price</TableHead>
-              <TableHead className="font-bold text-primary text-center uppercase text-[10px] tracking-wider">Stock</TableHead>
-              <TableHead className="font-bold text-primary text-right pr-6 uppercase text-[10px] tracking-wider">Action</TableHead>
+              <TableHead className="pl-6 w-12"><div className="w-4 h-4 border border-[#0db39e] rounded bg-[#0db39e]/10"></div></TableHead>
+              <TableHead className="w-16">Image</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Name</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Category</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Price</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Stock</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Status</TableHead>
+              <TableHead className="text-[12px] font-medium text-slate-600">Date Added</TableHead>
+              <TableHead className="text-right pr-6 text-[12px] font-medium text-slate-600">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
                <TableRow>
-                  <TableCell colSpan={7} className="py-20 text-center font-medium italic opacity-50">Loading products...</TableCell>
+                  <TableCell colSpan={9} className="py-20 text-center font-medium italic opacity-50">Loading products...</TableCell>
                </TableRow>
             ) : currentProducts.length === 0 ? (
                <TableRow>
-                  <TableCell colSpan={7} className="py-20 text-center font-medium italic opacity-50">No products found.</TableCell>
+                  <TableCell colSpan={9} className="py-20 text-center font-medium italic opacity-50">No products found.</TableCell>
                </TableRow>
             ) : currentProducts.map((p) => (
-              <TableRow key={p.id} className="hover:bg-secondary/5 transition-colors border-b border-secondary/20">
-                <TableCell className="pl-6 py-4">
-                  <div className="w-12 h-12 bg-secondary/30 rounded-xl overflow-hidden border border-secondary/50 shadow-sm transition-transform hover:scale-105">
+              <TableRow key={p.id} className="hover:bg-slate-50 transition-colors border-b border-slate-100 h-16">
+                <TableCell className="pl-6"><div className="w-4 h-4 border border-slate-200 rounded"></div></TableCell>
+                <TableCell>
+                  <div className="w-10 h-10 rounded-full border border-slate-100 overflow-hidden bg-slate-50">
                     <img 
                       src={p.images && p.images.length > 0 ? p.images[0] : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200'} 
                       alt={p.name} 
@@ -573,24 +604,37 @@ const AdminProducts = () => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <p className="font-bold text-sm text-slate-700">{p.name}</p>
+                  <div className="flex flex-col">
+                    <span className="text-[13px] font-semibold text-slate-900">{p.name}</span>
+                    <span className="text-[11px] text-slate-400 font-medium">PK: 15478</span>
+                  </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 border-none transition-colors px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">{p.category}</Badge>
+                  <span className="text-[13px] font-medium text-slate-600">{p.category}</span>
                 </TableCell>
                 <TableCell>
-                   <p className="text-xs font-bold text-slate-500">{p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'Initial'}</p>
+                  <span className="text-[13px] font-semibold text-slate-900">৳ {p.price.toLocaleString()}</span>
                 </TableCell>
-                <TableCell className="font-black text-primary">৳ {p.price.toLocaleString()}</TableCell>
-                <TableCell className="text-center">
-                   <div className="inline-flex items-center justify-center p-1.5 bg-secondary/20 rounded-lg min-w-[40px]">
-                      <span className={`font-black text-xs ${p.stock < 5 ? 'text-destructive animate-pulse' : 'text-slate-600'}`}>{p.stock}</span>
+                <TableCell>
+                  <span className={`text-[13px] font-semibold ${p.stock < 10 ? 'text-orange-500' : 'text-slate-900'}`}>{p.stock}</span>
+                </TableCell>
+                <TableCell>
+                   <div className="flex items-center gap-2">
+                      <div className={`w-1.5 h-1.5 rounded-full ${p.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                      <span className={`text-[12px] font-medium ${p.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>{p.stock > 0 ? 'Instock' : 'Out of Stock'}</span>
                    </div>
                 </TableCell>
+                <TableCell>
+                   <span className="text-[13px] text-slate-500 font-medium">{p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'Initial'}</span>
+                </TableCell>
                 <TableCell className="text-right pr-6">
-                  <div className="flex items-center justify-end gap-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-primary hover:bg-primary/5 rounded-lg" onClick={() => openEdit(p)}><Edit className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-destructive hover:bg-destructive/5 rounded-lg" onClick={() => handleDelete(p.id)}><Trash2 className="h-4 w-4" /></Button>
+                  <div className="flex items-center justify-end gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#00458e] hover:bg-slate-100" onClick={() => openEdit(p)}>
+                       <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-slate-100" onClick={() => handleDelete(p.id)}>
+                       <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>

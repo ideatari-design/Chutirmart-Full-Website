@@ -312,14 +312,20 @@ async function queryD1(sql: string, params: any[] = []) {
     console.log(`[D1] SQL: ${sql.substring(0, 50)}...`);
     console.log(`[D1] Using Account: ${accountId.substring(0, 8)}... and DB: ${databaseId.substring(0, 8)}...`);
 
+    const abortController = new AbortController();
+    const timeout = setTimeout(() => abortController.abort(), 10000); // 10s timeout
+
     const res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${databaseId}/query`, {
       method: "POST",
       headers: {
         "Authorization": authHeader,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ sql, params })
+      body: JSON.stringify({ sql, params }),
+      signal: abortController.signal
     });
+
+    clearTimeout(timeout);
 
     const data: any = await res.json();
     
@@ -345,6 +351,12 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+  
+  // Health check endpoint BEFORE everything else
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", time: new Date().toISOString() });
+  });
+
   app.use("/uploads", express.static(uploadDir));
 
   // --- Upload API ---
@@ -1029,7 +1041,7 @@ async function startServer() {
   // Create order
   app.post("/api/orders", async (req, res) => {
     const orderData = req.body;
-    const orderId = `#${Math.floor(Math.random() * 900000) + 100000}`;
+    const orderId = `CHU#${Math.floor(Math.random() * 900000) + 100000}`;
     const createdAt = new Date().toISOString();
 
     const d1Result = await queryD1(
@@ -1063,7 +1075,19 @@ async function startServer() {
 
   // Get order by tracking ID
   app.get("/api/orders/:id", async (req, res) => {
-    const d1Result = await queryD1("SELECT * FROM orders WHERE id = ?", [req.params.id.startsWith('#') ? req.params.id : `#${req.params.id}`]);
+    const trackingId = req.params.id;
+    let orderId = trackingId;
+    
+    // Support various formats for lookup: '123456', '#123456', 'CHU#123456'
+    if (!orderId.includes('#')) {
+      // Try to find if either # or CHU# exists
+      const d1Check = await queryD1("SELECT id FROM orders WHERE id LIKE ?", [`%#${orderId}`]);
+      if (d1Check && d1Check.results.length > 0) {
+        orderId = d1Check.results[0].id;
+      }
+    }
+
+    const d1Result = await queryD1("SELECT * FROM orders WHERE id = ?", [orderId]);
     if (d1Result && d1Result.results.length > 0) {
       const order = {
         ...d1Result.results[0],
@@ -1072,7 +1096,6 @@ async function startServer() {
       return res.json(order);
     }
 
-    const orderId = req.params.id.startsWith('#') ? req.params.id : `#${req.params.id}`;
     const order = ORDERS.find(o => o.id === orderId);
     if (!order) return res.status(404).json({ message: "Order not found" });
     res.json(order);
@@ -1210,4 +1233,7 @@ async function startServer() {
   });
 }
 
-startServer();
+startServer().catch(err => {
+  console.error("FATAL: Failed to start server:", err);
+  process.exit(1);
+});

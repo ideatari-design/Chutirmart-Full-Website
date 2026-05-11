@@ -65,7 +65,7 @@ const Checkout = () => {
       if (order) {
         toast.success("Your order has been successfully placed!");
         clearCart();
-        navigate(`/track?id=${order.id.replace('#', '')}`);
+        navigate(`/track?id=${order.id}`);
       }
     } catch (err) {
       toast.error("Something went wrong, please try again.");
