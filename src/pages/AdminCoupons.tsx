@@ -1,221 +1,130 @@
 import React, { useState } from 'react';
 import { 
-  Ticket, 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  Copy,
-  CheckCircle2,
-  XCircle,
-  Calendar,
-  Percent
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { 
   Table, 
   TableBody, 
   TableCell, 
   TableHead, 
   TableHeader, 
   TableRow 
-} from '@/components/ui/table';
+} from "@/components/ui/table";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { 
+  PlusCircle, 
+  Search, 
+  Edit, 
+  Trash2, 
+  Ticket,
+  Percent,
+  Calendar,
+  Zap,
+  CheckCircle2,
+  XCircle
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
 const AdminCoupons = () => {
-  const [search, setSearch] = useState('');
   const [coupons, setCoupons] = useState([
-    { id: '1', code: 'WELCOME10', discount: 10, type: 'percentage', expiry: '2024-12-31', status: 'active', usage: 156 },
-    { id: '2', code: 'EID2024', discount: 200, type: 'fixed', expiry: '2024-06-30', status: 'active', usage: 890 },
-    { id: '3', code: 'OFF50', discount: 50, type: 'percentage', expiry: '2024-05-01', status: 'expired', usage: 45 },
+    { id: '1', code: 'WELCOME50', type: 'percentage', value: 50, expiry: '2025-12-31', minPurchase: 500, status: 'active', usageCount: 145 },
+    { id: '2', code: 'FLAT200', type: 'fixed', value: 200, expiry: '2025-06-30', minPurchase: 1000, status: 'active', usageCount: 42 },
+    { id: '3', code: 'EXPIRED10', type: 'percentage', value: 10, expiry: '2023-01-01', minPurchase: 0, status: 'expired', usageCount: 890 },
   ]);
 
-  const [newCoupon, setNewCoupon] = useState({ code: '', discount: 0, type: 'percentage', expiry: '', status: 'active' });
-  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState('');
 
   const filteredCoupons = coupons.filter(c => 
     c.code.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleAdd = () => {
-    if (!newCoupon.code || !newCoupon.discount) return;
-    setCoupons([...coupons, { ...newCoupon, id: Math.random().toString(36).substr(2, 9), usage: 0 } as any]);
-    setNewCoupon({ code: '', discount: 0, type: 'percentage', expiry: '', status: 'active' });
-    setIsOpen(false);
-    toast.success("Coupon created successfully!");
-  };
-
-  const handleDelete = (id: string) => {
-    setCoupons(coupons.filter(c => c.id !== id));
-    toast.success("Coupon deleted");
-  };
-
-  const copyToClipboard = (code: string) => {
-    navigator.clipboard.writeText(code);
-    toast.success("Code copied to clipboard!");
-  };
-
   return (
-    <div className="space-y-8 pb-20">
-      <div className="flex flex-col space-y-6">
+    <div className="space-y-6 pb-20">
+      <div className="flex flex-col space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-slate-900">Coupons</h1>
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger nativeButton={true} render={
-              <Button className="h-10 bg-[#00458e] hover:bg-blue-800 text-white rounded-lg font-semibold text-xs px-5 flex items-center gap-2">
-                <Plus className="h-4 w-4" /> Create Coupon
-              </Button>
-            } />
-            <DialogContent className="rounded-xl sm:max-w-md border-none shadow-2xl">
-              <DialogHeader>
-                <DialogTitle className="text-xl font-bold text-slate-900">Create New Coupon</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-5 py-4">
-                <div className="space-y-2">
-                  <Label className="text-[12px] font-semibold text-slate-700">Coupon Code</Label>
-                  <Input 
-                    placeholder="e.g. SUMMER25" 
-                    className="h-11 rounded-lg border-slate-200 focus:ring-2 focus:ring-blue-500/20 font-bold uppercase tracking-wider" 
-                    value={newCoupon.code}
-                    onChange={e => setNewCoupon({...newCoupon, code: e.target.value.toUpperCase()})}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-[12px] font-semibold text-slate-700">Discount Value</Label>
-                    <Input 
-                      type="number"
-                      placeholder="10" 
-                      className="h-11 rounded-lg border-slate-200 focus:ring-2 focus:ring-blue-500/20 font-medium" 
-                      value={newCoupon.discount}
-                      onChange={e => setNewCoupon({...newCoupon, discount: parseInt(e.target.value) || 0})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[12px] font-semibold text-slate-700">Type</Label>
-                    <select 
-                      className="w-full h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium outline-none"
-                      value={newCoupon.type}
-                      onChange={e => setNewCoupon({...newCoupon, type: e.target.value})}
-                    >
-                      <option value="percentage">Percentage (%)</option>
-                      <option value="fixed">Fixed (৳)</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[12px] font-semibold text-slate-700">Expiry Date</Label>
-                  <Input 
-                    type="date"
-                    className="h-11 rounded-lg border-slate-200 focus:ring-2 focus:ring-blue-500/20 font-medium" 
-                    value={newCoupon.expiry}
-                    onChange={e => setNewCoupon({...newCoupon, expiry: e.target.value})}
-                  />
-                </div>
-              </div>
-              <DialogFooter className="flex gap-3">
-                <Button variant="outline" className="h-11 rounded-lg text-xs font-bold" onClick={() => setIsOpen(false)}>Cancel</Button>
-                <Button className="h-11 rounded-lg bg-[#00458e] text-white text-xs font-bold px-8" onClick={handleAdd}>Activate Code</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+           <div className="flex flex-col space-y-1">
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight">Vouchers & Coupons</h1>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Drive sales by offering promotional discounts to your customers.</p>
+           </div>
+           <Button className="h-11 bg-[#00458e] hover:bg-blue-800 text-white rounded-xl font-black text-[11px] uppercase px-6 gap-2 shadow-lg shadow-blue-100 transition-all hover:scale-105">
+              <PlusCircle className="h-4 w-4" /> Create Voucher
+           </Button>
         </div>
 
-        {/* Filters Row */}
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-3">
-             <div className="flex items-center">
-                <select className="h-10 px-4 pr-10 border border-slate-200 rounded-lg text-sm font-medium bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-                  <option>Bulk Action</option>
-                </select>
-                <div className="pointer-events-none -ml-8 flex items-center px-2 text-slate-400">
-                  <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
-                </div>
-                <Button className="h-10 ml-3 bg-[#00458e] hover:bg-blue-800 text-white px-6 rounded-lg font-semibold text-xs">Apply</Button>
-             </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-             <div className="relative">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                <Input 
-                  placeholder="Search code..." 
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10 h-10 w-[300px] border-slate-200 rounded-lg text-sm bg-white" 
-                />
-             </div>
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-4 py-2">
+           <div className="relative w-full md:w-[400px]">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input 
+                placeholder="Search by coupon code..." 
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="h-12 pl-12 rounded-2xl border-slate-100 bg-white shadow-sm font-medium"
+              />
+           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl overflow-hidden border border-[#0db39e]/20 shadow-sm">
+      <div className="bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/50">
         <Table>
-          <TableHeader className="bg-[#ecfdfa]">
-            <TableRow className="hover:bg-transparent border-none">
-              <TableHead className="pl-6 w-12"><div className="w-4 h-4 border border-[#0db39e] rounded bg-[#0db39e]/10"></div></TableHead>
-              <TableHead className="text-[12px] font-medium text-slate-600">Coupon Code</TableHead>
-              <TableHead className="text-[12px] font-medium text-slate-600 text-center">Discount</TableHead>
-              <TableHead className="text-[12px] font-medium text-slate-600 text-center">Usages</TableHead>
-              <TableHead className="text-[12px] font-medium text-slate-600 text-center">Expiry</TableHead>
-              <TableHead className="text-[12px] font-medium text-slate-600 text-center">Status</TableHead>
-              <TableHead className="text-[12px] font-medium text-slate-600 text-right pr-6">Action</TableHead>
+          <TableHeader className="bg-slate-50/50 border-b border-slate-100">
+            <TableRow className="h-14">
+              <TableHead className="pl-8 text-[11px] font-black uppercase text-slate-400 tracking-widest">Coupon Code</TableHead>
+              <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Discount Info</TableHead>
+              <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Min. Purchase</TableHead>
+              <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Expiry Date</TableHead>
+              <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Usage</TableHead>
+              <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Status</TableHead>
+              <TableHead className="text-right pr-8 text-[11px] font-black uppercase text-slate-400 tracking-widest">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredCoupons.map((coupon) => (
-              <TableRow key={coupon.id} className="hover:bg-slate-50 transition-colors border-b border-slate-100 h-16">
-                <TableCell className="pl-6"><div className="w-4 h-4 border border-slate-200 rounded"></div></TableCell>
+              <TableRow key={coupon.id} className="h-20 hover:bg-slate-50/50 transition-colors group border-b border-slate-50">
+                <TableCell className="pl-8">
+                  <div className="flex items-center gap-3">
+                     <div className="h-10 w-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center border border-orange-100">
+                        <Ticket className="h-5 w-5" />
+                     </div>
+                     <span className="text-[14px] font-black text-slate-900 tracking-widest">{coupon.code}</span>
+                  </div>
+                </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 bg-blue-50 text-[#00458e] border border-blue-100 rounded text-[11px] font-bold tracking-widest uppercase">
-                       {coupon.code}
-                    </span>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400" onClick={() => copyToClipboard(coupon.code)}>
-                       <Copy className="h-3 w-3" />
-                    </Button>
-                  </div>
+                   <div className="flex flex-col">
+                      <span className="text-[13px] font-black text-slate-800">
+                        {coupon.type === 'percentage' ? `${coupon.value}% OFF` : `৳ ${coupon.value} OFF`}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">{coupon.type === 'percentage' ? 'Percentage Based' : 'Fixed Amount'}</span>
+                   </div>
                 </TableCell>
-                <TableCell className="text-center">
-                  <span className="text-[13px] font-bold text-slate-800">
-                    {coupon.type === 'percentage' ? `${coupon.discount}%` : `৳ ${coupon.discount.toLocaleString()}`}
-                  </span>
+                <TableCell>
+                  <span className="text-[12px] font-bold text-slate-600">৳ {coupon.minPurchase}</span>
                 </TableCell>
-                <TableCell className="text-center">
-                  <span className="text-[12px] font-medium text-slate-500">{coupon.usage}</span>
+                <TableCell>
+                   <div className="flex items-center gap-1.5 text-slate-500">
+                      <Calendar className="h-3 w-3" />
+                      <span className="text-[11px] font-bold uppercase">{coupon.expiry}</span>
+                   </div>
                 </TableCell>
-                <TableCell className="text-center">
-                  <div className="flex items-center justify-center gap-1.5 text-[11px] font-medium text-slate-500">
-                    <Calendar className="h-3.5 w-3.5 text-slate-300" />
-                    {coupon.expiry}
-                  </div>
+                <TableCell>
+                   <div className="flex items-center gap-2">
+                      <Zap className="h-3 w-3 text-indigo-500" />
+                      <span className="text-[12px] font-black text-slate-700">{coupon.usageCount} Times</span>
+                   </div>
                 </TableCell>
-                <TableCell className="text-center">
-                   <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                     coupon.status === 'active' ? 'bg-green-50 text-[#0db39e]' : 'bg-slate-50 text-slate-400'
+                <TableCell>
+                   <Badge className={`rounded-full px-3 py-1 font-black text-[9px] uppercase tracking-widest border-none ${
+                     coupon.status === 'active' ? 'bg-emerald-500 text-white' : 'bg-slate-300 text-white'
                    }`}>
                       {coupon.status}
-                   </span>
+                   </Badge>
                 </TableCell>
-                <TableCell className="text-right pr-6">
-                   <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#00458e] hover:bg-blue-50">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50" onClick={() => handleDelete(coupon.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                <TableCell className="text-right pr-8">
+                   <div className="flex justify-end gap-2">
+                      <button className="h-9 w-9 flex items-center justify-center rounded-2xl bg-white text-slate-400 hover:bg-[#00458e] hover:text-white transition-all shadow-sm border border-slate-100">
+                         <Edit className="h-4 w-4" />
+                      </button>
+                      <button className="h-9 w-9 flex items-center justify-center rounded-2xl bg-white text-slate-400 hover:bg-rose-500 hover:text-white transition-all shadow-sm border border-slate-100">
+                         <Trash2 className="h-4 w-4" />
+                      </button>
                    </div>
                 </TableCell>
               </TableRow>

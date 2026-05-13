@@ -294,26 +294,22 @@ async function queryD1(sql: string, params: any[] = []) {
   const databaseId = (process.env.CLOUDFLARE_DATABASE_ID || "").trim();
   const token = (process.env.CLOUDFLARE_API_TOKEN || "").trim();
 
-  if (!accountId || !databaseId || !token) {
-    console.warn("D1 Credentials missing in environment variables. Please check Settings > Secrets.");
+  // If credentials missing or are placeholders, fail fast
+  if (!accountId || !databaseId || !token || accountId.includes("YOUR_") || token.includes("YOUR_")) {
+    // Only log once to avoid cluttering logs
+    if (!(global as any)._d1Warned) {
+      console.warn("D1 Credentials missing or invalid. Using memory storage fallback.");
+      (global as any)._d1Warned = true;
+    }
     return null;
   }
 
   try {
     const authHeader = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
-
-    if (accountId.length !== 32) {
-      console.warn(`[D1 Hint] Account ID is ${accountId.length} chars, usually it's exactly 32 hex chars.`);
-    }
-    if (databaseId.length !== 32) {
-      console.warn(`[D1 Hint] Database ID is ${databaseId.length} chars, usually it's exactly 32 hex chars.`);
-    }
-
-    console.log(`[D1] SQL: ${sql.substring(0, 50)}...`);
-    console.log(`[D1] Using Account: ${accountId.substring(0, 8)}... and DB: ${databaseId.substring(0, 8)}...`);
-
-    const abortController = new AbortController();
-    const timeout = setTimeout(() => abortController.abort(), 10000); // 10s timeout
+    
+    // Add a strict timeout to the Cloudflare API call to avoid hanging the entire server
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
 
     const res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${databaseId}/query`, {
       method: "POST",
@@ -322,26 +318,38 @@ async function queryD1(sql: string, params: any[] = []) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ sql, params }),
-      signal: abortController.signal
+      signal: controller.signal
     });
 
-    clearTimeout(timeout);
+    clearTimeout(timeoutId);
 
-    const data: any = await res.json();
+    const resText = await res.text();
+    if (!res.ok) {
+      // Don't log "duplicate column" errors as hard errors in the logs
+      const isDuplicate = resText.toLowerCase().includes("duplicate column name") || resText.toLowerCase().includes("already exists");
+      if (!isDuplicate) {
+        console.error(`[D1 API ERROR] Status: ${res.status}`, resText);
+      }
+      return null;
+    }
+
+    const data: any = JSON.parse(resText);
     
     if (!data.success) {
       console.error("[D1 ERROR]", JSON.stringify(data.errors));
-      if (data.errors && data.errors.some((e: any) => e.code === 10000)) {
-        console.error("CRITICAL: Authentication failed. Please verify your CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in Secrets.");
-      }
       return null;
     }
     
     // Cloudflare returns an array of results for each query in the POST body
     // Since we only send one query, we take the first result
-    return Array.isArray(data.result) ? data.result[0] : data.result;
-  } catch (err) {
-    console.error("D1 Fetch Exception:", err);
+    const result = Array.isArray(data.result) ? data.result[0] : data.result;
+    return result;
+  } catch (err: any) {
+    if (err.name === 'AbortError') {
+      console.error("D1 Query timed out after 8s");
+    } else {
+      console.error("D1 Fetch Exception:", err);
+    }
     return null;
   }
 }
@@ -349,6 +357,19 @@ async function queryD1(sql: string, params: any[] = []) {
 async function startServer() {
   const app = express();
   const PORT = 3000;
+
+  // --- Logger Middleware ---
+  app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    res.on('finish', () => {
+      if (res.statusCode >= 400) {
+        console.error(`[RESP] ${req.method} ${req.url} -> STATUS: ${res.statusCode}`);
+      } else {
+        console.log(`[RESP] ${req.method} ${req.url} -> STATUS: ${res.statusCode}`);
+      }
+    });
+    next();
+  });
 
   app.use(express.json());
   
@@ -448,10 +469,20 @@ async function startServer() {
       )
     `;
 
-    // Ensure columns exist for older tables
-    const addFlashSale = "ALTER TABLE products ADD COLUMN isFlashSale INTEGER DEFAULT 0";
-    const addNewArrival = "ALTER TABLE products ADD COLUMN isNewArrival INTEGER DEFAULT 0";
-    const addBestSelling = "ALTER TABLE products ADD COLUMN isBestSelling INTEGER DEFAULT 0";
+    // Ensure columns exist for older tables - consolidated and silenced
+    const migrations = [
+      "ALTER TABLE products ADD COLUMN isFlashSale INTEGER DEFAULT 0",
+      "ALTER TABLE products ADD COLUMN isNewArrival INTEGER DEFAULT 0",
+      "ALTER TABLE products ADD COLUMN isBestSelling INTEGER DEFAULT 0",
+      "ALTER TABLE products ADD COLUMN nameBn TEXT",
+      "ALTER TABLE products ADD COLUMN oldPrice REAL DEFAULT 0",
+      "ALTER TABLE products ADD COLUMN stars REAL DEFAULT 0",
+      "ALTER TABLE products ADD COLUMN specs TEXT DEFAULT '{}'",
+      "ALTER TABLE products ADD COLUMN description TEXT DEFAULT ''",
+      "ALTER TABLE products ADD COLUMN isFeatured INTEGER DEFAULT 0",
+      "ALTER TABLE products ADD COLUMN stock INTEGER DEFAULT 0",
+      "ALTER TABLE products ADD COLUMN category TEXT DEFAULT 'Uncategorized'"
+    ];
 
     const createOrdersTable = `
       CREATE TABLE IF NOT EXISTS orders (
@@ -489,10 +520,10 @@ async function startServer() {
     try {
       await queryD1(createProductsTable);
       
-      // Try to add columns if they don't exist (D1 might fail if they exist, which is fine)
-      try { await queryD1(addFlashSale); } catch(e) {}
-      try { await queryD1(addNewArrival); } catch(e) {}
-      try { await queryD1(addBestSelling); } catch(e) {}
+      // Run migrations
+      for (const m of migrations) {
+        await queryD1(m);
+      }
 
       await queryD1(createOrdersTable);
       await queryD1(createBannersTable);
@@ -627,6 +658,10 @@ async function startServer() {
   });
 
   // --- API Routes ---
+  
+  app.get("/api/test", (req, res) => {
+    res.json({ success: true, message: "API is working", time: new Date().toISOString() });
+  });
 
   // Debug uploads directory
   app.get("/api/admin/debug-uploads", (req, res) => {
@@ -640,13 +675,17 @@ async function startServer() {
 
   // Get all orders
   app.get("/api/orders", async (req, res) => {
-    const d1Result = await queryD1("SELECT * FROM orders ORDER BY createdAt DESC");
-    if (d1Result) {
-      const orders = d1Result.results.map((o: any) => ({
-        ...o,
-        items: JSON.parse(o.items || "[]")
-      }));
-      return res.json(orders);
+    try {
+      const d1Result = await queryD1("SELECT * FROM orders ORDER BY createdAt DESC");
+      if (d1Result && Array.isArray(d1Result.results)) {
+        const orders = d1Result.results.map((o: any) => ({
+          ...o,
+          items: JSON.parse(o.items || "[]")
+        }));
+        return res.json(orders);
+      }
+    } catch (err) {
+      console.error("Orders GET Exception:", err);
     }
     res.json(ORDERS);
   });
@@ -657,29 +696,7 @@ async function startServer() {
       const dResult = await queryD1("SELECT * FROM products");
       
       // If D1 is working and has data
-      if (dResult && dResult.results && dResult.results.length > 0) {
-        // Check if any product has flags set. if NOT, let's fix a few
-        const hasFlags = dResult.results.some((p: any) => p.isFlashSale || p.isNewArrival || p.isBestSelling);
-        if (!hasFlags) {
-          console.log("No products have flags set. Auto-flagging some products...");
-          await queryD1("UPDATE products SET isFlashSale = 1, isNewArrival = 1 WHERE id IN (SELECT id FROM products LIMIT 5)");
-          await queryD1("UPDATE products SET isBestSelling = 1, isNewArrival = 1 WHERE id IN (SELECT id FROM products ORDER BY id DESC LIMIT 5)");
-          // Re-fetch
-          const refreshed = await queryD1("SELECT * FROM products");
-          if (refreshed && refreshed.results) {
-             const products = refreshed.results.map((p: any) => ({
-              ...p,
-              images: JSON.parse(p.images || "[]"),
-              specs: JSON.parse(p.specs || "{}"),
-              isFeatured: Boolean(p.isFeatured),
-              isFlashSale: Boolean(p.isFlashSale),
-              isNewArrival: Boolean(p.isNewArrival),
-              isBestSelling: Boolean(p.isBestSelling)
-            }));
-            return res.json(products);
-          }
-        }
-
+      if (dResult && Array.isArray(dResult.results) && dResult.results.length > 0) {
         const products = dResult.results.map((p: any) => ({
           ...p,
           images: JSON.parse(p.images || "[]"),
@@ -692,7 +709,6 @@ async function startServer() {
         return res.json(products);
       }
       
-      // If D1 query failed (null) or is explicitly unsuccessful or empty
       console.warn("[D1 Fallback] Database query failed or returned no data. Using memory data.");
       return res.json(PRODUCTS);
     } catch (err) {
@@ -703,21 +719,23 @@ async function startServer() {
 
   // Get single product
   app.get("/api/products/:id", async (req, res) => {
-    const d1Result = await queryD1("SELECT * FROM products WHERE id = ?", [req.params.id]);
-    if (d1Result && d1Result.results.length > 0) {
-      const p = d1Result.results[0];
-      const product = {
-        ...p,
-        images: JSON.parse(p.images || "[]"),
-        specs: JSON.parse(p.specs || "{}"),
-        isFeatured: Boolean(p.isFeatured),
-        isFlashSale: Boolean(p.isFlashSale),
-        isNewArrival: Boolean(p.isNewArrival),
-        isBestSelling: Boolean(p.isBestSelling)
-      };
-      // For reviews, we can also query D1 or keep them in-memory for now if table doesn't exist
-      res.json({ ...product, reviews: REVIEWS.filter(r => r.productId === req.params.id) });
-      return;
+    try {
+      const d1Result = await queryD1("SELECT * FROM products WHERE id = ?", [req.params.id]);
+      if (d1Result && Array.isArray(d1Result.results) && d1Result.results.length > 0) {
+        const p = d1Result.results[0];
+        const product = {
+          ...p,
+          images: JSON.parse(p.images || "[]"),
+          specs: JSON.parse(p.specs || "{}"),
+          isFeatured: Boolean(p.isFeatured),
+          isFlashSale: Boolean(p.isFlashSale),
+          isNewArrival: Boolean(p.isNewArrival),
+          isBestSelling: Boolean(p.isBestSelling)
+        };
+        return res.json({ ...product, reviews: REVIEWS.filter(r => r.productId === req.params.id) });
+      }
+    } catch (err) {
+      console.error("Product Detail API exception:", err);
     }
 
     const product = PRODUCTS.find(p => p.id === req.params.id);
@@ -730,13 +748,13 @@ async function startServer() {
   app.get("/api/banners", async (req, res) => {
     try {
       const d1Result = await queryD1("SELECT * FROM banners ORDER BY createdAt DESC");
-      if (d1Result && d1Result.results && d1Result.results.length > 0) {
+      if (d1Result && Array.isArray(d1Result.results) && d1Result.results.length > 0) {
         return res.json(d1Result.results);
       }
-      res.json(BANNERS);
     } catch (err) {
-      res.json(BANNERS);
+      console.error("Banners GET exception:", err);
     }
+    res.json(BANNERS);
   });
 
   app.post("/api/banners", async (req, res) => {
@@ -799,7 +817,7 @@ async function startServer() {
   app.get("/api/settings", async (req, res) => {
     try {
       const d1Result = await queryD1("SELECT * FROM settings");
-      if (d1Result && d1Result.results) {
+      if (d1Result && Array.isArray(d1Result.results)) {
         const settings: any = {};
         d1Result.results.forEach((s: any) => {
           let val = s.value;
@@ -814,11 +832,10 @@ async function startServer() {
         });
         return res.json(settings);
       }
-      res.json({});
     } catch (err) {
       console.error("Settings GET failed:", err);
-      res.status(500).json({ success: false });
     }
+    res.json({});
   });
 
   app.patch("/api/settings", async (req, res) => {
@@ -1078,22 +1095,26 @@ async function startServer() {
     const trackingId = req.params.id;
     let orderId = trackingId;
     
-    // Support various formats for lookup: '123456', '#123456', 'CHU#123456'
-    if (!orderId.includes('#')) {
-      // Try to find if either # or CHU# exists
-      const d1Check = await queryD1("SELECT id FROM orders WHERE id LIKE ?", [`%#${orderId}`]);
-      if (d1Check && d1Check.results.length > 0) {
-        orderId = d1Check.results[0].id;
+    try {
+      // Support various formats for lookup: '123456', '#123456', 'CHU#123456'
+      if (!orderId.includes('#')) {
+        // Try to find if either # or CHU# exists
+        const d1Check = await queryD1("SELECT id FROM orders WHERE id LIKE ?", [`%#${orderId}`]);
+        if (d1Check && Array.isArray(d1Check.results) && d1Check.results.length > 0) {
+          orderId = d1Check.results[0].id;
+        }
       }
-    }
 
-    const d1Result = await queryD1("SELECT * FROM orders WHERE id = ?", [orderId]);
-    if (d1Result && d1Result.results.length > 0) {
-      const order = {
-        ...d1Result.results[0],
-        items: JSON.parse(d1Result.results[0].items || "[]")
-      };
-      return res.json(order);
+      const d1Result = await queryD1("SELECT * FROM orders WHERE id = ?", [orderId]);
+      if (d1Result && Array.isArray(d1Result.results) && d1Result.results.length > 0) {
+        const order = {
+          ...d1Result.results[0],
+          items: JSON.parse(d1Result.results[0].items || "[]")
+        };
+        return res.json(order);
+      }
+    } catch (err) {
+      console.error("Order lookup Exception:", err);
     }
 
     const order = ORDERS.find(o => o.id === orderId);
@@ -1229,7 +1250,7 @@ async function startServer() {
         key TEXT PRIMARY KEY, value TEXT, updatedAt TEXT
       )`);
 
-      // Ensure necessary columns exist (for existing tables)
+      // Ensure necessary columns exist (for existing tables) - queryD1 now handles suppression of duplicate errors
       const columnFixes = [
         "ALTER TABLE products ADD COLUMN nameBn TEXT",
         "ALTER TABLE products ADD COLUMN oldPrice REAL DEFAULT 0",
@@ -1245,16 +1266,7 @@ async function startServer() {
       ];
 
       for (const sql of columnFixes) {
-        try {
-          await queryD1(sql);
-          console.log(`Executed: ${sql}`);
-        } catch (e: any) {
-          // Ignore "duplicate column" errors
-          const msg = e.message?.toLowerCase() || "";
-          if (!msg.includes("duplicate column") && !msg.includes("already exists")) {
-            console.warn(`Column check failed for: ${sql}`, e.message);
-          }
-        }
+        await queryD1(sql);
       }
 
       console.log("Auto-init complete.");

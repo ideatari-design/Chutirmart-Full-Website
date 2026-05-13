@@ -1,229 +1,127 @@
 import React, { useState } from 'react';
 import { 
-  FileText, 
-  Save, 
-  Eye, 
-  History,
-  Info,
-  Phone,
-  ShieldAlert,
-  RotateCcw,
-  HelpCircle,
-  Plus
-} from 'lucide-react';
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from '@/components/ui/label';
+import { 
+  PlusCircle, 
+  Search, 
+  Edit, 
+  Trash2, 
+  FileText,
+  Eye,
+  Settings,
+  Link as LinkIcon,
+  Globe
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
 const AdminCMS = () => {
-  const [activeTab, setActiveTab] = useState('about');
-  
-  const [content, setContent] = useState({
-    about: {
-      title: 'About Our Shop',
-      text: 'Ojala Shop is committed to providing high-quality products to our customers in Bangladesh. We started our journey in 2024 with a vision to redefine the online shopping experience.',
-      metaDescription: 'Learn more about Ojala Shop - the best online shopping destination in Bangladesh.'
-    },
-    contact: {
-      address: 'Plot 12, Road 5, Block B, Nikunja 2, Dhaka 1229',
-      phone: '01812345678',
-      email: 'support@ojala.com',
-      whatsapp: '01812345678'
-    },
-    terms: {
-      title: 'Terms & Conditions',
-      text: 'By using Ojala Shop, you agree to comply with our policies. We reserve the right to change these terms at any time...',
-    },
-    return_policy: {
-      title: 'Return & Refund Policy',
-      text: 'We offer a 7-day return policy for unused items in original packaging. Refunds are processed within 3-5 working days.',
-    }
-  });
+  const [pages, setPages] = useState([
+    { id: '1', title: 'Privacy Policy', slug: 'privacy-policy', lastUpdated: '2024-02-15', status: 'published' },
+    { id: '2', title: 'Terms & Conditions', slug: 'terms-and-conditions', lastUpdated: '2024-02-15', status: 'published' },
+    { id: '3', title: 'About Us', slug: 'about-us', lastUpdated: '2024-01-10', status: 'published' },
+    { id: '4', title: 'Refund Policy', slug: 'refund-policy', lastUpdated: '2024-03-20', status: 'draft' },
+  ]);
 
-  const handleSave = () => {
-    toast.success(`${activeTab.toUpperCase()} content saved successfully!`);
-  };
+  const [search, setSearch] = useState('');
+
+  const filteredPages = pages.filter(p => 
+    p.title.toLowerCase().includes(search.toLowerCase()) || 
+    p.slug.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="space-y-8 pb-20">
-      <div className="flex flex-col space-y-6">
+    <div className="space-y-6 pb-20">
+      <div className="flex flex-col space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-slate-900">CMS Management</h1>
-          <div className="flex gap-3">
-             <Button variant="outline" className="h-10 rounded-lg text-xs font-bold flex items-center gap-2">
-                <Eye className="h-4 w-4" /> Preview Live
-             </Button>
-             <Button className="h-10 bg-[#00458e] hover:bg-blue-800 text-white rounded-lg font-semibold text-xs px-6 flex items-center gap-2 shadow-lg shadow-blue-900/10" onClick={handleSave}>
-               <Save className="h-4 w-4" /> Save Changes
-             </Button>
-          </div>
+           <div className="flex flex-col space-y-1">
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight">Content Management</h1>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Create and manage your legal pages, blogs, and custom static content.</p>
+           </div>
+           <Button className="h-11 bg-[#00458e] hover:bg-blue-800 text-white rounded-xl font-black text-[11px] uppercase px-6 gap-2 shadow-lg shadow-blue-100 transition-all hover:scale-105">
+              <PlusCircle className="h-4 w-4" /> Create New Page
+           </Button>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-4 py-2">
+           <div className="relative w-full md:w-[400px]">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input 
+                placeholder="Search pages..." 
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="h-12 pl-12 rounded-2xl border-slate-100 bg-white shadow-sm font-medium"
+              />
+           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-[#0db39e]/20 overflow-hidden">
-        <Tabs defaultValue="about" onValueChange={setActiveTab} className="w-full">
-          <div className="border-b border-slate-100 bg-slate-50/50 px-6 pt-6">
-            <TabsList className="bg-transparent p-0 h-auto gap-8 flex justify-start items-center">
-              <TabsTrigger value="about" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#00458e] data-[state=active]:text-[#00458e] data-[state=active]:bg-transparent shadow-none px-0 pb-4 text-xs font-bold uppercase tracking-wider transition-all gap-2 text-slate-400">
-                About Us
-              </TabsTrigger>
-              <TabsTrigger value="contact" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#00458e] data-[state=active]:text-[#00458e] data-[state=active]:bg-transparent shadow-none px-0 pb-4 text-xs font-bold uppercase tracking-wider transition-all gap-2 text-slate-400">
-                Contact Info
-              </TabsTrigger>
-              <TabsTrigger value="terms" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#00458e] data-[state=active]:text-[#00458e] data-[state=active]:bg-transparent shadow-none px-0 pb-4 text-xs font-bold uppercase tracking-wider transition-all gap-2 text-slate-400">
-                Terms
-              </TabsTrigger>
-              <TabsTrigger value="policy" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#00458e] data-[state=active]:text-[#00458e] data-[state=active]:bg-transparent shadow-none px-0 pb-4 text-xs font-bold uppercase tracking-wider transition-all gap-2 text-slate-400">
-                Policy
-              </TabsTrigger>
-              <TabsTrigger value="faq" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#00458e] data-[state=active]:text-[#00458e] data-[state=active]:bg-transparent shadow-none px-0 pb-4 text-xs font-bold uppercase tracking-wider transition-all gap-2 text-slate-400">
-                FAQs
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <div className="p-8">
-            <TabsContent value="about" className="space-y-8 mt-0 focus-visible:outline-none focus:outline-none border-none">
-               <div className="grid gap-6 max-w-4xl">
-                  <div className="space-y-2">
-                    <Label className="text-[12px] font-semibold text-slate-700">Page Title</Label>
-                    <Input 
-                      value={content.about.title}
-                      onChange={e => setContent({...content, about: {...content.about, title: e.target.value}})}
-                      className="h-11 rounded-lg border-slate-200 font-bold"
-                    />
+      <div className="bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/50">
+        <Table>
+          <TableHeader className="bg-slate-50/50 border-b border-slate-100">
+            <TableRow className="h-14">
+              <TableHead className="pl-8 text-[11px] font-black uppercase text-slate-400 tracking-widest">Page Title</TableHead>
+              <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Slug / URL Path</TableHead>
+              <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Last Updated</TableHead>
+              <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Status</TableHead>
+              <TableHead className="text-right pr-8 text-[11px] font-black uppercase text-slate-400 tracking-widest">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredPages.map((page) => (
+              <TableRow key={page.id} className="h-20 hover:bg-slate-50/50 transition-colors group border-b border-slate-50">
+                <TableCell className="pl-8">
+                  <div className="flex items-center gap-3">
+                     <div className="h-10 w-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center border border-slate-200">
+                        <FileText className="h-5 w-5" />
+                     </div>
+                     <span className="text-[14px] font-black text-slate-900">{page.title}</span>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-[12px] font-semibold text-slate-700">Main Content</Label>
-                    <textarea 
-                      value={content.about.text}
-                      onChange={e => setContent({...content, about: {...content.about, text: e.target.value}})}
-                      className="w-full h-80 rounded-lg border border-slate-200 px-4 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium leading-relaxed bg-white"
-                    />
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[11px] uppercase underline underline-offset-4 decoration-slate-200 decoration-2">
+                     <LinkIcon className="h-3 w-3" />
+                     /{page.slug}
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-[12px] font-semibold text-slate-700">SEO Meta Description</Label>
-                    <Input 
-                      value={content.about.metaDescription}
-                      onChange={e => setContent({...content, about: {...content.about, metaDescription: e.target.value}})}
-                      className="h-11 rounded-lg border-slate-200 text-slate-500 font-medium"
-                    />
-                  </div>
-               </div>
-            </TabsContent>
-
-            <TabsContent value="contact" className="space-y-8 mt-0 focus-visible:outline-none focus:outline-none border-none">
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
-                  <div className="space-y-2">
-                    <Label className="text-[12px] font-semibold text-slate-700">Store Address</Label>
-                    <Input 
-                      value={content.contact.address}
-                      onChange={e => setContent({...content, contact: {...content.contact, address: e.target.value}})}
-                      className="h-11 rounded-lg border-slate-200 font-medium"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[12px] font-semibold text-slate-700">Support Email</Label>
-                    <Input 
-                      value={content.contact.email}
-                      onChange={e => setContent({...content, contact: {...content.contact, email: e.target.value}})}
-                      className="h-11 rounded-lg border-slate-200 font-medium"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[12px] font-semibold text-slate-700">Phone Number</Label>
-                    <Input 
-                      value={content.contact.phone}
-                      onChange={e => setContent({...content, contact: {...content.contact, phone: e.target.value}})}
-                      className="h-11 rounded-lg border-slate-200 font-medium"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[12px] font-semibold text-slate-700">WhatsApp Number</Label>
-                    <Input 
-                      value={content.contact.whatsapp}
-                      onChange={e => setContent({...content, contact: {...content.contact, whatsapp: e.target.value}})}
-                      className="h-11 rounded-lg border-slate-200 font-medium"
-                    />
-                  </div>
-               </div>
-            </TabsContent>
-
-            <TabsContent value="terms" className="space-y-8 mt-0 min-h-[400px] flex flex-col items-center justify-center text-center">
-               <div className="p-4 bg-slate-50 rounded-full border border-slate-100">
-                 <FileText className="h-10 w-10 text-slate-300" />
-               </div>
-               <div className="space-y-2">
-                 <h3 className="text-lg font-bold text-slate-900">Advanced Editor</h3>
-                 <p className="text-sm text-slate-500 max-w-xs mx-auto">The rich text editor is under development. You can use basic text area for now.</p>
-               </div>
-               <Button variant="outline" className="rounded-lg h-10 px-6 font-bold text-xs uppercase tracking-wider">Configure Editor</Button>
-            </TabsContent>
-
-            <TabsContent value="policy" className="space-y-8 mt-0 min-h-[400px] flex flex-col items-center justify-center text-center">
-               <div className="p-4 bg-[#ecfdfa] rounded-full border border-[#0db39e]/20">
-                 <RotateCcw className="h-10 w-10 text-[#0db39e]" />
-               </div>
-               <div className="space-y-2">
-                 <h3 className="text-lg font-bold text-slate-900">Return & Refund Policy</h3>
-                 <p className="text-sm text-slate-500 max-w-xs mx-auto">Define how returns are handled for your store items.</p>
-               </div>
-               <Button className="rounded-lg h-10 px-6 bg-[#00458e] text-white font-bold text-xs uppercase tracking-wider">Edit Policy</Button>
-            </TabsContent>
-
-            <TabsContent value="faq" className="space-y-8 mt-0 max-w-4xl focus-visible:outline-none focus:outline-none border-none">
-               <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                  <h3 className="font-bold text-xl text-slate-900 underline decoration-[#0db39e] decoration-2 underline-offset-8">FAQ Items</h3>
-                  <Button className="h-9 bg-[#00458e] hover:bg-blue-800 text-white rounded-lg font-semibold text-[11px] px-4 flex items-center gap-2">
-                    <Plus className="h-3.5 w-3.5" /> Add Question
-                  </Button>
-               </div>
-               <div className="space-y-6">
-                  {[1, 2].map(i => (
-                    <div key={i} className="p-8 bg-slate-50/50 rounded-xl border border-slate-200 relative group transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-200/50">
-                       <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:bg-red-50">
-                            <Minus className="h-4 w-4" />
-                         </Button>
-                       </div>
-                       <div className="space-y-5">
-                          <div className="space-y-2">
-                            <Label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">Question</Label>
-                            <Input className="bg-white rounded-lg border-slate-200 font-bold h-11" placeholder="e.g. How can I track my order?" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">Answer</Label>
-                            <textarea className="w-full bg-white rounded-lg border border-slate-200 p-4 text-sm min-h-[120px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium leading-relaxed" placeholder="Detailed answer content here..." />
-                          </div>
-                       </div>
-                    </div>
-                  ))}
-               </div>
-            </TabsContent>
-          </div>
-        </Tabs>
+                </TableCell>
+                <TableCell>
+                  <span className="text-[12px] font-bold text-slate-600">{page.lastUpdated}</span>
+                </TableCell>
+                <TableCell>
+                   <Badge className={`rounded-full px-3 py-1 font-black text-[9px] uppercase tracking-widest border-none ${
+                     page.status === 'published' ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-100' : 'bg-amber-500 text-white shadow-sm shadow-amber-100'
+                   }`}>
+                      {page.status}
+                   </Badge>
+                </TableCell>
+                <TableCell className="text-right pr-8">
+                   <div className="flex justify-end gap-2">
+                      <button className="h-9 w-9 flex items-center justify-center rounded-2xl bg-white text-slate-400 hover:bg-[#00458e] hover:text-white transition-all shadow-sm border border-slate-100">
+                         <Eye className="h-4 w-4" />
+                      </button>
+                      <button className="h-9 w-9 flex items-center justify-center rounded-2xl bg-white text-slate-400 hover:bg-[#00458e] hover:text-white transition-all shadow-sm border border-slate-100">
+                         <Edit className="h-4 w-4" />
+                      </button>
+                      <button className="h-9 w-9 flex items-center justify-center rounded-2xl bg-white text-slate-400 hover:bg-rose-500 hover:text-white transition-all shadow-sm border border-slate-100">
+                         <Trash2 className="h-4 w-4" />
+                      </button>
+                   </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
 };
-
-const Minus = ({ className }: { className?: string }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className={className}
-  >
-    <path d="M5 12h14"/>
-  </svg>
-);
 
 export default AdminCMS;

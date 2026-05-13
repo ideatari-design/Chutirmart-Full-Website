@@ -15,11 +15,32 @@ import {
   FileText,
   Image as ImageIcon,
   AlertCircle,
+  ShieldCheck,
   LayoutDashboard,
   Menu,
-  ExternalLink
+  ExternalLink,
+  ChevronDown,
+  ChevronRight,
+  Bell,
+  HelpCircle,
+  User,
+  Layout,
+  ListRestart,
+  PlusCircle,
+  Layers,
+  History,
+  MousePointer2,
+  Globe,
+  Wallet3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import AdminDashboard from '@/pages/AdminDashboard';
@@ -27,42 +48,129 @@ import AdminProducts from '@/pages/AdminProducts';
 import AdminOrders from '@/pages/AdminOrders';
 import AdminIncompleteOrders from '@/pages/AdminIncompleteOrders';
 import AdminCategories from '@/pages/AdminCategories';
+import AdminSorting from '@/pages/AdminSorting';
+import AdminBrands from '@/pages/AdminBrands';
+import AdminUnits from '@/pages/AdminUnits';
+import AdminAddProduct from '@/pages/AdminAddProduct';
+import AdminDraftProducts from '@/pages/AdminDraftProducts';
+import AdminStockAdjustment from '@/pages/AdminStockAdjustment';
 import AdminPayments from '@/pages/AdminPayments';
 import AdminCustomers from '@/pages/AdminCustomers';
 import AdminDeliveryZones from '@/pages/AdminDeliveryZones';
 import AdminCMS from '@/pages/AdminCMS';
+import AdminPromotions from '@/pages/AdminPromotions';
 import AdminBanners from '@/pages/AdminBanners';
 import AdminSettings from '@/pages/AdminSettings';
 import AdminCoupons from '@/pages/AdminCoupons';
+import AdminManageShop from '@/pages/AdminManageShop';
+import AdminLandingPages from '@/pages/AdminLandingPages';
 import { useSettings } from '@/context/SettingsContext';
 import { convertGoogleDriveLink } from '@/lib/imageUtils';
 
 const menuItems = [
   { label: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" />, path: '/admin' },
   { 
-    label: 'Order Management', 
-    isHeader: true 
+    label: 'Attributes', 
+    icon: <Tags className="h-5 w-5" />, 
+    path: '/admin/attributes',
+    children: [
+      { label: 'Categories', path: '/admin/attributes/categories' },
+      { label: 'Sorting', path: '/admin/attributes/sorting' },
+      { label: 'Brands', path: '/admin/attributes/brands' },
+      { label: 'Units', path: '/admin/attributes/units' },
+    ]
   },
-  { label: 'All Orders', icon: <ShoppingCart className="h-5 w-5" />, path: '/admin/orders' },
-  { label: 'Incomplete Orders', icon: <AlertCircle className="h-5 w-5" />, path: '/admin/incomplete-orders' },
-  { label: 'Payments', icon: <CreditCard className="h-5 w-5" />, path: '/admin/payments' },
   { 
-    label: 'Products Managements', 
-    isHeader: true 
+    label: 'Products', 
+    icon: <Package className="h-5 w-5" />, 
+    path: '/admin/products',
+    children: [
+      { label: 'Add Product', path: '/admin/products/add' },
+      { label: 'Manage Product', path: '/admin/products' },
+      { label: 'Draft Product', path: '/admin/products/draft' },
+      { label: 'Adjustment Stock', path: '/admin/products/adjustment' },
+    ]
   },
-  { label: 'All Products', icon: <Package className="h-5 w-5" />, path: '/admin/products' },
-  { label: 'Categories', icon: <Tags className="h-5 w-5" />, path: '/admin/categories' },
-  { label: 'Coupons', icon: <Ticket className="h-5 w-5" />, path: '/admin/coupons' },
-  { label: 'Delivery Zone', icon: <Truck className="h-5 w-5" />, path: '/admin/delivery-zones' },
-  { 
-    label: 'Store Settings', 
-    isHeader: true 
-  },
+  { label: 'Landing Page', icon: <Layout className="h-5 w-5" />, path: '/admin/landing-pages' },
   { label: 'Customers', icon: <Users className="h-5 w-5" />, path: '/admin/customers' },
-  { label: 'Content (CMS)', icon: <FileText className="h-5 w-5" />, path: '/admin/cms' },
-  { label: 'Banners', icon: <ImageIcon className="h-5 w-5" />, path: '/admin/banners' },
-  { label: 'Settings', icon: <Settings className="h-5 w-5" />, path: '/admin/settings' },
+  { label: 'Orders', icon: <ShoppingCart className="h-5 w-5" />, path: '/admin/orders' },
+  { label: 'Manage Shop', icon: <Store className="h-5 w-5" />, path: '/admin/manage-shop' },
+  { label: 'Payments', icon: <CreditCard className="h-5 w-5" />, path: '/admin/payments' },
+  { label: 'Delivery Zones', icon: <Truck className="h-5 w-5" />, path: '/admin/delivery-zones' },
+  { label: 'Coupon Code', icon: <Ticket className="h-5 w-5" />, path: '/admin/coupons' },
+  { label: 'Promotions', icon: <MousePointer2 className="h-5 w-5" />, path: '/admin/promotions' },
+  { label: 'HRM', icon: <Users className="h-5 w-5" />, path: '/admin/hrm' },
+  { label: 'Reports', icon: <BarChart3 className="h-5 w-5" />, path: '/admin/reports' },
+  { label: 'Role & Permission', icon: <Users className="h-5 w-5" />, path: '/admin/roles' },
+  { label: 'Fraud Check', icon: <AlertCircle className="h-5 w-5" />, path: '/admin/fraud-check' },
+  { label: 'Upgrade Package', icon: <CreditCard className="h-5 w-5" />, path: '/admin/upgrade' },
+  { label: 'How to Setup', icon: <HelpCircle className="h-5 w-5" />, path: '/admin/setup-guide' },
+  { label: 'Help 24/7', icon: <HelpCircle className="h-5 w-5" />, path: '/admin/help' },
 ];
+
+const SidebarItem = ({ item, pathname, onLinkClick }: { item: any, pathname: string, onLinkClick?: () => void }) => {
+  const [isOpen, setIsOpen] = React.useState(item.children ? pathname.startsWith(item.path) : false);
+  const isActive = item.path === '/admin' ? (pathname === '/admin' || pathname === '/admin/') : pathname.startsWith(item.path);
+
+  if (item.isHeader) {
+    return (
+      <p className="text-[11px] font-medium text-slate-500 px-3 pt-6 pb-2 uppercase tracking-wider">
+        {item.label}
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-1">
+      {item.children ? (
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-all duration-200 group ${
+            isActive ? 'bg-[#00458e] text-white shadow-lg shadow-blue-900/10' : 'text-slate-600 hover:bg-slate-50'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className={`${isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-700'}`}>
+              {item.icon}
+            </div>
+            <span className="font-medium text-sm">{item.label}</span>
+          </div>
+          {isOpen ? <ChevronDown className="h-4 w-4 opacity-50" /> : <ChevronRight className="h-4 w-4 opacity-50" />}
+        </button>
+      ) : (
+        <Link 
+          to={item.path} 
+          onClick={onLinkClick}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${
+            isActive ? 'bg-[#00458e] text-white shadow-lg shadow-blue-900/10' : 'text-slate-600 hover:bg-slate-50'
+          }`}
+        >
+          <div className={`${isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-700'}`}>
+            {item.icon}
+          </div>
+          <span className="font-medium text-sm">{item.label}</span>
+        </Link>
+      )}
+
+      {item.children && isOpen && (
+        <div className="pl-11 space-y-1 mt-1 animate-in slide-in-from-top-2 duration-200">
+          {item.children.map((child: any, idx: number) => (
+            <Link
+              key={idx}
+              to={child.path}
+              onClick={onLinkClick}
+              className={`block px-3 py-1.5 text-sm rounded-md transition-colors ${
+                pathname === child.path ? 'text-primary font-bold bg-primary/5' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+              }`}
+            >
+              {child.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const SidebarContent = ({ pathname, onLinkClick }: { pathname: string, onLinkClick?: () => void }) => {
   const { settings } = useSettings();
@@ -88,29 +196,7 @@ const SidebarContent = ({ pathname, onLinkClick }: { pathname: string, onLinkCli
       <ScrollArea className="flex-grow px-4">
         <nav className="space-y-1 pb-10">
           {menuItems.map((item, i) => (
-            item.isHeader ? (
-              <p key={i} className="text-[11px] font-medium text-slate-500 px-3 pt-6 pb-2">
-                {item.label}
-              </p>
-            ) : (
-              <Link 
-                key={i} 
-                to={item.path!} 
-                onClick={onLinkClick}
-                className="block"
-              >
-                <div className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${
-                  (item.path === '/admin' ? pathname === '/admin' || pathname === '/admin/' : pathname.startsWith(item.path)) 
-                    ? 'bg-[#00458e] text-white shadow-lg shadow-blue-900/10' 
-                    : 'text-slate-600 hover:bg-slate-50'
-                }`}>
-                  <div className={`${(item.path === '/admin' ? pathname === '/admin' || pathname === '/admin/' : pathname.startsWith(item.path)) ? 'text-white' : 'text-slate-500 group-hover:text-slate-700'}`}>
-                    {item.icon}
-                  </div>
-                  <span className="font-medium text-sm">{item.label}</span>
-                </div>
-              </Link>
-            )
+            <SidebarItem key={i} item={item} pathname={pathname} onLinkClick={onLinkClick} />
           ))}
         </nav>
       </ScrollArea>
@@ -142,24 +228,53 @@ const AdminLayout = () => {
       {/* Main Content Area */}
       <div className="flex-grow flex flex-col min-w-0">
         {/* Desktop Header */}
-        <header className="hidden lg:flex h-16 bg-transparent items-center justify-end px-10 pt-4">
+        <header className="hidden lg:flex h-20 bg-transparent items-center justify-between px-8 pt-4">
+           {/* Breadcrumbs can go here but existing design has it better in pages */}
+           <div></div>
            <div className="flex items-center gap-6">
-              <button className="text-slate-400 hover:text-slate-600 transition-colors">
-                <div className="w-6 h-6 rounded-full bg-slate-200/50 flex items-center justify-center text-[10px] font-bold text-slate-500">?</div>
+              <button className="h-10 w-10 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white rounded-xl transition-all shadow-sm">
+                <HelpCircle className="h-5 w-5" />
               </button>
-              <button className="text-slate-400 hover:text-slate-600 transition-colors relative">
-                <div className="w-2 h-2 bg-rose-500 rounded-full absolute top-0 right-0 border-2 border-[#f8fafa]"></div>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+              <button className="h-10 w-10 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white rounded-xl transition-all shadow-sm relative">
+                <div className="w-2 h-2 bg-rose-500 rounded-full absolute top-2 right-2 border-2 border-white shadow-sm animate-pulse"></div>
+                <Bell className="h-5 w-5" />
               </button>
-              <div className="flex items-center gap-3 ml-2">
-                 <div className="text-right">
-                    <p className="text-sm font-bold text-slate-900 leading-none">Katie Pena</p>
-                    <p className="text-[10px] text-slate-500 font-medium mt-1">Admin</p>
-                 </div>
-                 <div className="w-9 h-9 rounded-full bg-[#1a1a1a] overflow-hidden flex items-center justify-center border-2 border-white shadow-sm">
-                    <img src="https://i.pravatar.cc/150?u=katie" alt="User" className="w-full h-full object-cover" />
-                 </div>
-              </div>
+              
+              <Dialog>
+                <DialogTrigger render={
+                  <div className="flex items-center gap-3 ml-2 group cursor-pointer p-1 pr-3 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100">
+                     <div className="w-9 h-9 rounded-lg bg-[#00458e] overflow-hidden flex items-center justify-center border-2 border-white shadow-sm transform group-hover:rotate-3 transition-transform">
+                        <img src="https://i.pravatar.cc/150?u=admin" alt="User" className="w-full h-full object-cover" />
+                     </div>
+                     <div className="text-left">
+                        <p className="text-sm font-black text-slate-900 leading-none">Super Admin</p>
+                        <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-tighter">Manage Account</p>
+                     </div>
+                     <ChevronDown className="h-4 w-4 text-slate-300 group-hover:text-slate-950 transition-colors" />
+                  </div>
+                } />
+                <DialogContent className="sm:max-w-[300px] rounded-[32px] p-6 top-[15%] left-[90%] translate-x-[-100%] border-none shadow-2xl">
+                   <div className="space-y-4">
+                      <div className="flex flex-col items-center py-4 border-b border-slate-50">
+                        <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
+                           <Users className="h-8 w-8 text-slate-400" />
+                        </div>
+                        <p className="font-black text-slate-900">Admin Panel</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Super Admin Role</p>
+                      </div>
+                      <div className="space-y-1">
+                        <Link to="/admin/settings">
+                           <Button variant="ghost" className="w-full justify-start gap-3 rounded-xl h-11 text-slate-600 hover:text-[#00458e] hover:bg-blue-50 font-bold text-xs uppercase tracking-tight">
+                              <Settings className="h-4 w-4" /> Account Settings
+                           </Button>
+                        </Link>
+                        <Button variant="ghost" className="w-full justify-start gap-3 rounded-xl h-11 text-rose-500 hover:text-rose-600 hover:bg-rose-50 font-bold text-xs uppercase tracking-tight" onClick={() => window.location.href = '/'}>
+                           <LogOut className="h-4 w-4" /> Logout
+                        </Button>
+                      </div>
+                   </div>
+                </DialogContent>
+              </Dialog>
            </div>
         </header>
 
@@ -190,22 +305,45 @@ const AdminLayout = () => {
         </header>
 
         {/* Main View Area */}
-        <div className="flex-grow p-4 md:p-6 lg:p-10 overflow-x-hidden">
-           <div className="max-w-7xl mx-auto">
+        <div className="flex-grow p-4 md:p-6 lg:px-8 lg:py-10 overflow-x-hidden">
+           <div className="max-w-[1600px] mx-auto">
               <Routes>
                 <Route index element={<AdminDashboard />} />
+                
+                {/* Attributes */}
+                <Route path="attributes/categories" element={<AdminCategories />} />
+                <Route path="attributes/sorting" element={<AdminSorting />} />
+                <Route path="attributes/brands" element={<AdminBrands />} />
+                <Route path="attributes/units" element={<AdminUnits />} />
+                
+                {/* Products */}
                 <Route path="products" element={<AdminProducts />} />
+                <Route path="products/add" element={<AdminAddProduct />} />
+                <Route path="products/draft" element={<AdminDraftProducts />} />
+                <Route path="products/adjustment" element={<AdminStockAdjustment />} />
+                
+                {/* Management */}
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="incomplete-orders" element={<AdminIncompleteOrders />} />
-                <Route path="payments" element={<AdminPayments />} />
                 <Route path="customers" element={<AdminCustomers />} />
-                <Route path="categories" element={<AdminCategories />} />
-                <Route path="coupons" element={<AdminCoupons />} />
+                <Route path="manage-shop" element={<AdminManageShop />} />
+                <Route path="payments" element={<AdminPayments />} />
                 <Route path="delivery-zones" element={<AdminDeliveryZones />} />
+                <Route path="landing-pages" element={<AdminLandingPages />} />
+                
+                {/* CMS & Settings */}
+                <Route path="coupons" element={<AdminCoupons />} />
+                <Route path="promotions" element={<AdminPromotions />} />
                 <Route path="cms" element={<AdminCMS />} />
                 <Route path="banners" element={<AdminBanners />} />
                 <Route path="settings" element={<AdminSettings />} />
-                <Route path="*" element={<div className="p-20 text-center text-muted-foreground italic bg-white rounded-2xl border shadow-sm">New feature coming soon...</div>} />
+                
+                <Route path="hrm" element={<div className="p-20 text-center"><Users className="h-12 w-12 mx-auto mb-4 opacity-10" /> <span className="font-bold opacity-30">HRM Module Coming Soon</span></div>} />
+                <Route path="reports" element={<div className="p-20 text-center"><BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-10" /> <span className="font-bold opacity-30">Reports Module Coming Soon</span></div>} />
+                <Route path="roles" element={<div className="p-20 text-center"><ShieldCheck className="h-12 w-12 mx-auto mb-4 opacity-10" /> <span className="font-bold opacity-30">Roles & Permissions Coming Soon</span></div>} />
+                <Route path="fraud-check" element={<div className="p-20 text-center"><AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-10" /> <span className="font-bold opacity-30">Fraud Check System Coming Soon</span></div>} />
+                
+                <Route path="*" element={<div className="p-20 text-center text-muted-foreground italic bg-white rounded-2xl border shadow-sm">Page not found or feature coming soon...</div>} />
               </Routes>
            </div>
         </div>
