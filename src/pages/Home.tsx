@@ -282,7 +282,7 @@ const BannerSlider = () => {
               <img 
                 src={convertGoogleDriveLink(slides[currentSlide].image)} 
                 alt={slides[currentSlide].title}
-                className="w-full h-full object-fill md:object-cover select-none pointer-events-none" 
+                className="w-full h-full object-cover select-none pointer-events-none" 
                 referrerPolicy="no-referrer"
                 loading="eager"
                 onError={(e) => {
@@ -295,7 +295,7 @@ const BannerSlider = () => {
             <img 
               src={convertGoogleDriveLink(slides[currentSlide].image)} 
               alt={slides[currentSlide].title}
-              className="w-full h-full object-fill md:object-cover select-none pointer-events-none" 
+              className="w-full h-full object-cover select-none pointer-events-none" 
               referrerPolicy="no-referrer"
               loading="eager"
               onError={(e) => {
@@ -335,13 +335,13 @@ const BannerSlider = () => {
         <>
           <button 
             onClick={(e) => { e.stopPropagation(); paginate(-1); }}
-            className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 h-8 w-8 md:h-14 md:w-14 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center text-white md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-white/20 z-30 border border-white/20"
+            className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 h-8 w-8 md:h-14 md:w-14 rounded-full bg-white/20 md:bg-white/10 md:backdrop-blur-xl flex items-center justify-center text-white md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-white/20 z-30 border border-white/20 mobile-no-blur"
           >
             <ChevronLeft className="h-4 w-4 md:h-8 md:w-8" />
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); paginate(1); }}
-            className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 h-8 w-8 md:h-14 md:w-14 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center text-white md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-white/20 z-30 border border-white/20"
+            className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 h-8 w-8 md:h-14 md:w-14 rounded-full bg-white/20 md:bg-white/10 md:backdrop-blur-xl flex items-center justify-center text-white md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-white/20 z-30 border border-white/20 mobile-no-blur"
           >
             <ChevronRight className="h-4 w-4 md:h-8 md:w-8" />
           </button>
@@ -387,7 +387,7 @@ const Home = () => {
       {/* Hero Section */}
       <section className="bg-background py-4 md:py-8 lg:py-10">
         <div className="max-w-[1140px] mx-auto px-4">
-          <div className="relative aspect-[21/10] sm:aspect-[16/7] md:aspect-[21/9] lg:h-[520px] w-full">
+          <div className="relative aspect-[16/9] sm:aspect-[16/7] md:aspect-[21/9] lg:h-[520px] w-full gpu-accelerate">
              <BannerSlider />
           </div>
         </div>
@@ -434,15 +434,14 @@ const Home = () => {
            {loading ? (
              [...Array(8)].map((_, i) => <ProductCardSkeleton key={i} />)
            ) : (
-             <AnimatePresence mode="popLayout">
+             <AnimatePresence mode="wait">
                {filteredProducts.slice(0, 8).map((p) => (
                  <motion.div
                    key={p.id}
-                   layout
-                   initial={{ opacity: 0, scale: 0.9 }}
-                   animate={{ opacity: 1, scale: 1 }}
-                   exit={{ opacity: 0, scale: 0.9 }}
-                   transition={{ duration: 0.3 }}
+                   initial={{ opacity: 0 }}
+                   animate={{ opacity: 1 }}
+                   exit={{ opacity: 0 }}
+                   transition={{ duration: 0.2 }}
                  >
                    <ProductCard product={p} />
                  </motion.div>

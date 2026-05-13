@@ -37,14 +37,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <div className="group bg-white flex flex-col h-full transition-all duration-500 hover:shadow-2xl hover:shadow-[#00458f]/10 rounded-3xl border border-slate-100 w-full relative overflow-hidden">
+    <div className="group bg-white flex flex-col h-full transition-shadow duration-300 hover:shadow-2xl hover:shadow-[#00458f]/10 rounded-3xl border border-slate-100 w-full relative overflow-hidden">
       {/* Image Section */}
       <div className="relative aspect-square overflow-hidden bg-muted/20 shrink-0">
         <Link to={`/product/${product.id}`} className="w-full h-full block">
           <img 
             src={convertGoogleDriveLink(product.images[0] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800')} 
             alt={product.name} 
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            className="w-full h-full object-cover md:group-hover:scale-105 transition-transform duration-700"
             referrerPolicy="no-referrer"
             loading="lazy"
             onError={(e) => {
@@ -57,19 +57,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Badges */}
         {discount > 0 && (
           <div className="absolute top-4 left-4">
-            <Badge variant="secondary" className="bg-white/90 backdrop-blur-md text-primary border-none rounded-full px-3 py-1 text-[10px] font-bold shadow-sm">
+            <Badge variant="secondary" className="bg-white md:bg-white/90 md:backdrop-blur-md text-primary border-none rounded-full px-3 py-1 text-[10px] font-bold shadow-sm">
               -{discount}%
             </Badge>
           </div>
         )}
 
         {/* Floating Actions */}
-        <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500">
+        <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-4 opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100 transition-all duration-500">
           <Button 
             onClick={toggleWishlist}
             variant="secondary" 
             size="icon" 
-            className={`rounded-full h-10 w-10 backdrop-blur-md shadow-2xl transition-all ${isInWishlist(product.id) ? 'bg-accent text-accent-foreground' : 'bg-white/70 hover:bg-white text-foreground'}`}
+            className={`rounded-full h-10 w-10 bg-white shadow-2xl transition-all ${isInWishlist(product.id) ? 'bg-accent text-accent-foreground' : 'hover:bg-white text-foreground'}`}
           >
             <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
           </Button>
@@ -84,14 +84,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </h3>
         </Link>
         
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
           {product.oldPrice && (
-            <span className="text-[10px] md:text-sm text-muted-foreground font-bold line-through">
+            <span className="text-[10px] md:text-sm text-muted-foreground font-bold line-through whitespace-nowrap">
               {product.oldPrice.toLocaleString()} ৳
             </span>
           )}
-          <span className="text-lg md:text-2xl font-black text-primary">
-            {product.price.toLocaleString()} <span className="text-accent">৳</span>
+          <span className="text-lg md:text-2xl font-black text-primary whitespace-nowrap flex items-center gap-0.5">
+            {product.price.toLocaleString()} <span className="text-accent text-sm md:text-xl">৳</span>
           </span>
         </div>
 
@@ -120,14 +120,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               });
             }}
             variant="outline" 
-            className="w-full h-10 md:h-14 rounded-xl md:rounded-2xl border md:border-2 border-accent/20 text-accent hover:bg-accent hover:text-white hover:border-accent hover:scale-[1.02] font-bold text-[10px] md:text-sm flex items-center justify-center gap-1.5 md:gap-3 transition-all active:scale-95 px-2 md:px-6 shadow-sm"
+            className="w-full h-10 md:h-14 rounded-xl md:rounded-2xl border md:border-2 border-accent/20 text-accent md:hover:bg-accent md:hover:text-white md:hover:border-accent md:hover:scale-[1.02] font-bold text-[10px] md:text-sm flex items-center justify-center gap-1.5 md:gap-3 transition-all active:scale-95 px-2 md:px-6 shadow-sm"
           >
             Add to cart
             <ShoppingCart className="w-3.5 h-3.5 md:w-5 h-5" />
           </Button>
           <Button 
             onClick={handleBuyNow}
-            className="w-full h-10 md:h-14 rounded-xl md:rounded-2xl bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] font-bold text-[10px] md:text-sm transition-all active:scale-95 border-none shadow-lg shadow-primary/20"
+            className="w-full h-10 md:h-14 rounded-xl md:rounded-2xl bg-primary text-primary-foreground md:hover:opacity-90 md:hover:scale-[1.02] font-bold text-[10px] md:text-sm transition-all active:scale-95 border-none shadow-lg shadow-primary/20"
           >
             Buy now
           </Button>

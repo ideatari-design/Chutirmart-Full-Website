@@ -729,7 +729,7 @@ export default function App() {
       {!isAdminPath && <TopHeader />}
       {!isAdminPath && <MainHeader />}
       {!isAdminPath && <NavHeader />}
-      <main className="flex-grow w-full overflow-x-hidden">
+      <main className="flex-grow w-full overflow-x-hidden smooth-scroll-container">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Catalog />} />
