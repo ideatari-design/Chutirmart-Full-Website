@@ -140,7 +140,6 @@ const SidebarItem = ({
   }
 
   const handleLinkClick = () => {
-    onToggle();
     if (onLinkClick) onLinkClick();
   };
 
@@ -262,7 +261,7 @@ const SidebarContent = ({ pathname, onLinkClick }: { pathname: string, onLinkCli
               pathname={pathname} 
               onLinkClick={onLinkClick} 
               isOpen={openMenu === item.label}
-              isActive={openMenu === item.label}
+              isActive={activeMenuLabel === item.label}
               onToggle={() => setOpenMenu(openMenu === item.label ? null : item.label)}
             />
           ))}

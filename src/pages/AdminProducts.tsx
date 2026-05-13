@@ -189,16 +189,16 @@ const AdminProducts = () => {
   return (
     <div className="space-y-6 pb-20">
       <div className="flex flex-col space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
            <div className="flex flex-col space-y-1">
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">Manage Products</h1>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Organize and control your entire inventory — add, edit, or remove products instantly.</p>
+              <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Manage Products</h1>
+              <p className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest">Organize and control your entire inventory — add, edit, or remove products instantly.</p>
            </div>
            <Button 
              onClick={() => navigate('/admin/products/add')}
-             className="h-11 bg-[#00458e] hover:bg-blue-800 text-white rounded-xl font-black text-[11px] uppercase px-6 gap-2 shadow-lg shadow-blue-100 transition-all hover:scale-105 active:scale-95"
+             className="h-11 md:h-12 bg-[#00458e] hover:bg-blue-800 text-white rounded-xl font-black text-[11px] md:text-xs uppercase px-6 gap-2 shadow-lg shadow-blue-100 transition-all hover:scale-105 active:scale-95"
            >
-              <PlusCircle className="h-4 w-4" /> Add New Product
+              <PlusCircle className="h-4 w-4" /> Add Product
            </Button>
         </div>
 
@@ -225,22 +225,22 @@ const AdminProducts = () => {
         </div>
 
         {/* Search & Actions */}
-        <div className="flex flex-wrap items-center justify-between gap-4 py-2">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 py-2">
            <div className="relative w-full md:w-[400px]">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input 
-                placeholder="Search products by name, SKU, or category..." 
+                placeholder="Search products..." 
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="h-12 pl-12 rounded-lg border-slate-100 bg-white shadow-sm ring-0 focus:ring-2 focus:ring-primary/10 text-sm font-medium"
+                className="h-11 md:h-12 pl-12 rounded-lg border-slate-100 bg-white shadow-sm focus:ring-2 focus:ring-primary/10 text-xs md:text-sm font-medium"
               />
            </div>
-           <div className="flex items-center gap-3">
-              <div className="flex items-center bg-white border border-slate-100 rounded-lg shadow-sm h-12 overflow-hidden px-1">
+           <div className="flex items-center gap-3 w-full md:w-auto">
+              <div className="flex-grow md:flex-grow-0 flex items-center bg-white border border-slate-100 rounded-lg shadow-sm h-11 md:h-12 overflow-hidden px-1">
                  <select 
                   value={bulkAction}
                   onChange={(e) => setBulkAction(e.target.value)}
-                  className="h-full bg-transparent text-[11px] font-bold uppercase tracking-tight text-slate-500 outline-none px-4 cursor-pointer"
+                  className="w-full md:w-auto h-full bg-transparent text-[11px] font-bold uppercase tracking-tight text-slate-500 outline-none px-4 cursor-pointer"
                  >
                     <option value="">Bulk Action</option>
                     <option value="publish">Publish Selected</option>
@@ -253,7 +253,7 @@ const AdminProducts = () => {
                   onClick={handleBulkAction}
                   disabled={!bulkAction || selectedIds.length === 0}
                   size="icon" 
-                  className={`h-10 w-10 ${!bulkAction || selectedIds.length === 0 ? 'bg-slate-100 text-slate-400' : 'bg-[#00458e] text-white'} rounded-md shadow-md`}
+                  className={`h-9 w-9 md:h-10 md:w-10 flex-shrink-0 ${!bulkAction || selectedIds.length === 0 ? 'bg-slate-100 text-slate-400' : 'bg-[#00458e] text-white'} rounded-md shadow-md`}
                  >
                     <CheckCircle2 className="h-4 w-4" />
                  </Button>
@@ -261,7 +261,7 @@ const AdminProducts = () => {
               <Button 
                 variant="ghost" 
                 onClick={() => { setSearch(''); setFilterTab('All'); setSelectedIds([]); }}
-                className="h-12 w-12 rounded-lg border border-slate-100 bg-white text-slate-400 hover:text-slate-900 shadow-sm"
+                className="h-11 w-11 md:h-12 md:w-12 rounded-lg border border-slate-100 bg-white text-slate-400 hover:text-slate-900 shadow-sm shrink-0"
               >
                  <RefreshCcw className="h-4 w-4" />
               </Button>

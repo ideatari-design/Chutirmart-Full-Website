@@ -625,12 +625,12 @@ const Footer = () => {
   return (
     <footer className="bg-[#111] text-white pt-20 pb-10">
       <div className="max-w-[1140px] mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-20">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-12 mb-20">
+          <div className="col-span-2 md:col-span-3 lg:col-span-2">
             <Link to="/">
-              <Logo className="h-12 w-auto object-contain mb-8" invert />
+              <Logo className="h-10 md:h-12 w-auto object-contain mb-6 md:mb-8" invert />
             </Link>
-            <div className="space-y-4 text-sm text-muted-foreground">
+            <div className="space-y-4 text-xs md:text-sm text-muted-foreground">
             <div className="flex gap-3">
               <MapPin className="h-5 w-5 text-muted-foreground/60 shrink-0" />
               <span>Dhaka, Bangladesh</span>
@@ -670,8 +670,8 @@ const Footer = () => {
           </div>
         ))}
 
-        <div className="lg:col-span-2">
-           <h4 className="font-bold text-[11px] uppercase mb-8">Follow Us</h4>
+        <div className="col-span-2 md:col-span-3 lg:col-span-2">
+           <h4 className="font-bold text-[10px] md:text-[11px] uppercase mb-6 md:mb-8 tracking-widest text-[#555]">Follow Us</h4>
             <div className="relative">
                <Input 
                  placeholder="Enter your email" 
@@ -689,8 +689,8 @@ const Footer = () => {
         </div>
       </div>
       
-      <div className="flex flex-col md:flex-row justify-between items-center py-10 border-t border-gray-800 gap-12">
-        <div className="flex flex-wrap items-center gap-12">
+      <div className="flex flex-col lg:flex-row justify-between items-center py-10 border-t border-gray-800 gap-10 lg:gap-12 text-center lg:text-left">
+        <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center lg:justify-start gap-8 lg:gap-12">
             {[
               { icon: <Phone className="h-6 w-6 text-primary" />, title: "Can't find what you're looking for?", link: "Contact Us" },
               { icon: <HelpCircle className="h-6 w-6 text-primary" />, title: "How can we help?", link: "Help Center" },

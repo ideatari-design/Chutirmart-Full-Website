@@ -124,19 +124,19 @@ const FlashDeals = ({ products, loading }: { products: Product[], loading: boole
   }, []);
 
   return (
-    <div className="py-20 max-w-[1140px] mx-auto px-0 sm:px-4">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-12 gap-6 bg-secondary/50 p-8 rounded-3xl border border-border mx-4 sm:mx-0">
-        <div className="flex items-center gap-8">
-          <div>
-            <h2 className="text-4xl font-bold text-foreground">Flash sale</h2>
-            <p className="text-xs font-semibold text-muted-foreground mt-2">Don't miss the current deals!</p>
+    <div className="py-12 md:py-20 max-w-[1140px] mx-auto px-0 sm:px-4">
+      <div className="flex flex-col lg:flex-row justify-between items-center mb-12 gap-6 bg-secondary/50 p-6 md:p-8 rounded-[1.5rem] md:rounded-3xl border border-border mx-4 sm:mx-0">
+        <div className="flex flex-col items-center lg:items-start lg:flex-row lg:gap-12 w-full">
+          <div className="text-center lg:text-left mb-4 lg:mb-0">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">Flash sale</h2>
+            <p className="text-[11px] md:text-xs font-semibold text-muted-foreground mt-1 md:mt-2">Don't miss the current deals!</p>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-[11px] font-bold text-muted-foreground">Ends in:</span>
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-muted-foreground">Ends in:</span>
             <div className="flex gap-2">
               {[timeLeft.h, timeLeft.m, timeLeft.s].map((t, i) => (
                 <div key={i} className="flex flex-col items-center">
-                  <div className="bg-accent text-accent-foreground w-12 h-12 flex items-center justify-center text-xl font-bold rounded-xl shadow-lg shadow-accent/20">
+                  <div className="bg-accent text-accent-foreground w-11 h-11 md:w-12 md:h-12 flex items-center justify-center text-lg md:text-xl font-bold rounded-xl shadow-lg shadow-accent/20">
                     {t.toString().padStart(2, '0')}
                   </div>
                   <span className="text-[9px] font-bold mt-1 text-muted-foreground">{i === 0 ? 'Hrs' : i === 1 ? 'Min' : 'Sec'}</span>
@@ -145,14 +145,14 @@ const FlashDeals = ({ products, loading }: { products: Product[], loading: boole
             </div>
           </div>
         </div>
-        <Link to="/products">
-          <Button variant="outline" className="rounded-2xl px-10 h-14 font-bold text-[15px] leading-[18px] border-2 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all shadow-sm hover:shadow-md no-underline">
+        <Link to="/products" className="w-full lg:w-auto">
+          <Button variant="outline" className="w-full lg:w-auto rounded-xl md:rounded-2xl px-10 h-12 md:h-14 font-black text-[13px] md:text-[15px] leading-[18px] border-2 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all shadow-sm hover:shadow-md no-underline uppercase tracking-tight">
             See all products
           </Button>
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 px-4 sm:px-0">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 px-4 sm:px-0">
         {loading ? (
           [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
         ) : products.length > 0 ? (
@@ -249,7 +249,7 @@ const BannerSlider = () => {
   }
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-[1.5rem] group bg-secondary shadow-2xl">
+    <div className="relative h-full w-full overflow-hidden rounded-2xl md:rounded-[1.5rem] group bg-secondary shadow-2xl">
       <AnimatePresence initial={false} custom={direction} mode="popLayout">
         <motion.div
           key={currentSlide}
@@ -282,7 +282,7 @@ const BannerSlider = () => {
               <img 
                 src={convertGoogleDriveLink(slides[currentSlide].image)} 
                 alt={slides[currentSlide].title}
-                className="w-full h-full object-cover select-none pointer-events-none" 
+                className="w-full h-full object-fill md:object-cover select-none pointer-events-none" 
                 referrerPolicy="no-referrer"
                 loading="eager"
                 onError={(e) => {
@@ -295,7 +295,7 @@ const BannerSlider = () => {
             <img 
               src={convertGoogleDriveLink(slides[currentSlide].image)} 
               alt={slides[currentSlide].title}
-              className="w-full h-full object-cover select-none pointer-events-none" 
+              className="w-full h-full object-fill md:object-cover select-none pointer-events-none" 
               referrerPolicy="no-referrer"
               loading="eager"
               onError={(e) => {
@@ -312,7 +312,7 @@ const BannerSlider = () => {
 
       {/* Navigation Dots */}
       {slides.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+        <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2 md:gap-3 z-20">
           {slides.map((_, i) => (
             <button
               key={i}
@@ -320,10 +320,10 @@ const BannerSlider = () => {
                 setDirection(i > currentSlide ? 1 : -1);
                 setCurrentSlide(i);
               }}
-              className={`h-2 rounded-full transition-all duration-500 shadow-sm ${
+              className={`h-1.5 md:h-2 rounded-full transition-all duration-500 shadow-sm ${
                 i === currentSlide 
-                ? 'w-10 bg-white' 
-                : 'w-2 bg-white/40 hover:bg-white/60'
+                ? 'w-8 md:w-12 bg-white' 
+                : 'w-1.5 md:w-2 bg-white/40 hover:bg-white/60'
               }`}
             />
           ))}
@@ -335,15 +335,15 @@ const BannerSlider = () => {
         <>
           <button 
             onClick={(e) => { e.stopPropagation(); paginate(-1); }}
-            className="absolute left-6 top-1/2 -translate-y-1/2 h-14 w-14 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-white/20 z-30 border border-white/20"
+            className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 h-8 w-8 md:h-14 md:w-14 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center text-white md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-white/20 z-30 border border-white/20"
           >
-            <ChevronLeft className="h-8 w-8" />
+            <ChevronLeft className="h-4 w-4 md:h-8 md:w-8" />
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); paginate(1); }}
-            className="absolute right-6 top-1/2 -translate-y-1/2 h-14 w-14 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-white/20 z-30 border border-white/20"
+            className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 h-8 w-8 md:h-14 md:w-14 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center text-white md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-white/20 z-30 border border-white/20"
           >
-            <ChevronRight className="h-8 w-8" />
+            <ChevronRight className="h-4 w-4 md:h-8 md:w-8" />
           </button>
         </>
       )}
@@ -385,9 +385,9 @@ const Home = () => {
   return (
     <div className="bg-background">
       {/* Hero Section */}
-      <section className="bg-background py-6 md:py-10">
+      <section className="bg-background py-4 md:py-8 lg:py-10">
         <div className="max-w-[1140px] mx-auto px-4">
-          <div className="relative h-[220px] sm:h-[350px]">
+          <div className="relative aspect-[21/10] sm:aspect-[16/7] md:aspect-[21/9] lg:h-[520px] w-full">
              <BannerSlider />
           </div>
         </div>
@@ -408,28 +408,29 @@ const Home = () => {
       <FlashDeals products={flashSaleProducts} loading={loading} />
       
       {/* New Arrivals */}
-      <section className="py-20 max-w-[1140px] mx-auto px-0 sm:px-4 border-t">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-12 gap-8 px-4 sm:px-0">
-            <h2 className="text-4xl font-bold text-foreground">New arrivals</h2>
-            <div className="flex flex-wrap justify-center gap-10 items-center">
-              {tabs.map((tab) => (
-                <button 
-                  key={tab} 
-                  onClick={() => setActiveTab(tab)}
-                  className={`text-xs font-bold transition-all relative py-2 ${activeTab === tab ? 'text-accent' : 'text-muted-foreground hover:text-foreground'}`}
-                >
-                  {tab}
-                  {activeTab === tab && <motion.div layoutId="tabUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-full" />}
-                </button>
-              ))}
-              <Separator orientation="vertical" className="h-6 hidden sm:block bg-border/50" />
-              <Link to="/products" className="text-xs font-bold text-muted-foreground hover:text-accent flex items-center gap-2 transition-colors group">
-                See all <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
+      <section className="py-12 md:py-20 max-w-[1140px] mx-auto px-0 md:px-4 border-t">
+        <div className="flex flex-col items-center mb-8 md:mb-12 gap-8 px-4 md:px-0">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">New arrivals</h2>
+            <div className="w-full flex items-center gap-6 overflow-x-auto no-scrollbar pb-2 px-2">
+              <div className="flex items-center gap-8 md:gap-10 mx-auto">
+                {tabs.map((tab) => (
+                  <button 
+                    key={tab} 
+                    onClick={() => setActiveTab(tab)}
+                    className={`text-[11px] md:text-xs font-black uppercase tracking-widest transition-all relative py-2 whitespace-nowrap ${activeTab === tab ? 'text-accent' : 'text-muted-foreground hover:text-foreground'}`}
+                  >
+                    {tab}
+                    {activeTab === tab && <motion.div layoutId="tabUnderline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-full" />}
+                  </button>
+                ))}
+              </div>
             </div>
+            <Link to="/products" className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-accent flex items-center gap-2 transition-colors group">
+              See all <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+            </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 px-4 sm:px-0">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 px-4 sm:px-0">
            {loading ? (
              [...Array(8)].map((_, i) => <ProductCardSkeleton key={i} />)
            ) : (
@@ -464,13 +465,17 @@ const Home = () => {
       </section>
 
       {/* Best Selling */}
-      <section className="py-24 bg-secondary/30">
-         <div className="max-w-[1140px] mx-auto px-0 sm:px-4">
-            <div className="flex justify-between items-center mb-12 px-4 sm:px-0">
-               <h2 className="text-4xl font-bold text-foreground">Best selling</h2>
-               <Link to="/products" className="text-xs font-bold text-muted-foreground hover:text-accent transition-colors bg-white px-6 py-2.5 rounded-full shadow-sm border border-border/50">See all products</Link>
+      <section className="py-16 md:py-24 bg-secondary/30">
+         <div className="max-w-[1140px] mx-auto px-0 md:px-4">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6 px-4 md:px-0">
+               <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center md:text-left">Best selling</h2>
+               <Link to="/products" className="w-full md:w-auto">
+                 <Button variant="outline" className="w-full md:w-auto h-12 md:h-auto rounded-full px-8 py-2.5 bg-white border-border/50 text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-accent hover:border-accent transition-all shadow-sm">
+                   See all products
+                 </Button>
+               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 px-4 sm:px-0">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 px-4 sm:px-0">
                {loading ? (
                  [...Array(4)].map((_, i) => <ProductCardSkeleton key={i} />)
                ) : bestSellingProducts.length > 0 ? (
@@ -487,16 +492,16 @@ const Home = () => {
       </section>
 
       {/* From Our Blog */}
-      <section className="py-20 max-w-[1140px] mx-auto px-4 border-t">
-         <h2 className="text-3xl font-bold mb-12">From our blog</h2>
+      <section className="py-16 md:py-20 max-w-[1140px] mx-auto px-4 border-t">
+         <h2 className="text-3xl font-bold mb-12 text-center md:text-left">From our blog</h2>
          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { category: "Beauty & fashion", title: "Weekday Outfit Inspiration For All Occasions", author: "Mirtul Mina", image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=600" },
-              { category: "Cosmetics", title: "100% Pure & Natural Sage Essential Oil", author: "Mirtul Mina", image: "https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&q=80&w=600" },
-              { category: "Electronics", title: "Tips for Cleaning Desktop & Laptop", author: "Mirtul Mina", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=600" },
+              { category: "Beauty & fashion", title: "Weekday Outfit Inspiration", author: "Mirtul Mina", image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=600" },
+              { category: "Cosmetics", title: "Pure & Natural Essential Oil", author: "Mirtul Mina", image: "https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&q=80&w=600" },
+              { category: "Electronics", title: "Tips for Cleaning Hardware", author: "Mirtul Mina", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=600" },
             ].map((blog, i) => (
               <div key={i} className="group cursor-pointer">
-                  <div className="aspect-[16/10] overflow-hidden rounded-[2rem] mb-6 shadow-xl shadow-foreground/5">
+                  <div className="aspect-[16/10] overflow-hidden rounded-[1.5rem] md:rounded-[2rem] mb-6 shadow-xl shadow-foreground/5">
                     <img 
                       src={blog.image} 
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" 
@@ -507,15 +512,15 @@ const Home = () => {
                       }}
                     />
                   </div>
-                 <div className="space-y-4 px-2">
-                    <div className="flex items-center gap-4 text-[11px] font-bold text-muted-foreground">
+                 <div className="space-y-3 md:space-y-4 px-2">
+                    <div className="flex items-center gap-4 text-[10px] md:text-[11px] font-bold text-muted-foreground uppercase tracking-tight">
                        <span className="text-primary">{blog.category}</span>
                        <span className="w-1 h-1 rounded-full bg-border" />
                        <span>By <span className="text-foreground">{blog.author}</span></span>
                     </div>
-                    <h3 className="text-2xl font-bold group-hover:text-primary transition-colors leading-tight">{blog.title}</h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec porta et nisl at sodales.</p>
-                    <Button variant="outline" className="h-12 text-[11px] font-bold px-10 rounded-2xl border-2 hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm">Read more</Button>
+                    <h3 className="text-xl md:text-2xl font-bold group-hover:text-primary transition-colors leading-tight">{blog.title}</h3>
+                    <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 leading-relaxed">High quality products and expert advice for your everyday needs.</p>
+                    <Button variant="outline" className="w-full md:w-auto h-11 md:h-12 text-[10px] md:text-[11px] font-black uppercase tracking-widest px-8 rounded-xl md:rounded-2xl border-2 hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm">Read more</Button>
                  </div>
               </div>
             ))}
@@ -523,14 +528,14 @@ const Home = () => {
       </section>
 
       {/* Middle Search banner */}
-      <section className="bg-primary py-24 text-white overflow-hidden relative">
+      <section className="bg-primary py-16 md:py-24 text-white overflow-hidden relative">
          <div className="max-w-2xl mx-auto px-4 text-center relative z-10">
-            <h2 className="text-4xl md:text-6xl font-bold mb-8">Looking for <br /> something else?</h2>
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 md:mb-8 leading-tight">Looking for <br /> something else?</h2>
             <div className="relative mb-8 group">
-               <Input placeholder="Search for products..." className="h-16 pr-16 rounded-full text-sm text-center border-none bg-white/10 backdrop-blur-xl text-white placeholder:text-white/40 focus-visible:ring-white/20" />
-               <Button className="absolute right-2 top-2 h-12 w-12 rounded-full bg-white text-primary hover:bg-white/90 shadow-xl"><Search className="h-5 w-5" /></Button>
+               <Input placeholder="Search for products..." className="h-14 md:h-16 pr-14 md:pr-16 rounded-full text-xs md:text-sm text-center border-none bg-white/10 backdrop-blur-xl text-white placeholder:text-white/40 focus-visible:ring-white/20" />
+               <Button className="absolute right-1.5 md:right-2 top-1.5 md:top-2 h-11 w-11 md:h-12 md:w-12 rounded-full bg-white text-primary hover:bg-white/90 shadow-xl transition-all active:scale-95"><Search className="h-4 w-4 md:h-5 md:w-5" /></Button>
             </div>
-            <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-xs font-bold text-white/70">
+            <div className="flex flex-wrap justify-center gap-x-6 md:gap-x-8 gap-y-3 md:gap-y-4 text-[10px] md:text-xs font-black uppercase tracking-widest text-white/70">
                {["Smartphone", "Tablet", "Furniture", "Laptop", "Fashion", "Home & decor", "Camera"].map(tag => (
                  <span key={tag} className="hover:text-white cursor-pointer transition-colors hover:scale-110 transform duration-300">{tag}</span>
                ))}

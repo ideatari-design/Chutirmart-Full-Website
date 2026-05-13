@@ -163,12 +163,12 @@ const AdminOrders = () => {
   return (
     <div className="space-y-6 pb-20">
       <div className="flex flex-col space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
            <div className="flex flex-col space-y-1">
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">All Orders</h1>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Manage and track every customer order — from new requests to successful deliveries.</p>
+              <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">All Orders</h1>
+              <p className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest">Manage and track every customer order — from new requests to successful deliveries.</p>
            </div>
-           <div className="flex items-center gap-2">
+           <div className="flex items-center gap-2 self-end sm:self-auto">
               <span className="h-5 w-5 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white shadow-sm">1</span>
            </div>
         </div>
@@ -199,53 +199,56 @@ const AdminOrders = () => {
         </div>
 
         {/* Action Bar (Filters + Bulk Buttons) */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mt-4">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mt-4">
            {/* Left Controls */}
-           <div className="flex flex-wrap items-center gap-2">
-              <div className="flex flex-col space-y-1.5 min-w-[150px]">
+           <div className="grid grid-cols-1 sm:grid-cols-2 xl:flex xl:flex-wrap items-end gap-3">
+              <div className="flex flex-col space-y-1.5 min-w-0 sm:min-w-[150px]">
                  <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Invoice / Phone</label>
                  <div className="relative">
-                    <Smartphone className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-300 pointer-events-none" />
+                    <Smartphone className="absolute left-3 top-3 h-3.5 w-3.5 text-slate-300 pointer-events-none" />
                     <Input 
                       placeholder="Invoice / Phone" 
                       value={invoicePhone}
                       onChange={(e) => setInvoicePhone(e.target.value)}
-                      className="h-10 pl-9 text-[11px] font-bold border-slate-100 bg-white rounded-lg shadow-sm focus:ring-primary/20" 
+                      className="h-10 md:h-11 pl-9 text-[11px] font-bold border-slate-100 bg-white rounded-lg shadow-sm focus:ring-primary/20" 
                     />
                  </div>
               </div>
-              <div className="flex flex-col space-y-1.5 min-w-[120px]">
+              <div className="flex flex-col space-y-1.5 min-w-0 sm:min-w-[120px]">
                  <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Order Type</label>
-                 <select 
-                   value={orderType}
-                   onChange={(e) => setOrderType(e.target.value)}
-                   className="h-10 px-3 text-[11px] font-bold bg-white border border-slate-100 rounded-lg shadow-sm outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer pr-8"
-                 >
-                    <option value="All">All</option>
-                    <option value="Multiple">Multiple Products</option>
-                    <option value="Single">Single Product</option>
-                 </select>
+                 <div className="relative">
+                    <select 
+                      value={orderType}
+                      onChange={(e) => setOrderType(e.target.value)}
+                      className="w-full h-10 md:h-11 px-3 text-[11px] font-bold bg-white border border-slate-100 rounded-lg shadow-sm outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer pr-8"
+                    >
+                       <option value="All">All</option>
+                       <option value="Multiple">Multiple Products</option>
+                       <option value="Single">Single Product</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-3.5 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                 </div>
               </div>
-              <div className="flex flex-col space-y-1.5 min-w-[150px]">
+              <div className="flex flex-col space-y-1.5 min-w-0 sm:min-w-[150px]">
                  <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Order Date</label>
                  <div className="relative">
-                    <Calendar className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-300 pointer-events-none" />
+                    <Calendar className="absolute left-3 top-3 h-3.5 w-3.5 text-slate-300 pointer-events-none" />
                     <Input 
                       type="date"
                       value={orderDate}
                       onChange={(e) => setOrderDate(e.target.value)}
-                      className="h-10 pl-9 text-[11px] font-bold border-slate-100 bg-white rounded-lg shadow-sm appearance-none" 
+                      className="h-10 md:h-11 pl-9 text-[11px] font-bold border-slate-100 bg-white rounded-lg shadow-sm appearance-none" 
                     />
                  </div>
               </div>
-              <div className="flex items-center gap-1 mt-auto h-10">
-                 <Button className="h-full px-5 bg-[#00458e] text-white rounded-xl gap-2 font-bold text-[10px] shadow-lg shadow-blue-100 hover:shadow-xl transition-all uppercase tracking-widest">
+              <div className="flex items-center gap-2 h-10 md:h-11 sm:col-span-2 xl:col-span-1">
+                 <Button className="flex-grow sm:flex-grow-0 h-full px-6 bg-[#00458e] text-white rounded-lg gap-2 font-black text-[11px] shadow-lg shadow-blue-100 hover:shadow-xl transition-all uppercase tracking-widest">
                     <Search className="h-3.5 w-3.5" /> Search
                  </Button>
                  <Button 
                    variant="ghost" 
                    onClick={() => { setInvoicePhone(""); setOrderType("All"); setOrderDate(""); }}
-                   className="h-full px-4 text-slate-400 hover:text-slate-900 gap-2 font-bold text-[10px] uppercase tracking-widest"
+                   className="h-full px-4 text-slate-400 hover:text-slate-900 gap-2 font-black text-[11px] uppercase tracking-widest"
                  >
                     <RefreshCcw className="h-3.5 w-3.5" /> Clear
                  </Button>

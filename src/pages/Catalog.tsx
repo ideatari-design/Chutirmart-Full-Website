@@ -277,7 +277,7 @@ const Catalog = () => {
 
           {/* Product Grid */}
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 px-0">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 px-0">
                {[...Array(6)].map((_, i) => <ProductCardSkeleton key={i} />)}
             </div>
           ) : filteredProducts.length === 0 ? (
@@ -292,7 +292,7 @@ const Catalog = () => {
                <Button onClick={clearFilters} variant="outline" className="rounded-full px-10 uppercase font-black text-xs transition-all hover:bg-secondary border-2">Reset View</Button>
             </div>
           ) : (
-            <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 px-0" : "flex flex-col gap-8"}>
+            <div className={viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 px-0" : "flex flex-col gap-8"}>
                {paginatedProducts.map(product => (
                  <ProductCard key={product.id} product={product} />
                ))}

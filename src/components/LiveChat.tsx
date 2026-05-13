@@ -94,14 +94,14 @@ const LiveChat = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end">
+    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[100] flex flex-col items-end">
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="w-[350px] mb-4 bg-background rounded-2xl shadow-2xl border flex flex-col overflow-hidden h-[500px]"
+            className="w-[calc(100vw-32px)] sm:w-[350px] mb-4 bg-background rounded-2xl shadow-2xl border flex flex-col overflow-hidden h-[500px] max-h-[calc(100vh-120px)]"
           >
             {/* Header */}
             <div className="bg-primary p-4 text-primary-foreground flex justify-between items-center shrink-0">
@@ -209,7 +209,10 @@ const LiveChat = () => {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
         className="h-14 w-14 bg-primary text-primary-foreground rounded-full shadow-2xl flex items-center justify-center relative overflow-hidden group"
       >
         <AnimatePresence mode="wait">

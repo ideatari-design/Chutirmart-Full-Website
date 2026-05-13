@@ -38,7 +38,13 @@ const AdminChat = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
-  const [incompleteOrders, setIncompleteOrders] = useState<IncompleteOrder[]>([]);
+  const [mobileView, setMobileView] = useState<'list' | 'chat'>('list');
+
+  useEffect(() => {
+    if (activeSessionId) {
+      setMobileView('chat');
+    }
+  }, [activeSessionId]);
 
   useEffect(() => {
     const socket = chatService.connect();
@@ -144,9 +150,9 @@ const AdminChat = () => {
   }, [activeSession, incompleteOrders]);
 
   return (
-    <div className="flex h-[calc(100vh-160px)] bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
+    <div className="flex h-[calc(100vh-120px)] md:h-[calc(100vh-160px)] bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm relative">
       {/* Sidebar - Sessions List */}
-      <div className="w-[350px] border-r flex flex-col bg-slate-50/50 shrink-0">
+      <div className={`w-full md:w-[350px] border-r flex flex-col bg-slate-50/50 shrink-0 ${mobileView === 'chat' ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-6 space-y-4 border-b bg-white">
           <div className="flex justify-between items-center">
              <h2 className="text-xl font-bold text-slate-900 group flex items-center gap-2">
@@ -226,40 +232,48 @@ const AdminChat = () => {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-grow flex flex-col bg-slate-50/30 overflow-hidden">
+      <div className={`flex-grow flex flex-col bg-slate-50/30 overflow-hidden ${mobileView === 'list' ? 'hidden md:flex' : 'flex'}`}>
         {!activeSessionId ? (
-          <div className="flex-grow flex flex-col items-center justify-center text-center p-20 space-y-6 text-slate-900">
-             <div className="h-24 w-24 bg-white rounded-3xl shadow-xl shadow-blue-900/5 flex items-center justify-center text-[#00458e] animate-bounce-slow">
-                <MessageCircle className="h-12 w-12" />
+          <div className="flex-grow flex flex-col items-center justify-center text-center p-10 md:p-20 space-y-6 text-slate-900">
+             <div className="h-20 w-20 md:h-24 md:w-24 bg-white rounded-3xl shadow-xl shadow-blue-900/5 flex items-center justify-center text-[#00458e] animate-bounce-slow">
+                <MessageCircle className="h-10 w-10 md:h-12 md:w-12" />
              </div>
              <div>
-                <h3 className="text-2xl font-black tracking-tight">Select a conversation</h3>
-                <p className="text-slate-500 text-sm font-medium mt-1">Pick a customer from the left to start chatting in real time.</p>
+                <h3 className="text-xl md:text-2xl font-black tracking-tight">Select a conversation</h3>
+                <p className="text-slate-500 text-xs md:text-sm font-medium mt-1">Pick a customer from the left to start chatting in real time.</p>
              </div>
           </div>
         ) : (
           <>
             {/* Header */}
-            <div className="p-6 border-b bg-white flex justify-between items-center shrink-0">
-               <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 bg-slate-100 rounded-2xl flex items-center justify-center text-[#00458e]">
-                     <User className="h-7 w-7" />
+            <div className="p-4 md:p-6 border-b bg-white flex justify-between items-center shrink-0">
+               <div className="flex items-center gap-3 md:gap-4">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="md:hidden h-8 w-8 text-slate-500"
+                    onClick={() => setMobileView('list')}
+                  >
+                    <ChevronRight className="h-5 w-5 rotate-180" />
+                  </Button>
+                  <div className="h-10 w-10 md:h-12 md:w-12 bg-slate-100 rounded-xl md:rounded-2xl flex items-center justify-center text-[#00458e]">
+                     <User className="h-6 w-6 md:h-7 md:w-7" />
                   </div>
-                  <div>
-                    <h3 className="font-bold text-slate-900 text-lg leading-tight">{activeSession?.name || 'Anonymous User'}</h3>
-                    <div className="flex items-center gap-3 mt-0.5">
-                       <span className="flex items-center gap-1 text-[11px] font-bold text-[#00458e]">
-                          <Phone className="h-3 w-3" /> {activeSession?.phone || 'No Phone provided'}
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-slate-900 text-sm md:text-lg leading-tight truncate">{activeSession?.name || 'Anonymous User'}</h3>
+                    <div className="flex items-center gap-2 md:gap-3 mt-0.5">
+                       <span className="flex items-center gap-1 text-[9px] md:text-[11px] font-bold text-[#00458e] truncate">
+                          <Phone className="h-2.5 w-2.5" /> {activeSession?.phone || 'No Phone provided'}
                        </span>
-                       <span className="h-1 w-1 rounded-full bg-slate-300" />
-                       <span className="text-[11px] font-bold text-emerald-500 uppercase flex items-center gap-1">
-                          <CheckCircle2 className="h-3 w-3" /> Online
+                       <span className="h-1 w-1 rounded-full bg-slate-300 shrink-0" />
+                       <span className="text-[9px] md:text-[11px] font-bold text-emerald-500 uppercase flex items-center gap-1 shrink-0">
+                          <CheckCircle2 className="h-2.5 w-2.5" /> Online
                        </span>
                     </div>
                   </div>
                </div>
-               <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl text-slate-400"><MoreVertical className="h-5 w-5" /></Button>
+               <div className="flex items-center gap-2 md:gap-3">
+                  <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10 rounded-xl text-slate-400"><MoreVertical className="h-4 w-4 md:h-5 md:w-5" /></Button>
                </div>
             </div>
 
@@ -307,7 +321,7 @@ const AdminChat = () => {
 
       {/* Right Sidebar - Customer Details & Incomplete Orders */}
       {activeSessionId && (
-        <div className="w-[300px] border-l flex flex-col bg-white shrink-0 overflow-hidden">
+        <div className="w-[300px] border-l hidden xl:flex flex-col bg-white shrink-0 overflow-hidden">
           <div className="p-6 border-b">
              <h3 className="font-black text-slate-900 text-sm uppercase tracking-widest mb-4">Customer Info</h3>
              <div className="space-y-4">
