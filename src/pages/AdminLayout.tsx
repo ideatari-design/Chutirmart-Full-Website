@@ -32,7 +32,8 @@ import {
   History,
   MousePointer2,
   Globe,
-  Wallet3
+  Wallet3,
+  Maximize2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -77,10 +78,10 @@ const menuItems = [
     icon: <Tags className="h-5 w-5" />, 
     path: '/admin/attributes',
     children: [
-      { label: 'Categories', path: '/admin/attributes/categories' },
-      { label: 'Sorting', path: '/admin/attributes/sorting' },
-      { label: 'Brands', path: '/admin/attributes/brands' },
-      { label: 'Units', path: '/admin/attributes/units' },
+      { label: 'Categories', path: '/admin/attributes/categories', icon: <Layers className="h-3.5 w-3.5" /> },
+      { label: 'Sorting', path: '/admin/attributes/sorting', icon: <ListRestart className="h-3.5 w-3.5" /> },
+      { label: 'Brands', path: '/admin/attributes/brands', icon: <Globe className="h-3.5 w-3.5" /> },
+      { label: 'Units', path: '/admin/attributes/units', icon: <Maximize2 className="h-3.5 w-3.5" /> },
     ]
   },
   { 
@@ -88,10 +89,10 @@ const menuItems = [
     icon: <Package className="h-5 w-5" />, 
     path: '/admin/products',
     children: [
-      { label: 'Add Product', path: '/admin/products/add' },
-      { label: 'Manage Product', path: '/admin/products' },
-      { label: 'Draft Product', path: '/admin/products/draft' },
-      { label: 'Adjustment Stock', path: '/admin/products/adjustment' },
+      { label: 'Add Product', path: '/admin/products/add', icon: <PlusCircle className="h-3.5 w-3.5" /> },
+      { label: 'Manage Product', path: '/admin/products', icon: <Store className="h-3.5 w-3.5" /> },
+      { label: 'Draft Product', path: '/admin/products/draft', icon: <FileText className="h-3.5 w-3.5" /> },
+      { label: 'Adjustment Stock', path: '/admin/products/adjustment', icon: <History className="h-3.5 w-3.5" /> },
     ]
   },
   { label: 'Landing Page', icon: <Layout className="h-5 w-5" />, path: '/admin/landing-pages' },
@@ -102,9 +103,9 @@ const menuItems = [
     icon: <ShoppingCart className="h-5 w-5" />, 
     path: '/admin/orders',
     children: [
-      { label: 'Manage Orders', path: '/admin/orders' },
-      { label: 'Incomplete Orders', path: '/admin/incomplete-orders' },
-      { label: 'Recovery Analytics', path: '/admin/orders/recovery-stats' },
+      { label: 'Manage Orders', path: '/admin/orders', icon: <ShoppingCart className="h-3.5 w-3.5" /> },
+      { label: 'Incomplete Orders', path: '/admin/incomplete-orders', icon: <AlertCircle className="h-3.5 w-3.5" /> },
+      { label: 'Recovery Analytics', path: '/admin/orders/recovery-stats', icon: <BarChart3 className="h-3.5 w-3.5" /> },
     ]
   },
   { label: 'Manage Shop', icon: <Store className="h-5 w-5" />, path: '/admin/manage-shop' },
@@ -113,13 +114,23 @@ const menuItems = [
   { label: 'Coupon Code', icon: <Ticket className="h-5 w-5" />, path: '/admin/coupons' },
   { label: 'Promotions', icon: <MousePointer2 className="h-5 w-5" />, path: '/admin/promotions' },
   { label: 'Fraud Check', icon: <AlertCircle className="h-5 w-5" />, path: '/admin/fraud-check' },
-  { label: 'How to Setup', icon: <HelpCircle className="h-5 w-5" />, path: '/admin/setup-guide' },
 ];
 
-const SidebarItem = ({ item, pathname, onLinkClick }: { item: any, pathname: string, onLinkClick?: () => void }) => {
-  const [isOpen, setIsOpen] = React.useState(item.children ? pathname.startsWith(item.path) : false);
-  const isActive = item.path === '/admin' ? (pathname === '/admin' || pathname === '/admin/') : pathname.startsWith(item.path);
-
+const SidebarItem = ({ 
+  item, 
+  pathname, 
+  onLinkClick, 
+  isActive, 
+  onToggle,
+  isOpen
+}: { 
+  item: any, 
+  pathname: string, 
+  onLinkClick?: () => void,
+  isActive: boolean,
+  onToggle: () => void,
+  isOpen: boolean
+}) => {
   if (item.isHeader) {
     return (
       <p className="text-[11px] font-medium text-slate-500 px-3 pt-6 pb-2 uppercase tracking-wider">
@@ -128,52 +139,69 @@ const SidebarItem = ({ item, pathname, onLinkClick }: { item: any, pathname: str
     );
   }
 
+  const handleLinkClick = () => {
+    onToggle();
+    if (onLinkClick) onLinkClick();
+  };
+
   return (
     <div className="space-y-1">
       {item.children ? (
         <button
-          onClick={() => setIsOpen(!isOpen)}
-          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-all duration-200 group ${
-            isActive ? 'bg-[#00458e] text-white shadow-lg shadow-blue-900/10' : 'text-slate-600 hover:bg-slate-50'
+          onClick={onToggle}
+          className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 group ${
+            isActive 
+              ? 'bg-[#00458e] text-white shadow-[0_10px_20px_-10px_rgba(0,69,142,0.4)]' 
+              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
           }`}
         >
           <div className="flex items-center gap-3">
-            <div className={`${isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-700'}`}>
+            <div className={`transition-colors duration-300 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-900'}`}>
               {item.icon}
             </div>
-            <span className="font-medium text-sm">{item.label}</span>
+            <span className="font-bold text-[13px] tracking-tight">{item.label}</span>
           </div>
-          {isOpen ? <ChevronDown className="h-4 w-4 opacity-50" /> : <ChevronRight className="h-4 w-4 opacity-50" />}
+          <ChevronRight className={`h-3.5 w-3.5 opacity-50 transition-transform duration-300 ${isOpen ? 'rotate-90' : ''}`} />
         </button>
       ) : (
         <Link 
           to={item.path} 
-          onClick={onLinkClick}
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${
-            isActive ? 'bg-[#00458e] text-white shadow-lg shadow-blue-900/10' : 'text-slate-600 hover:bg-slate-50'
+          onClick={handleLinkClick}
+          className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group ${
+            isActive 
+              ? 'bg-[#00458e] text-white shadow-[0_10px_20px_-10px_rgba(0,69,142,0.4)]' 
+              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
           }`}
         >
-          <div className={`${isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-700'}`}>
+          <div className={`transition-colors duration-300 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-900'}`}>
             {item.icon}
           </div>
-          <span className="font-medium text-sm">{item.label}</span>
+          <span className="font-bold text-[13px] tracking-tight">{item.label}</span>
         </Link>
       )}
 
       {item.children && isOpen && (
-        <div className="pl-11 space-y-1 mt-1 animate-in slide-in-from-top-2 duration-200">
-          {item.children.map((child: any, idx: number) => (
-            <Link
-              key={idx}
-              to={child.path}
-              onClick={onLinkClick}
-              className={`block px-3 py-1.5 text-sm rounded-md transition-colors ${
-                pathname === child.path ? 'text-primary font-bold bg-primary/5' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-              }`}
-            >
-              {child.label}
-            </Link>
-          ))}
+        <div className="pl-3 space-y-1 mt-1 animate-in fade-in slide-in-from-left-2 duration-300">
+          {item.children.map((child: any, idx: number) => {
+            const isChildActive = pathname === child.path || pathname.startsWith(child.path + '/');
+            return (
+              <Link
+                key={idx}
+                to={child.path}
+                onClick={onLinkClick}
+                className={`flex items-center gap-2.5 px-3 py-2 text-[13px] rounded-lg transition-all duration-200 ${
+                  isChildActive 
+                    ? 'text-[#00458e] font-black bg-blue-50/50' 
+                    : 'text-slate-500 font-bold hover:text-slate-900 hover:bg-slate-50'
+                }`}
+              >
+                <div className={`transition-colors duration-300 ${isChildActive ? 'text-[#00458e]' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                  {child.icon}
+                </div>
+                <span>{child.label}</span>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
@@ -182,6 +210,30 @@ const SidebarItem = ({ item, pathname, onLinkClick }: { item: any, pathname: str
 
 const SidebarContent = ({ pathname, onLinkClick }: { pathname: string, onLinkClick?: () => void }) => {
   const { settings } = useSettings();
+  
+  // Find which menu item is active by default based on URL
+  const activeMenuLabel = React.useMemo(() => {
+    // Exact match or prefix match for parent items
+    const activeItem = menuItems.find(item => {
+      if (item.path === '/admin') return pathname === '/admin' || pathname === '/admin/';
+      if (pathname === item.path || (item.path !== '/admin' && pathname.startsWith(item.path + '/'))) return true;
+      if (item.children) {
+        return item.children.some((child: any) => pathname === child.path || pathname.startsWith(child.path + '/'));
+      }
+      return false;
+    });
+    return activeItem?.label || null;
+  }, [pathname]);
+
+  const [openMenu, setOpenMenu] = React.useState<string | null>(activeMenuLabel);
+
+  // Sync open menu when pathname changes (for external navigation)
+  React.useEffect(() => {
+    if (activeMenuLabel) {
+      setOpenMenu(activeMenuLabel);
+    }
+  }, [activeMenuLabel]);
+
   return (
     <div className="flex flex-col h-full bg-white">
       <div className="p-6 sticky top-0 bg-white z-10 mb-4">
@@ -201,13 +253,22 @@ const SidebarContent = ({ pathname, onLinkClick }: { pathname: string, onLinkCli
          </Link>
       </div>
 
-      <ScrollArea className="flex-grow px-4">
+      <ScrollArea className="flex-grow px-3">
         <nav className="space-y-1 pb-10">
           {menuItems.map((item, i) => (
-            <SidebarItem key={i} item={item} pathname={pathname} onLinkClick={onLinkClick} />
+            <SidebarItem 
+              key={i} 
+              item={item} 
+              pathname={pathname} 
+              onLinkClick={onLinkClick} 
+              isOpen={openMenu === item.label}
+              isActive={openMenu === item.label}
+              onToggle={() => setOpenMenu(openMenu === item.label ? null : item.label)}
+            />
           ))}
         </nav>
       </ScrollArea>
+
 
       <div className="p-4 border-t mt-auto">
          <Link to="/" className="block">
@@ -229,7 +290,7 @@ const AdminLayout = () => {
   return (
     <div className="flex min-h-screen w-full bg-[#f8fafa] relative">
       {/* Sidebar for Desktop */}
-      <aside className="w-64 bg-white border-r hidden lg:flex flex-col sticky top-0 h-screen z-20">
+      <aside className="w-72 bg-white border-r hidden lg:flex flex-col sticky top-0 h-screen z-20 shadow-[8px_0_40px_rgb(0,0,0,0.015)]">
         <SidebarContent pathname={location.pathname} />
       </aside>
 

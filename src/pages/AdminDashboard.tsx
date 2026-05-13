@@ -92,6 +92,16 @@ const AdminDashboard = () => {
         accentColor: 'border-amber-500',
         iconColor: 'text-amber-500 bg-amber-50'
       },
+      { 
+        label: 'Incomplete Conversion', 
+        value: `0.0%`, 
+        detail: 'Needs attention ↓',
+        subDetail: 'Conversion tracking active',
+        icon: <AlertCircle className="h-6 w-6" />, 
+        color: 'bg-white',
+        accentColor: 'border-rose-400',
+        iconColor: 'text-rose-500 bg-rose-50'
+      },
     ];
   }, [orders, timeRange]);
 
@@ -119,7 +129,7 @@ const AdminDashboard = () => {
             <LayoutDashboard className="h-3 w-3" />
             <span>Dashboard</span>
             <ChevronRight className="h-2.5 w-2.5 opacity-50" />
-            <span className="text-slate-900">Shorab Elite Mart</span>
+            <span className="text-slate-900">Chutirmart</span>
           </div>
         </div>
         <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-xl shadow-sm border border-slate-100">
@@ -183,41 +193,59 @@ const AdminDashboard = () => {
           </div>
           <div className="p-6 flex-grow h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={salesData}>
+              <AreaChart data={salesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0db39e" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#0db39e" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#00458e" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#00458e" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.05}/>
+                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <CartesianGrid strokeDasharray="8 8" vertical={false} stroke="#f1f5f9" />
                 <XAxis 
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }} 
+                  tick={{ fontSize: 9, fill: '#64748b', fontWeight: 700 }} 
                   dy={10}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }} 
+                  tick={{ fontSize: 9, fill: '#64748b', fontWeight: 700 }} 
                 />
                 <Tooltip 
+                  cursor={{ stroke: '#e2e8f0', strokeWidth: 2 }}
                   contentStyle={{ 
-                    borderRadius: '16px', 
-                    border: 'none', 
-                    boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
-                    padding: '12px'
+                    borderRadius: '20px', 
+                    border: '1px solid #f1f5f9', 
+                    boxShadow: '0 20px 50px -12px rgb(0 0 0 / 0.1)',
+                    padding: '16px',
+                    fontSize: '12px',
+                    fontWeight: 'bold'
                   }}
                 />
                 <Area 
-                  type="step" 
+                  type="monotone" 
                   dataKey="sales" 
-                  stroke="#0db39e" 
-                  strokeWidth={2} 
+                  stroke="#00458e" 
+                  strokeWidth={4} 
                   fillOpacity={1} 
                   fill="url(#colorSales)" 
+                  animationDuration={2000}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="expenses" 
+                  stroke="#f43f5e" 
+                  strokeWidth={2} 
+                  strokeDasharray="5 5"
+                  fillOpacity={1} 
+                  fill="url(#colorExpenses)" 
+                  animationDuration={2000}
                 />
               </AreaChart>
             </ResponsiveContainer>

@@ -134,12 +134,8 @@ const AdminOrders = () => {
   ];
 
   const formatOrderId = (id: string) => {
-    // If not starting with CHU#, prepend it
     let displayId = id.startsWith('CHU#') ? id : `CHU#${id}`;
-    if (displayId.length > 7) {
-      return displayId.substring(0, 7) + '...';
-    }
-    return displayId;
+    return displayId.length > 10 ? displayId.substring(0, 10) + '...' : displayId;
   };
 
   const formatText = (text: string) => {
@@ -153,13 +149,14 @@ const AdminOrders = () => {
 
   const getStatusStyle = (status: string) => {
     switch(status) {
-      case 'pending': return 'bg-amber-50 text-amber-600 border-amber-100 italic';
-      case 'approved': return 'bg-emerald-50 text-emerald-600 border-emerald-100 font-bold';
-      case 'processing': return 'bg-blue-50 text-blue-600 border-blue-100 font-bold';
-      case 'delivered': return 'bg-teal-50 text-teal-600 border-teal-100 font-bold';
-      case 'cancelled': return 'bg-rose-50 text-rose-500 border-rose-200 font-bold';
-      case 'shipped': return 'bg-slate-50 text-slate-600 border-slate-200 font-bold';
-      default: return 'bg-slate-50 text-slate-500 border-slate-100 font-bold';
+      case 'pending': return 'bg-amber-50 text-amber-600 border-amber-100/50';
+      case 'approved': return 'bg-emerald-50 text-emerald-600 border-emerald-100/50';
+      case 'processing': return 'bg-indigo-50 text-indigo-600 border-indigo-100/50';
+      case 'delivered': return 'bg-teal-50 text-teal-600 border-teal-100/50';
+      case 'cancelled': return 'bg-rose-50 text-rose-500 border-rose-100/50';
+      case 'shipped': return 'bg-blue-50 text-blue-600 border-blue-100/50';
+      case 'returned': return 'bg-orange-50 text-orange-600 border-orange-100/50';
+      default: return 'bg-slate-50 text-slate-500 border-slate-100/50';
     }
   };
 
@@ -272,21 +269,20 @@ const AdminOrders = () => {
 
       <div className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/50">
         <Table>
-          <TableHeader className="bg-[#f8fafc] border-b border-slate-100">
+          <TableHeader className="bg-slate-50/50 border-b border-slate-100">
             <TableRow className="hover:bg-transparent h-12">
               <TableHead className="pl-6 w-12">
                 <input type="checkbox" className="w-4 h-4 border-slate-300 rounded text-primary focus:ring-primary/20 accent-[#00458e]" />
               </TableHead>
-              <TableHead className="text-[12px] font-black text-slate-400 uppercase tracking-tight">Order ID</TableHead>
-              <TableHead className="text-[12px] font-black text-slate-400 uppercase tracking-tight">Customer Name</TableHead>
-              <TableHead className="text-[12px] font-black text-slate-400 uppercase tracking-tight">Customer Address</TableHead>
-              <TableHead className="text-[12px] font-black text-slate-400 uppercase tracking-tight">Date</TableHead>
-              <TableHead className="text-[12px] font-black text-slate-400 uppercase tracking-tight">Status</TableHead>
-              <TableHead className="text-[12px] font-black text-slate-400 uppercase tracking-tight">Amount</TableHead>
-              <TableHead className="text-[12px] font-black text-slate-400 uppercase tracking-tight">Payment</TableHead>
-              <TableHead className="text-[12px] font-black text-slate-400 uppercase tracking-tight">Send to Courier</TableHead>
-              <TableHead className="text-[12px] font-black text-slate-400 uppercase tracking-tight">Origin</TableHead>
-              <TableHead className="text-right pr-6 text-[12px] font-black text-slate-400 uppercase tracking-tight">Action</TableHead>
+              <TableHead className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Order ID</TableHead>
+              <TableHead className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Customer</TableHead>
+              <TableHead className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Address</TableHead>
+              <TableHead className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Date</TableHead>
+              <TableHead className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Status</TableHead>
+              <TableHead className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Amount</TableHead>
+              <TableHead className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Payment</TableHead>
+              <TableHead className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Logistic</TableHead>
+              <TableHead className="text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -336,7 +332,7 @@ const AdminOrders = () => {
                     {new Date(o.createdAt).toLocaleDateString("en-GB")}
                   </TableCell>
                   <TableCell>
-                     <div className={`inline-flex items-center px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tight border ${getStatusStyle(o.status)}`}>
+                     <div className={`inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${getStatusStyle(o.status)} shadow-sm`}>
                         {o.status}
                      </div>
                   </TableCell>

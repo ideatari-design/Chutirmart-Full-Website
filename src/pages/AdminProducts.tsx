@@ -281,12 +281,11 @@ const AdminProducts = () => {
                    />
                  </TableHead>
                  <TableHead className="w-20 text-[11px] font-black uppercase text-slate-400 tracking-widest text-center">Image</TableHead>
-                 <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Product Information</TableHead>
+                 <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Product Info</TableHead>
                  <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Category</TableHead>
                  <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Pricing</TableHead>
-                 <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Stock</TableHead>
-                 <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Status</TableHead>
-                 <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Added Date</TableHead>
+                 <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Stock Status</TableHead>
+                 <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Date</TableHead>
                  <TableHead className="text-right pr-8 text-[11px] font-black uppercase text-slate-400 tracking-widest">Actions</TableHead>
                </TableRow>
              </TableHeader>
