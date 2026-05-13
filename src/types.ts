@@ -47,6 +47,20 @@ export interface Order {
   invoiceUrl?: string;
 }
 
+export interface IncompleteOrder {
+  id: string;
+  customerName: string;
+  customerPhone: string;
+  customerAddress: string;
+  items: CartItem[];
+  total: number;
+  status: 'incomplete' | 'recovered' | 'converted' | 'expired';
+  createdAt: string;
+  updatedAt: string;
+  deviceInfo?: string;
+  trafficSource?: string;
+}
+
 export interface UserProfile {
   id: string;
   email: string;

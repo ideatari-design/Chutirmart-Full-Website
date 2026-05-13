@@ -60,6 +60,7 @@ import { Product } from '@/types';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { convertGoogleDriveLink } from '@/lib/imageUtils';
+import LiveChat from '@/components/LiveChat';
 
 const TopHeader = () => (
   <div className="bg-background border-b py-2 text-xs text-muted-foreground hidden lg:block">
@@ -740,6 +741,7 @@ export default function App() {
         </Routes>
       </main>
       {!isAdminPath && <Footer />}
+      {!isAdminPath && <LiveChat />}
       <Toaster position="bottom-right" richColors />
     </div>
   );

@@ -5,6 +5,8 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import fs from "fs";
 import multer from "multer";
+import { createServer as createHttpServer } from "http";
+import { Server } from "socket.io";
 
 dotenv.config();
 
@@ -357,6 +359,13 @@ async function queryD1(sql: string, params: any[] = []) {
 async function startServer() {
   const app = express();
   const PORT = 3000;
+  const httpServer = createHttpServer(app);
+  const io = new Server(httpServer, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"]
+    }
+  });
 
   // --- Logger Middleware ---
   app.use((req, res, next) => {
@@ -1086,6 +1095,11 @@ async function startServer() {
       ORDERS.push(newOrder);
     }
 
+    // Convert draft to converted if draftId provided
+    if (orderData.draftId) {
+      await queryD1("UPDATE incomplete_orders SET status = 'converted', updatedAt = ? WHERE id = ?", [createdAt, orderData.draftId]);
+    }
+
     console.log(`New Order Created: ${newOrder.id}`);
     res.status(201).json(newOrder);
   });
@@ -1163,12 +1177,230 @@ async function startServer() {
     res.status(204).send();
   });
 
+  // --- Incomplete Orders API ---
+  app.get("/api/incomplete-orders", async (req, res) => {
+    try {
+      const d1Result = await queryD1("SELECT * FROM incomplete_orders ORDER BY updatedAt DESC");
+      if (d1Result && Array.isArray(d1Result.results)) {
+        const orders = d1Result.results.map((o: any) => ({
+          ...o,
+          items: JSON.parse(o.items || "[]")
+        }));
+        return res.json(orders);
+      }
+    } catch (err) {
+      console.error("Incomplete Orders GET Exception:", err);
+    }
+    res.json([]);
+  });
+
+  app.post("/api/incomplete-orders", async (req, res) => {
+    const data = req.body;
+    const id = data.id || `INC#${Math.floor(Math.random() * 900000) + 100000}`;
+    const now = new Date().toISOString();
+    
+    try {
+      // Use INSERT OR REPLACE to update existing draft or create new one
+      const sql = `
+        INSERT OR REPLACE INTO incomplete_orders (
+          id, customerName, customerPhone, customerAddress, total, items, status, createdAt, updatedAt, deviceInfo, trafficSource
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, COALESCE((SELECT createdAt FROM incomplete_orders WHERE id = ?), ?), ?, ?, ?)
+      `;
+      const params = [
+        id,
+        data.customerName || '',
+        data.customerPhone || '',
+        data.customerAddress || '',
+        data.total || 0,
+        JSON.stringify(data.items || []),
+        data.status || 'incomplete',
+        id, now, // createdAt fallback
+        now, // updatedAt
+        data.deviceInfo || '',
+        data.trafficSource || ''
+      ];
+      
+      await queryD1(sql, params);
+      res.json({ id, success: true });
+    } catch (err) {
+      console.error("Incomplete Order Save Exception:", err);
+      res.status(500).json({ success: false });
+    }
+  });
+
+  app.patch("/api/incomplete-orders/:id/recover", async (req, res) => {
+    const id = req.params.id;
+    try {
+      // 1. Get the incomplete order
+      const d1Result = await queryD1("SELECT * FROM incomplete_orders WHERE id = ?", [id]);
+      if (!d1Result || !d1Result.results || d1Result.results.length === 0) {
+        return res.status(404).json({ success: false, message: "Draft not found" });
+      }
+      
+      const draft = d1Result.results[0];
+      
+      // 2. Create a real order
+      const orderId = `CHU#${Math.floor(Math.random() * 900000) + 100000}`;
+      const createdAt = new Date().toISOString();
+      
+      await queryD1(
+        "INSERT INTO orders (id, customerName, customerPhone, customerAddress, total, items, status, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          orderId,
+          draft.customerName,
+          draft.customerPhone,
+          draft.customerAddress,
+          draft.total,
+          draft.items,
+          'pending',
+          createdAt
+        ]
+      );
+      
+      // 3. Mark draft as recovered/converted
+      await queryD1("UPDATE incomplete_orders SET status = 'converted', updatedAt = ? WHERE id = ?", [createdAt, id]);
+      
+      res.json({ success: true, orderId });
+    } catch (err) {
+      console.error("Recovery Exception:", err);
+      res.status(500).json({ success: false });
+    }
+  });
+
+  app.get("/api/incomplete-orders/stats", async (req, res) => {
+    try {
+      const allIncomplete = await queryD1("SELECT status, total, createdAt FROM incomplete_orders");
+      const allOrders = await queryD1("SELECT total FROM orders");
+      
+      const results = allIncomplete?.results || [];
+      const ordersResults = allOrders?.results || [];
+      
+      const totalIncomplete = results.length;
+      const recovered = results.filter((r: any) => r.status === 'converted' || r.status === 'recovered').length;
+      const recoveredRevenue = results
+        .filter((r: any) => r.status === 'converted' || r.status === 'recovered')
+        .reduce((sum: number, r: any) => sum + r.total, 0);
+      
+      const conversionRate = totalIncomplete > 0 ? (recovered / totalIncomplete) * 100 : 0;
+      
+      // Trend data (simple group by date)
+      const trends: Record<string, { incomplete: number, recovered: number }> = {};
+      results.forEach((r: any) => {
+        const date = r.createdAt.split('T')[0];
+        if (!trends[date]) trends[date] = { incomplete: 0, recovered: 0 };
+        trends[date].incomplete++;
+        if (r.status === 'converted' || r.status === 'recovered') {
+          trends[date].recovered++;
+        }
+      });
+      
+      const trendArray = Object.entries(trends).map(([date, counts]) => ({
+        date,
+        ...counts
+      })).sort((a, b) => a.date.localeCompare(b.date));
+
+      res.json({
+        totalIncomplete,
+        recoveredOrders: recovered,
+        recoveryConversionRate: conversionRate,
+        recoveredRevenue,
+        trends: trendArray,
+        topRecoveredAmounts: results
+          .filter((r: any) => r.status === 'converted')
+          .sort((a: any, b: any) => b.total - a.total)
+          .slice(0, 5)
+      });
+    } catch (err) {
+      console.error("Stats Exception:", err);
+      res.status(500).json({ success: false });
+    }
+  });
+
   // uddoktapay mock
   app.post("/api/payments/initiate", (req, res) => {
     const { amount, orderId } = req.body;
     res.json({
       success: true,
       payment_url: `https://payment.example.com/pay/${orderId}?amount=${amount}`,
+    });
+  });
+
+  app.get("/api/chat/sessions", async (req, res) => {
+    try {
+      const d1Result = await queryD1("SELECT * FROM chat_sessions ORDER BY updatedAt DESC");
+      res.json(d1Result?.results || []);
+    } catch (err) {
+      res.status(500).json({ success: false });
+    }
+  });
+
+  app.get("/api/chat/messages/:sessionId", async (req, res) => {
+    try {
+      const d1Result = await queryD1("SELECT * FROM chat_messages WHERE sessionId = ? ORDER BY createdAt ASC", [req.params.sessionId]);
+      res.json(d1Result?.results || []);
+    } catch (err) {
+      res.status(500).json({ success: false });
+    }
+  });
+
+  app.post("/api/chat/reset-unread/:sessionId", async (req, res) => {
+    try {
+      await queryD1("UPDATE chat_sessions SET unreadCount = 0 WHERE id = ?", [req.params.sessionId]);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ success: false });
+    }
+  });
+
+  // --- Socket.IO Chat Logic ---
+  io.on("connection", (socket) => {
+    console.log("Client connected:", socket.id);
+
+    socket.on("join_chat", async ({ sessionId, isAdmin }) => {
+      socket.join(sessionId);
+      if (isAdmin) {
+         socket.join("admins");
+      }
+      console.log(`${isAdmin ? 'Admin' : 'Customer'} joined session: ${sessionId}`);
+    });
+
+    socket.on("send_message", async (data) => {
+      const { sessionId, sender, message, name, phone } = data;
+      const now = new Date().toISOString();
+
+      // 1. Save message to DB
+      await queryD1(
+        "INSERT INTO chat_messages (sessionId, sender, message, createdAt) VALUES (?, ?, ?, ?)",
+        [sessionId, sender, message, now]
+      );
+
+      // 2. Update session
+      await queryD1(`
+        UPDATE chat_sessions 
+        SET lastMessage = ?, 
+            updatedAt = ?, 
+            status = 'active',
+            unreadCount = unreadCount + ?
+        WHERE id = ?
+      `, [message, now, sender === 'customer' ? 1 : 0, sessionId]).catch(async () => {
+         // Fallback if update fails (session doesn't exist yet)
+         await queryD1(`
+           INSERT INTO chat_sessions (id, name, phone, lastMessage, updatedAt, status, unreadCount)
+           VALUES (?, ?, ?, ?, ?, ?, ?)
+         `, [sessionId, name || '', phone || '', message, now, 'active', sender === 'customer' ? 1 : 0]);
+      });
+
+      // 3. Emit message
+      io.to(sessionId).emit("new_message", { ...data, createdAt: now });
+      
+      // If customer sent it, notify admins
+      if (sender === 'customer') {
+        io.to("admins").emit("chat_notification", { sessionId, name, message });
+      }
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Client disconnected:", socket.id);
     });
   });
 
@@ -1201,7 +1433,7 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", async () => {
+  httpServer.listen(PORT, "0.0.0.0", async () => {
     console.log(`Server running on http://localhost:${PORT}`);
     
     // Auto-init DB tables on start
@@ -1250,7 +1482,38 @@ async function startServer() {
         key TEXT PRIMARY KEY, value TEXT, updatedAt TEXT
       )`);
 
-      // Ensure necessary columns exist (for existing tables) - queryD1 now handles suppression of duplicate errors
+      await queryD1(`CREATE TABLE IF NOT EXISTS incomplete_orders (
+        id TEXT PRIMARY KEY, 
+        customerName TEXT, 
+        customerPhone TEXT, 
+        customerAddress TEXT, 
+        total REAL, 
+        items TEXT, 
+        status TEXT, 
+        createdAt TEXT,
+        updatedAt TEXT,
+        deviceInfo TEXT,
+        trafficSource TEXT
+      )`);
+
+      await queryD1(`CREATE TABLE IF NOT EXISTS chat_sessions (
+        id TEXT PRIMARY KEY,
+        name TEXT, 
+        phone TEXT, 
+        lastMessage TEXT, 
+        updatedAt TEXT, 
+        status TEXT,
+        unreadCount INTEGER DEFAULT 0
+      )`);
+      await queryD1(`CREATE TABLE IF NOT EXISTS chat_messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sessionId TEXT, 
+        sender TEXT, 
+        message TEXT, 
+        createdAt TEXT
+      )`);
+
+      // Ensure necessary columns exist (for existing tables)
       const columnFixes = [
         "ALTER TABLE products ADD COLUMN nameBn TEXT",
         "ALTER TABLE products ADD COLUMN oldPrice REAL DEFAULT 0",

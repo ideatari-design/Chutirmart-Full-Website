@@ -64,15 +64,6 @@ const AdminDashboard = () => {
         iconColor: 'text-indigo-500 bg-indigo-50'
       },
       { 
-        label: 'Total Expense', 
-        value: `৳ 0.00`, 
-        detail: 'Controlled spending ⌄',
-        subDetail: 'Compared to last period',
-        icon: <BarChart3 className="h-6 w-6" />, 
-        color: 'bg-white border-l-4 border-slate-400',
-        iconColor: 'text-slate-400 bg-slate-50'
-      },
-      { 
         label: 'Total Purchase', 
         value: `৳ 0.00`, 
         detail: 'Consistent buying trend ↑',
@@ -153,7 +144,7 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8">
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
           <div className="p-6 border-b border-slate-50">
              <h3 className="font-black text-slate-900 tracking-tight text-sm uppercase">Sales / Income Overview</h3>
@@ -199,49 +190,6 @@ const AdminDashboard = () => {
               </AreaChart>
             </ResponsiveContainer>
              <p className="text-[10px] text-slate-400 font-medium text-center pb-2">After every 4 hours chart data will automatically update</p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-slate-50 flex justify-between items-center">
-             <h3 className="font-black text-slate-900 tracking-tight text-sm uppercase">Expense Overview</h3>
-             <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                   <div className="w-3 h-3 rounded-full bg-slate-900"></div>
-                   <span className="text-[10px] font-bold text-slate-600 uppercase">Sales</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                   <div className="w-3 h-3 rounded-full bg-rose-500"></div>
-                   <span className="text-[10px] font-bold text-slate-600 uppercase">Expenses</span>
-                </div>
-             </div>
-          </div>
-          <div className="p-6 flex-grow h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={salesData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }} 
-                  dy={10}
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }} 
-                />
-                <Tooltip />
-                <Area 
-                  type="monotone" 
-                  dataKey="expenses" 
-                  stroke="#f43f5e" 
-                  strokeWidth={3} 
-                  fill="transparent" 
-                />
-              </AreaChart>
-            </ResponsiveContainer>
           </div>
         </div>
       </div>

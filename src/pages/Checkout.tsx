@@ -33,13 +33,39 @@ const Checkout = () => {
     phone: '',
     address: ''
   });
+  const [draftId, setDraftId] = useState<string | null>(null);
+
+  const deliveryCharge = deliveryArea === 'inside' ? 80 : 130;
+  const grandTotal = cartTotal + deliveryCharge;
 
   React.useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const deliveryCharge = deliveryArea === 'inside' ? 80 : 130;
-  const grandTotal = cartTotal + deliveryCharge;
+  // Track incomplete orders
+  React.useEffect(() => {
+    const timer = setTimeout(async () => {
+      // Only track if at least name or phone is entered
+      if ((formData.name || formData.phone) && cart.length > 0) {
+        const result = await orderService.saveIncompleteOrder({
+          id: draftId,
+          customerName: formData.name,
+          customerPhone: formData.phone,
+          customerAddress: formData.address,
+          items: cart,
+          total: grandTotal,
+          status: 'incomplete',
+          deviceInfo: navigator.userAgent,
+          trafficSource: document.referrer || 'Direct'
+        });
+        if (result && !draftId) {
+          setDraftId(result.id);
+        }
+      }
+    }, 2000); // Debounce 2 seconds
+
+    return () => clearTimeout(timer);
+  }, [formData, cart, grandTotal, draftId]);
 
   const handleOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +86,7 @@ const Checkout = () => {
         deposit: 0,
         status: 'pending',
         paymentStatus: 'unpaid'
-      });
+      }, draftId);
 
       if (order) {
         toast.success("Your order has been successfully placed!");

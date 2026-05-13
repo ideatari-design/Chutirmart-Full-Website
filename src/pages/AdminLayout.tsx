@@ -26,6 +26,7 @@ import {
   User,
   Layout,
   ListRestart,
+  MessageSquare,
   PlusCircle,
   Layers,
   History,
@@ -53,9 +54,11 @@ import AdminBrands from '@/pages/AdminBrands';
 import AdminUnits from '@/pages/AdminUnits';
 import AdminAddProduct from '@/pages/AdminAddProduct';
 import AdminDraftProducts from '@/pages/AdminDraftProducts';
+import AdminRecoveryAnalytics from '@/pages/AdminRecoveryAnalytics';
 import AdminStockAdjustment from '@/pages/AdminStockAdjustment';
 import AdminPayments from '@/pages/AdminPayments';
 import AdminCustomers from '@/pages/AdminCustomers';
+import AdminChat from '@/pages/AdminChat';
 import AdminDeliveryZones from '@/pages/AdminDeliveryZones';
 import AdminCMS from '@/pages/AdminCMS';
 import AdminPromotions from '@/pages/AdminPromotions';
@@ -92,20 +95,25 @@ const menuItems = [
     ]
   },
   { label: 'Landing Page', icon: <Layout className="h-5 w-5" />, path: '/admin/landing-pages' },
+  { label: 'Live Chat', icon: <MessageSquare className="h-5 w-5" />, path: '/admin/chat' },
   { label: 'Customers', icon: <Users className="h-5 w-5" />, path: '/admin/customers' },
-  { label: 'Orders', icon: <ShoppingCart className="h-5 w-5" />, path: '/admin/orders' },
+  { 
+    label: 'Orders', 
+    icon: <ShoppingCart className="h-5 w-5" />, 
+    path: '/admin/orders',
+    children: [
+      { label: 'Manage Orders', path: '/admin/orders' },
+      { label: 'Incomplete Orders', path: '/admin/incomplete-orders' },
+      { label: 'Recovery Analytics', path: '/admin/orders/recovery-stats' },
+    ]
+  },
   { label: 'Manage Shop', icon: <Store className="h-5 w-5" />, path: '/admin/manage-shop' },
   { label: 'Payments', icon: <CreditCard className="h-5 w-5" />, path: '/admin/payments' },
   { label: 'Delivery Zones', icon: <Truck className="h-5 w-5" />, path: '/admin/delivery-zones' },
   { label: 'Coupon Code', icon: <Ticket className="h-5 w-5" />, path: '/admin/coupons' },
   { label: 'Promotions', icon: <MousePointer2 className="h-5 w-5" />, path: '/admin/promotions' },
-  { label: 'HRM', icon: <Users className="h-5 w-5" />, path: '/admin/hrm' },
-  { label: 'Reports', icon: <BarChart3 className="h-5 w-5" />, path: '/admin/reports' },
-  { label: 'Role & Permission', icon: <Users className="h-5 w-5" />, path: '/admin/roles' },
   { label: 'Fraud Check', icon: <AlertCircle className="h-5 w-5" />, path: '/admin/fraud-check' },
-  { label: 'Upgrade Package', icon: <CreditCard className="h-5 w-5" />, path: '/admin/upgrade' },
   { label: 'How to Setup', icon: <HelpCircle className="h-5 w-5" />, path: '/admin/setup-guide' },
-  { label: 'Help 24/7', icon: <HelpCircle className="h-5 w-5" />, path: '/admin/help' },
 ];
 
 const SidebarItem = ({ item, pathname, onLinkClick }: { item: any, pathname: string, onLinkClick?: () => void }) => {
@@ -241,7 +249,7 @@ const AdminLayout = () => {
               </button>
               
               <Dialog>
-                <DialogTrigger render={
+                <DialogTrigger nativeButton={false} render={
                   <div className="flex items-center gap-3 ml-2 group cursor-pointer p-1 pr-3 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100">
                      <div className="w-9 h-9 rounded-lg bg-[#00458e] overflow-hidden flex items-center justify-center border-2 border-white shadow-sm transform group-hover:rotate-3 transition-transform">
                         <img src="https://i.pravatar.cc/150?u=admin" alt="User" className="w-full h-full object-cover" />
@@ -324,8 +332,10 @@ const AdminLayout = () => {
                 
                 {/* Management */}
                 <Route path="orders" element={<AdminOrders />} />
+                <Route path="orders/recovery-stats" element={<AdminRecoveryAnalytics />} />
                 <Route path="incomplete-orders" element={<AdminIncompleteOrders />} />
                 <Route path="customers" element={<AdminCustomers />} />
+                <Route path="chat" element={<AdminChat />} />
                 <Route path="manage-shop" element={<AdminManageShop />} />
                 <Route path="payments" element={<AdminPayments />} />
                 <Route path="delivery-zones" element={<AdminDeliveryZones />} />
@@ -338,9 +348,6 @@ const AdminLayout = () => {
                 <Route path="banners" element={<AdminBanners />} />
                 <Route path="settings" element={<AdminSettings />} />
                 
-                <Route path="hrm" element={<div className="p-20 text-center"><Users className="h-12 w-12 mx-auto mb-4 opacity-10" /> <span className="font-bold opacity-30">HRM Module Coming Soon</span></div>} />
-                <Route path="reports" element={<div className="p-20 text-center"><BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-10" /> <span className="font-bold opacity-30">Reports Module Coming Soon</span></div>} />
-                <Route path="roles" element={<div className="p-20 text-center"><ShieldCheck className="h-12 w-12 mx-auto mb-4 opacity-10" /> <span className="font-bold opacity-30">Roles & Permissions Coming Soon</span></div>} />
                 <Route path="fraud-check" element={<div className="p-20 text-center"><AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-10" /> <span className="font-bold opacity-30">Fraud Check System Coming Soon</span></div>} />
                 
                 <Route path="*" element={<div className="p-20 text-center text-muted-foreground italic bg-white rounded-2xl border shadow-sm">Page not found or feature coming soon...</div>} />
