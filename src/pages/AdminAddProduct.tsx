@@ -24,7 +24,6 @@ const AdminAddProduct = () => {
   const navigate = useNavigate();
   const [product, setProduct] = useState({
     name: '',
-    nameBn: '',
     price: 0,
     oldPrice: 0,
     category: 'Uncategorized',
@@ -110,13 +109,13 @@ const AdminAddProduct = () => {
         <div className="flex items-center gap-3">
           <Button 
             variant="outline" 
-            className="h-12 px-6 rounded-2xl font-black text-[11px] uppercase border-slate-200"
+            className="h-12 px-6 rounded-xl font-black text-[11px] uppercase border-slate-200"
             onClick={() => handleSave(true)}
           >
             Save as Draft
           </Button>
           <Button 
-            className="h-12 px-8 bg-[#00458e] text-white rounded-2xl font-black text-[11px] uppercase shadow-lg shadow-blue-100 transition-all hover:scale-105"
+            className="h-12 px-8 bg-[#00458e] text-white rounded-xl font-black text-[11px] uppercase shadow-lg shadow-blue-100 transition-all hover:scale-105"
             onClick={() => handleSave(false)}
           >
             Publish Product
@@ -127,7 +126,7 @@ const AdminAddProduct = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
            {/* General Section */}
-           <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 space-y-6">
+           <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8 space-y-6">
               <h3 className="text-[11px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
                  <LayoutGrid className="h-4 w-4" /> Basic Information
               </h3>
@@ -137,18 +136,9 @@ const AdminAddProduct = () => {
                     <Label className="text-xs font-bold text-slate-700 ml-1">Product Title (English)</Label>
                     <Input 
                       placeholder="e.g. Wireless Noise Cancelling Headphones"
-                      className="h-14 rounded-2xl border-slate-100 bg-slate-50 focus:bg-white font-bold"
+                      className="h-14 rounded-xl border-slate-100 bg-slate-50 focus:bg-white font-bold"
                       value={product.name}
                       onChange={e => setProduct({...product, name: e.target.value})}
-                    />
-                 </div>
-                 <div className="space-y-2">
-                    <Label className="text-xs font-bold text-slate-700 ml-1">Product Name (Bengali)</Label>
-                    <Input 
-                      placeholder="হেডফোন..."
-                      className="h-14 rounded-2xl border-slate-100 bg-slate-50 focus:bg-white font-bold"
-                      value={product.nameBn}
-                      onChange={e => setProduct({...product, nameBn: e.target.value})}
                     />
                  </div>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -156,7 +146,7 @@ const AdminAddProduct = () => {
                       <Label className="text-xs font-bold text-slate-700 ml-1">Selling Price (৳)</Label>
                       <Input 
                         type="number"
-                        className="h-14 rounded-2xl border-slate-100 bg-slate-50 focus:bg-white font-black text-lg text-emerald-600"
+                        className="h-14 rounded-xl border-slate-100 bg-slate-50 focus:bg-white font-black text-lg text-emerald-600"
                         value={product.price}
                         onChange={e => setProduct({...product, price: parseFloat(e.target.value) || 0})}
                       />
@@ -165,7 +155,7 @@ const AdminAddProduct = () => {
                       <Label className="text-xs font-bold text-slate-700 ml-1">Old Price (৳)</Label>
                       <Input 
                         type="number"
-                        className="h-14 rounded-2xl border-slate-100 bg-slate-50 focus:bg-white font-black text-lg text-slate-400"
+                        className="h-14 rounded-xl border-slate-100 bg-slate-50 focus:bg-white font-black text-lg text-slate-400"
                         value={product.oldPrice}
                         onChange={e => setProduct({...product, oldPrice: parseFloat(e.target.value) || 0})}
                       />
@@ -175,12 +165,12 @@ const AdminAddProduct = () => {
            </div>
 
            {/* Description Section */}
-           <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 space-y-6">
+           <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8 space-y-6">
               <h3 className="text-[11px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
                  <Info className="h-4 w-4" /> Description & Features
               </h3>
               <textarea 
-                className="w-full h-40 rounded-[28px] border border-slate-100 bg-slate-50 p-6 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all resize-none"
+                className="w-full h-40 rounded-xl border border-slate-100 bg-slate-50 p-6 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all resize-none"
                 placeholder="Tell your customers about the product features and quality..."
                 value={product.description}
                 onChange={e => setProduct({...product, description: e.target.value})}
@@ -188,7 +178,7 @@ const AdminAddProduct = () => {
            </div>
 
            {/* Specifications Section */}
-           <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 space-y-6">
+           <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8 space-y-6">
               <h3 className="text-[11px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
                  <Maximize2 className="h-4 w-4" /> Technical Specifications
               </h3>
@@ -235,7 +225,7 @@ const AdminAddProduct = () => {
 
         <div className="space-y-8">
            {/* Media Section */}
-           <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 space-y-6">
+           <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8 space-y-6">
               <h3 className="text-[11px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
                  <ImageIcon className="h-4 w-4" /> Product Media
               </h3>
@@ -244,18 +234,18 @@ const AdminAddProduct = () => {
                  <div className="flex gap-2">
                     <Input 
                       placeholder="Image URL..." 
-                      className="h-12 rounded-2xl border-slate-100 font-bold"
+                      className="h-12 rounded-xl border-slate-100 font-bold"
                       value={imageUrl}
                       onChange={e => setImageUrl(e.target.value)}
                     />
-                    <Button className="h-12 w-12 rounded-2xl bg-slate-900" onClick={addImage}>
+                    <Button className="h-12 w-12 rounded-xl bg-slate-900" onClick={addImage}>
                        <Plus className="h-5 w-5" />
                     </Button>
                  </div>
                  
                  <div className="grid grid-cols-3 gap-3">
                     {product.images.map((img, i) => (
-                      <div key={i} className="relative group h-24 rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
+                      <div key={i} className="relative group h-24 rounded-xl overflow-hidden border border-slate-100 shadow-sm">
                          <img src={img} alt="Product" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                          <button 
                            onClick={() => removeImage(i)}
@@ -266,7 +256,7 @@ const AdminAddProduct = () => {
                       </div>
                     ))}
                     {product.images.length === 0 && (
-                      <div className="col-span-3 h-24 rounded-2xl border-2 border-dashed border-slate-100 flex items-center justify-center text-slate-300">
+                      <div className="col-span-3 h-24 rounded-xl border-2 border-dashed border-slate-100 flex items-center justify-center text-slate-300">
                          <span className="text-[10px] font-black uppercase">No Images</span>
                       </div>
                     )}
@@ -275,7 +265,7 @@ const AdminAddProduct = () => {
            </div>
 
            {/* Attributes Summary Card */}
-           <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 space-y-6">
+           <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8 space-y-6">
               <h3 className="text-[11px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
                  <HelpCircle className="h-4 w-4" /> Inventory & Attributes
               </h3>
@@ -284,7 +274,7 @@ const AdminAddProduct = () => {
                  <div className="space-y-2">
                     <Label className="text-xs font-bold text-slate-700 ml-1">Category</Label>
                     <select 
-                      className="w-full h-12 rounded-2xl bg-slate-50 border border-slate-100 px-4 text-sm font-bold focus:bg-white outline-none"
+                      className="w-full h-12 rounded-xl bg-slate-50 border border-slate-100 px-4 text-sm font-bold focus:bg-white outline-none"
                       value={product.category}
                       onChange={e => setProduct({...product, category: e.target.value})}
                     >
@@ -300,7 +290,7 @@ const AdminAddProduct = () => {
                     <Label className="text-xs font-bold text-slate-700 ml-1">Current Stock Level</Label>
                     <Input 
                       type="number"
-                      className="h-12 rounded-2xl border-slate-100 font-black"
+                      className="h-12 rounded-xl border-slate-100 font-black"
                       value={product.stock}
                       onChange={e => setProduct({...product, stock: parseInt(e.target.value) || 0})}
                     />

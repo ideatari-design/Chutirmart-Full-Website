@@ -202,7 +202,7 @@ const AdminOrders = () => {
         </div>
 
         {/* Action Bar (Filters + Bulk Buttons) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-end mt-4">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mt-4">
            {/* Left Controls */}
            <div className="flex flex-wrap items-center gap-2">
               <div className="flex flex-col space-y-1.5 min-w-[150px]">
@@ -213,7 +213,7 @@ const AdminOrders = () => {
                       placeholder="Invoice / Phone" 
                       value={invoicePhone}
                       onChange={(e) => setInvoicePhone(e.target.value)}
-                      className="h-9 pl-9 text-[11px] font-bold border-slate-100 bg-white rounded-xl shadow-sm focus:ring-primary/20" 
+                      className="h-10 pl-9 text-[11px] font-bold border-slate-100 bg-white rounded-xl shadow-sm focus:ring-primary/20" 
                     />
                  </div>
               </div>
@@ -222,7 +222,7 @@ const AdminOrders = () => {
                  <select 
                    value={orderType}
                    onChange={(e) => setOrderType(e.target.value)}
-                   className="h-9 px-3 text-[11px] font-bold bg-white border border-slate-100 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer"
+                   className="h-10 px-3 text-[11px] font-bold bg-white border border-slate-100 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer pr-8"
                  >
                     <option value="All">All</option>
                     <option value="Multiple">Multiple Products</option>
@@ -237,18 +237,18 @@ const AdminOrders = () => {
                       type="date"
                       value={orderDate}
                       onChange={(e) => setOrderDate(e.target.value)}
-                      className="h-9 pl-9 text-[11px] font-bold border-slate-100 bg-white rounded-xl shadow-sm appearance-none" 
+                      className="h-10 pl-9 text-[11px] font-bold border-slate-100 bg-white rounded-xl shadow-sm appearance-none" 
                     />
                  </div>
               </div>
-              <div className="flex items-end h-[36px]">
-                 <Button className="h-9 px-4 bg-slate-900 text-white rounded-xl gap-2 font-bold text-[10px] shadow-lg shadow-slate-200">
+              <div className="flex items-center gap-1 mt-auto h-10">
+                 <Button className="h-full px-5 bg-[#00458e] text-white rounded-xl gap-2 font-bold text-[10px] shadow-lg shadow-blue-100 hover:shadow-xl transition-all uppercase tracking-widest">
                     <Search className="h-3.5 w-3.5" /> Search
                  </Button>
                  <Button 
                    variant="ghost" 
                    onClick={() => { setInvoicePhone(""); setOrderType("All"); setOrderDate(""); }}
-                   className="h-9 px-4 text-slate-400 hover:text-slate-900 gap-2 font-bold text-[10px] ml-1"
+                   className="h-full px-4 text-slate-400 hover:text-slate-900 gap-2 font-bold text-[10px] uppercase tracking-widest"
                  >
                     <RefreshCcw className="h-3.5 w-3.5" /> Clear
                  </Button>
@@ -257,20 +257,20 @@ const AdminOrders = () => {
 
            {/* Right Controls - Bulk Actions */}
            <div className="flex flex-wrap items-center justify-end gap-2">
-              <Button className="h-9 bg-[#00458e] hover:bg-blue-800 text-white px-4 rounded-xl gap-2 font-black text-[10px] shadow-lg shadow-blue-100">
+              <Button className="h-10 bg-[#0db39e] hover:bg-teal-600 text-white px-5 rounded-xl gap-2 font-black text-[10px] shadow-lg shadow-teal-50 uppercase tracking-widest border-none">
                  <Send className="h-3.5 w-3.5" /> Bulk Send to Courier
               </Button>
-              <Button className="h-9 bg-slate-800 hover:bg-slate-900 text-white px-4 rounded-xl gap-2 font-black text-[10px] shadow-lg shadow-slate-200">
-                 <Printer className="h-3.5 w-3.5" /> Bulk Print <ChevronDown className="h-3 w-3 opacity-50" />
+              <Button className="h-10 bg-slate-800 hover:bg-slate-900 text-white px-5 rounded-xl gap-2 font-black text-[10px] shadow-lg shadow-slate-200 uppercase tracking-widest">
+                 <Printer className="h-3.5 w-3.5" /> Bulk Print <ChevronDown className="h-3 w-3 opacity-50 ml-1" />
               </Button>
-              <Button className="h-9 bg-rose-500 hover:bg-rose-600 text-white px-4 rounded-xl gap-2 font-black text-[10px] shadow-lg shadow-rose-100">
+              <Button className="h-10 bg-rose-500 hover:bg-rose-600 text-white px-5 rounded-xl gap-2 font-black text-[10px] shadow-lg shadow-rose-50 uppercase tracking-widest">
                  <Trash2 className="h-3.5 w-3.5" /> Bulk Delete
               </Button>
            </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-[24px] overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/50">
+      <div className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/50">
         <Table>
           <TableHeader className="bg-[#f8fafc] border-b border-slate-100">
             <TableRow className="hover:bg-transparent h-12">

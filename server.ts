@@ -899,7 +899,7 @@ async function startServer() {
     let d1Error = null;
     try {
       const d1Result = await queryD1(
-        "INSERT INTO products (id, name, nameBn, price, oldPrice, category, images, stock, isFeatured, isFlashSale, isNewArrival, isBestSelling, stars, description, specs, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO products (id, name, nameBn, price, oldPrice, category, images, stock, isFeatured, isFlashSale, isNewArrival, isBestSelling, stars, description, specs, status, sku, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           newId, newProduct.name, newProduct.nameBn, 
           newProduct.price || 0, newProduct.oldPrice || 0, newProduct.category || 'Uncategorized',
@@ -910,6 +910,8 @@ async function startServer() {
           newProduct.isBestSelling ? 1 : 0,
           newProduct.stars || 0,
           newProduct.description || '', JSON.stringify(newProduct.specs || {}),
+          newProduct.status || 'active',
+          newProduct.sku || '',
           createdAt
         ]
       );
@@ -996,7 +998,9 @@ async function startServer() {
         ...updates,
         // Ensure price is number
         price: typeof updates.price !== 'undefined' ? parseFloat(updates.price) : existingProduct.price,
-        stock: typeof updates.stock !== 'undefined' ? parseInt(updates.stock) : existingProduct.stock
+        stock: typeof updates.stock !== 'undefined' ? parseInt(updates.stock) : existingProduct.stock,
+        status: updates.status || existingProduct.status || 'active',
+        sku: updates.sku || existingProduct.sku || ''
       };
       
       console.log(`[PATCH] Merged data for ${id} ready for DB`);
@@ -1005,7 +1009,7 @@ async function startServer() {
       let d1Error = null;
       try {
         const d1Result = await queryD1(
-          "UPDATE products SET name = ?, nameBn = ?, price = ?, oldPrice = ?, category = ?, images = ?, stock = ?, isFeatured = ?, isFlashSale = ?, isNewArrival = ?, isBestSelling = ?, stars = ?, description = ?, specs = ? WHERE id = ?",
+          "UPDATE products SET name = ?, nameBn = ?, price = ?, oldPrice = ?, category = ?, images = ?, stock = ?, isFeatured = ?, isFlashSale = ?, isNewArrival = ?, isBestSelling = ?, stars = ?, description = ?, specs = ?, status = ?, sku = ? WHERE id = ?",
           [
             merged.name || '', 
             merged.nameBn || merged.name || '', 
@@ -1021,6 +1025,8 @@ async function startServer() {
             merged.stars || 0, 
             merged.description || '',
             JSON.stringify(merged.specs || {}), 
+            merged.status || 'active',
+            merged.sku || '',
             id
           ]
         );
@@ -1518,6 +1524,8 @@ async function startServer() {
         "ALTER TABLE products ADD COLUMN nameBn TEXT",
         "ALTER TABLE products ADD COLUMN oldPrice REAL DEFAULT 0",
         "ALTER TABLE products ADD COLUMN stars REAL DEFAULT 0",
+        "ALTER TABLE products ADD COLUMN sku TEXT",
+        "ALTER TABLE products ADD COLUMN status TEXT DEFAULT 'active'",
         "ALTER TABLE products ADD COLUMN specs TEXT DEFAULT '{}'",
         "ALTER TABLE products ADD COLUMN description TEXT DEFAULT ''",
         "ALTER TABLE products ADD COLUMN isFeatured INTEGER DEFAULT 0",
@@ -1535,6 +1543,41 @@ async function startServer() {
       console.log("Auto-init complete.");
     } catch (err) {
       console.error("Auto-init failed (likely credentials not set):", err);
+    }
+  });
+
+  // Bulk Product Actions
+  app.post("/api/products/bulk", async (req, res) => {
+    const { ids, action, data } = req.body;
+    if (!ids || !ids.length || !action) {
+      return res.status(400).json({ success: false, message: "Missing ids or action" });
+    }
+
+    try {
+      const placeholders = ids.map(() => "?").join(",");
+      if (action === "delete") {
+        await queryD1(`DELETE FROM products WHERE id IN (${placeholders})`, ids);
+        // Also sync memory
+        ids.forEach((id: string) => {
+          const idx = PRODUCTS.findIndex(p => p.id === id);
+          if (idx !== -1) PRODUCTS.splice(idx, 1);
+        });
+      } else if (action === "update") {
+        const fields = Object.keys(data);
+        const setClause = fields.map(f => `${f} = ?`).join(", ");
+        const values = Object.values(data);
+        await queryD1(`UPDATE products SET ${setClause} WHERE id IN (${placeholders})`, [...values, ...ids]);
+        
+        // Sync memory
+        ids.forEach((id: string) => {
+          const idx = PRODUCTS.findIndex(p => p.id === id);
+          if (idx !== -1) PRODUCTS[idx] = { ...PRODUCTS[idx], ...data };
+        });
+      }
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Bulk action failed:", err);
+      res.status(500).json({ success: false, message: String(err) });
     }
   });
 }

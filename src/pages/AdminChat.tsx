@@ -10,16 +10,25 @@ import {
   MoreVertical,
   Bell,
   Volume2,
-  VolumeX
+  VolumeX,
+  Plus,
+  ShoppingBag,
+  ExternalLink,
+  ChevronRight,
+  AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { chatService } from '@/services/chatService';
+import { orderService } from '@/services/orderService';
+import { IncompleteOrder } from '@/types';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const AdminChat = () => {
+  const navigate = useNavigate();
   const [sessions, setSessions] = useState<any[]>([]);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -28,12 +37,15 @@ const AdminChat = () => {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+  const [incompleteOrders, setIncompleteOrders] = useState<IncompleteOrder[]>([]);
 
   useEffect(() => {
     const socket = chatService.connect();
     chatService.joinChat('admins', true);
 
     fetchSessions();
+    fetchIncompleteOrders();
 
     socket.on('chat_notification', (data: any) => {
       toast.info(`New message from ${data.name || 'Customer'}`, {
@@ -66,6 +78,11 @@ const AdminChat = () => {
   const fetchSessions = async () => {
     const data = await chatService.getSessions();
     setSessions(data);
+  };
+
+  const fetchIncompleteOrders = async () => {
+    const data = await orderService.getAllIncompleteOrders();
+    setIncompleteOrders(data);
   };
 
   const fetchMessages = async (id: string) => {
@@ -118,10 +135,18 @@ const AdminChat = () => {
     return sessions.find(s => s.id === activeSessionId);
   }, [sessions, activeSessionId]);
 
+  const activeCustomerIncompleteOrders = useMemo(() => {
+    if (!activeSession?.phone) return [];
+    return incompleteOrders.filter(o => 
+      o.customerPhone === activeSession.phone || 
+      (o.customerPhone && activeSession.phone && o.customerPhone.replace(/[^0-9]/g, '') === activeSession.phone.replace(/[^0-9]/g, ''))
+    );
+  }, [activeSession, incompleteOrders]);
+
   return (
     <div className="flex h-[calc(100vh-160px)] bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
       {/* Sidebar - Sessions List */}
-      <div className="w-[350px] border-r flex flex-col bg-slate-50/50">
+      <div className="w-[350px] border-r flex flex-col bg-slate-50/50 shrink-0">
         <div className="p-6 space-y-4 border-b bg-white">
           <div className="flex justify-between items-center">
              <h2 className="text-xl font-bold text-slate-900 group flex items-center gap-2">
@@ -201,27 +226,15 @@ const AdminChat = () => {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-grow flex flex-col bg-slate-50/30">
+      <div className="flex-grow flex flex-col bg-slate-50/30 overflow-hidden">
         {!activeSessionId ? (
-          <div className="flex-grow flex flex-col items-center justify-center text-center p-20 space-y-6">
+          <div className="flex-grow flex flex-col items-center justify-center text-center p-20 space-y-6 text-slate-900">
              <div className="h-24 w-24 bg-white rounded-3xl shadow-xl shadow-blue-900/5 flex items-center justify-center text-[#00458e] animate-bounce-slow">
                 <MessageCircle className="h-12 w-12" />
              </div>
              <div>
-                <h3 className="text-2xl font-black text-slate-900 tracking-tight">Select a conversation</h3>
+                <h3 className="text-2xl font-black tracking-tight">Select a conversation</h3>
                 <p className="text-slate-500 text-sm font-medium mt-1">Pick a customer from the left to start chatting in real time.</p>
-             </div>
-             <div className="grid grid-cols-2 gap-4 max-w-sm w-full">
-                <div className="p-4 bg-white rounded-2xl border border-slate-100 text-center">
-                   <h4 className="text-lg font-black text-emerald-500 leading-none">{sessions.length}</h4>
-                   <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">Total Chats</p>
-                </div>
-                <div className="p-4 bg-white rounded-2xl border border-slate-100 text-center">
-                   <h4 className="text-lg font-black text-amber-500 leading-none">
-                      {sessions.filter(s => new Date(s.updatedAt).getTime() > Date.now() - 3600000).length}
-                   </h4>
-                   <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">Last Hour</p>
-                </div>
              </div>
           </div>
         ) : (
@@ -246,9 +259,6 @@ const AdminChat = () => {
                   </div>
                </div>
                <div className="flex items-center gap-3">
-                  <Button variant="outline" className="h-10 rounded-xl px-4 font-bold text-xs gap-2">
-                     <Clock className="h-4 w-4" /> History
-                  </Button>
                   <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl text-slate-400"><MoreVertical className="h-5 w-5" /></Button>
                </div>
             </div>
@@ -256,11 +266,6 @@ const AdminChat = () => {
             {/* Messages */}
             <ScrollArea className="flex-grow p-8">
                <div className="space-y-6" ref={scrollRef}>
-                  <div className="flex justify-center mb-8">
-                     <span className="px-4 py-1.5 bg-slate-100 text-slate-500 text-[10px] font-bold uppercase rounded-full tracking-widest">
-                        Conversation started {new Date(activeSession?.updatedAt).toLocaleDateString()}
-                     </span>
-                  </div>
                   {chatMessages.map((msg, i) => (
                     <div key={i} className={`flex ${msg.sender === 'admin' ? 'justify-end' : 'justify-start'}`}>
                       <div className="flex flex-col max-w-[70%]">
@@ -290,9 +295,6 @@ const AdminChat = () => {
                       value={messageInput}
                       onChange={(e) => setMessageInput(e.target.value)}
                     />
-                    <button type="button" className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-300 hover:text-primary transition-colors">
-                       <Smile className="h-6 w-6" />
-                    </button>
                   </div>
                   <Button type="submit" size="icon" className="h-14 w-14 rounded-2xl bg-[#00458e] shadow-xl shadow-blue-900/20 active:scale-95 transition-all shrink-0">
                     <Send className="h-6 w-6" />
@@ -302,6 +304,96 @@ const AdminChat = () => {
           </>
         )}
       </div>
+
+      {/* Right Sidebar - Customer Details & Incomplete Orders */}
+      {activeSessionId && (
+        <div className="w-[300px] border-l flex flex-col bg-white shrink-0 overflow-hidden">
+          <div className="p-6 border-b">
+             <h3 className="font-black text-slate-900 text-sm uppercase tracking-widest mb-4">Customer Info</h3>
+             <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                   <div className="h-8 w-8 bg-slate-50 rounded-lg flex items-center justify-center text-slate-400">
+                      <User className="h-4 w-4" />
+                   </div>
+                   <div className="min-w-0">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Full Name</p>
+                      <p className="text-sm font-bold text-slate-900 truncate">{activeSession?.name || 'Anonymous'}</p>
+                   </div>
+                </div>
+                <div className="flex items-center gap-3">
+                   <div className="h-8 w-8 bg-slate-50 rounded-lg flex items-center justify-center text-blue-500">
+                      <Phone className="h-4 w-4" />
+                   </div>
+                   <div className="min-w-0">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Phone Number</p>
+                      <p className="text-sm font-bold text-slate-900 truncate">{activeSession?.phone || 'N/A'}</p>
+                   </div>
+                </div>
+             </div>
+          </div>
+
+          <ScrollArea className="flex-grow">
+             <div className="p-6 space-y-6">
+                <div>
+                   <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-black text-slate-900 text-[10px] uppercase tracking-widest">Incomplete Orders</h3>
+                      <Badge variant="secondary" className="bg-amber-50 text-amber-600 border-amber-100 text-[9px] px-1.5 h-4 font-black">
+                         {activeCustomerIncompleteOrders.length} DRAFTS
+                      </Badge>
+                   </div>
+                   
+                   {activeCustomerIncompleteOrders.length === 0 ? (
+                      <div className="p-10 text-center bg-slate-50/50 rounded-2xl border-2 border-dashed border-slate-100">
+                         <ShoppingBag className="h-8 w-8 text-slate-200 mx-auto mb-2" />
+                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">No incomplete orders found</p>
+                      </div>
+                   ) : (
+                      <div className="space-y-3">
+                         {activeCustomerIncompleteOrders.map((order) => (
+                            <button 
+                              key={order.id}
+                              onClick={() => navigate(`/admin/incomplete-orders?id=${order.id}`)}
+                              className="w-full p-4 bg-slate-50/50 hover:bg-slate-100 transition-colors rounded-2xl border border-slate-100 text-left group"
+                            >
+                               <div className="flex justify-between items-start mb-2">
+                                  <span className="text-[10px] font-black text-slate-900">#{order.id.slice(-6)}</span>
+                                  <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md ${
+                                    order.status === 'recovered' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'
+                                  }`}>
+                                     {order.status}
+                                  </span>
+                               </div>
+                               <div className="space-y-1 mb-3">
+                                  {order.items.slice(0, 2).map((item, idx) => (
+                                     <p key={idx} className="text-xs text-slate-500 truncate">• {item.name}</p>
+                                  ))}
+                                  {order.items.length > 2 && (
+                                     <p className="text-[10px] text-slate-400 font-bold pl-2">+ {order.items.length - 2} more items</p>
+                                  )}
+                               </div>
+                               <div className="flex justify-between items-center pt-3 border-t border-slate-200/50">
+                                  <span className="text-sm font-black text-slate-900 tracking-tight">৳ {order.total.toLocaleString()}</span>
+                                  <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
+                               </div>
+                            </button>
+                         ))}
+                      </div>
+                   )}
+                </div>
+
+                <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 space-y-3">
+                   <div className="flex items-center gap-2 text-blue-600">
+                      <AlertCircle className="h-4 w-4" />
+                      <h4 className="text-[10px] font-black uppercase tracking-widest">Admin Tip</h4>
+                   </div>
+                   <p className="text-[11px] text-blue-700 leading-relaxed font-medium">
+                      Mention the items in their cart to encourage them to complete the purchase. You can offer a small discount if they're hesitant.
+                   </p>
+                </div>
+             </div>
+          </ScrollArea>
+        </div>
+      )}
     </div>
   );
 };

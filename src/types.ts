@@ -9,6 +9,7 @@ export interface Review {
 
 export interface Product {
   id: string;
+  sku?: string;
   name: string;
   nameBn: string;
   description: string;
@@ -17,6 +18,7 @@ export interface Product {
   category: string;
   images: string[];
   stock: number;
+  status?: 'active' | 'draft';
   isFeatured?: boolean;
   isFlashSale?: boolean;
   isNewArrival?: boolean;

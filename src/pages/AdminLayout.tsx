@@ -261,10 +261,10 @@ const AdminLayout = () => {
                      <ChevronDown className="h-4 w-4 text-slate-300 group-hover:text-slate-950 transition-colors" />
                   </div>
                 } />
-                <DialogContent className="sm:max-w-[300px] rounded-[32px] p-6 top-[15%] left-[90%] translate-x-[-100%] border-none shadow-2xl">
+                <DialogContent className="sm:max-w-[300px] rounded-2xl p-6 top-[15%] left-[90%] translate-x-[-100%] border-none shadow-2xl">
                    <div className="space-y-4">
                       <div className="flex flex-col items-center py-4 border-b border-slate-50">
-                        <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
+                        <div className="w-16 h-16 rounded-xl bg-slate-100 flex items-center justify-center mb-3">
                            <Users className="h-8 w-8 text-slate-400" />
                         </div>
                         <p className="font-black text-slate-900">Admin Panel</p>

@@ -27,13 +27,17 @@ import {
   ChevronDown,
   LayoutGrid,
   FileText,
-  AlertTriangle
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Archive
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { productService } from '@/services/productService';
 import { Product } from '@/types';
 import { toast } from 'sonner';
 import AdminPagination from '@/components/AdminPagination';
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -53,6 +57,9 @@ const AdminProducts = () => {
   
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkAction, setBulkAction] = useState('');
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -83,9 +90,60 @@ const AdminProducts = () => {
     }
   };
 
+  const handleBulkAction = async () => {
+    if (!bulkAction || selectedIds.length === 0) return;
+
+    let success = false;
+    let message = "";
+
+    try {
+      switch (bulkAction) {
+        case 'delete':
+          if (confirm(`Are you sure you want to delete ${selectedIds.length} products?`)) {
+            success = await productService.bulkAction(selectedIds, 'delete');
+            message = "deleted";
+          } else return;
+          break;
+        case 'publish':
+          success = await productService.bulkAction(selectedIds, 'update', { status: 'active' });
+          message = "published";
+          break;
+        case 'draft':
+          success = await productService.bulkAction(selectedIds, 'update', { status: 'draft' });
+          message = "moved to draft";
+          break;
+        case 'flash-sale':
+          success = await productService.bulkAction(selectedIds, 'update', { isFlashSale: 1 });
+          message = "added to flash sale";
+          break;
+        case 'new-arrival':
+          success = await productService.bulkAction(selectedIds, 'update', { isNewArrival: 1 });
+          message = "marked as new arrival";
+          break;
+      }
+
+      if (success) {
+        toast.success(`${selectedIds.length} products ${message} successfully`);
+        fetchProducts();
+        setSelectedIds([]);
+        setBulkAction('');
+      } else {
+        toast.error("Bulk action failed");
+      }
+    } catch (err) {
+      toast.error("An error occurred during bulk action");
+    }
+  };
+
   const filteredProducts = useMemo(() => {
     let result = products.filter(p => {
-       return p.name.toLowerCase().includes(search.toLowerCase()) || (p.nameBn && p.nameBn.includes(search));
+       const searchLower = search.toLowerCase();
+       const matchesName = p.name.toLowerCase().includes(searchLower);
+       const matchesSku = p.sku && p.sku.toLowerCase().includes(searchLower);
+       const matchesCategory = p.category.toLowerCase().includes(searchLower);
+       const matchesId = p.id.toLowerCase().includes(searchLower);
+       
+       return matchesName || matchesSku || matchesCategory || matchesId;
     });
 
     switch(filterTab) {
@@ -104,6 +162,20 @@ const AdminProducts = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === currentProducts.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(currentProducts.map(p => p.id));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
 
   const tabs = [
     { name: 'All', count: products.length },
@@ -131,19 +203,19 @@ const AdminProducts = () => {
         </div>
 
         {/* Categories / Tabs */}
-        <div className="flex bg-white p-1 rounded-2xl shadow-sm border border-slate-100 overflow-x-auto no-scrollbar gap-1">
+        <div className="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100 overflow-x-auto no-scrollbar gap-1">
            {tabs.map((tab) => (
              <button
                key={tab.name}
                onClick={() => { setFilterTab(tab.name); setCurrentPage(1); }}
-               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl whitespace-nowrap transition-all duration-300 ${
+               className={`flex items-center gap-2 px-5 py-2.5 rounded-lg whitespace-nowrap transition-all duration-300 ${
                  filterTab === tab.name 
                    ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10' 
                    : 'text-slate-500 hover:bg-slate-50'
                }`}
              >
                <span className="text-[11px] font-bold uppercase tracking-tight">{tab.name}</span>
-               <span className={`text-[10px] px-2 py-0.5 rounded-lg font-black ${
+               <span className={`text-[10px] px-2 py-0.5 rounded-md font-black ${
                  filterTab === tab.name ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-400'
                }`}>
                  {tab.count}
@@ -157,27 +229,39 @@ const AdminProducts = () => {
            <div className="relative w-full md:w-[400px]">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input 
-                placeholder="Search products by name or code..." 
+                placeholder="Search products by name, SKU, or category..." 
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="h-12 pl-12 rounded-2xl border-slate-100 bg-white shadow-sm ring-0 focus:ring-2 focus:ring-primary/10 text-sm font-medium"
+                className="h-12 pl-12 rounded-xl border-slate-100 bg-white shadow-sm ring-0 focus:ring-2 focus:ring-primary/10 text-sm font-medium"
               />
            </div>
            <div className="flex items-center gap-3">
-              <div className="flex items-center bg-white border border-slate-100 rounded-2xl shadow-sm h-12 overflow-hidden px-1">
-                 <select className="h-full bg-transparent text-[11px] font-bold uppercase tracking-tight text-slate-500 outline-none px-4 cursor-pointer">
-                    <option>Bulk Action</option>
-                    <option>Sort by Price</option>
-                    <option>Sort by Date</option>
+              <div className="flex items-center bg-white border border-slate-100 rounded-xl shadow-sm h-12 overflow-hidden px-1">
+                 <select 
+                  value={bulkAction}
+                  onChange={(e) => setBulkAction(e.target.value)}
+                  className="h-full bg-transparent text-[11px] font-bold uppercase tracking-tight text-slate-500 outline-none px-4 cursor-pointer"
+                 >
+                    <option value="">Bulk Action</option>
+                    <option value="publish">Publish Selected</option>
+                    <option value="draft">Move to Draft</option>
+                    <option value="flash-sale">Add to Flash Sale</option>
+                    <option value="new-arrival">Mark as New Arrival</option>
+                    <option value="delete">Delete Selected</option>
                  </select>
-                 <Button size="icon" className="h-10 w-10 bg-slate-900 text-white rounded-xl shadow-md">
-                    <Filter className="h-4 w-4" />
+                 <Button 
+                  onClick={handleBulkAction}
+                  disabled={!bulkAction || selectedIds.length === 0}
+                  size="icon" 
+                  className={`h-10 w-10 ${!bulkAction || selectedIds.length === 0 ? 'bg-slate-100 text-slate-400' : 'bg-slate-900 text-white'} rounded-lg shadow-md`}
+                 >
+                    <CheckCircle2 className="h-4 w-4" />
                  </Button>
               </div>
               <Button 
                 variant="ghost" 
-                onClick={() => { setSearch(''); setFilterTab('All'); }}
-                className="h-12 w-12 rounded-2xl border border-slate-100 bg-white text-slate-400 hover:text-slate-900 shadow-sm"
+                onClick={() => { setSearch(''); setFilterTab('All'); setSelectedIds([]); }}
+                className="h-12 w-12 rounded-xl border border-slate-100 bg-white text-slate-400 hover:text-slate-900 shadow-sm"
               >
                  <RefreshCcw className="h-4 w-4" />
               </Button>
@@ -186,11 +270,17 @@ const AdminProducts = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-         <div className="bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/50">
+         <div className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/50">
            <Table>
              <TableHeader className="bg-slate-50/50 border-b border-slate-100">
                <TableRow className="h-14 hover:bg-transparent">
-                 <TableHead className="pl-8 w-20 text-[11px] font-black uppercase text-slate-400 tracking-widest">Image</TableHead>
+                 <TableHead className="pl-8 w-12">
+                   <Checkbox 
+                    checked={selectedIds.length === currentProducts.length && currentProducts.length > 0}
+                    onCheckedChange={toggleSelectAll}
+                   />
+                 </TableHead>
+                 <TableHead className="w-20 text-[11px] font-black uppercase text-slate-400 tracking-widest text-center">Image</TableHead>
                  <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Product Information</TableHead>
                  <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Category</TableHead>
                  <TableHead className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Pricing</TableHead>
@@ -203,7 +293,7 @@ const AdminProducts = () => {
              <TableBody>
                {loading ? (
                  <TableRow>
-                   <TableCell colSpan={8} className="py-40 text-center">
+                   <TableCell colSpan={9} className="py-40 text-center">
                      <div className="flex flex-col items-center gap-4 opacity-30">
                         <RefreshCcw className="h-12 w-12 animate-spin text-primary" />
                         <p className="text-sm font-black italic uppercase tracking-widest">Synchronizing products...</p>
@@ -212,7 +302,7 @@ const AdminProducts = () => {
                  </TableRow>
                ) : currentProducts.length === 0 ? (
                  <TableRow>
-                   <TableCell colSpan={8} className="py-40 text-center">
+                   <TableCell colSpan={9} className="py-40 text-center">
                      <div className="flex flex-col items-center gap-5 opacity-30 px-10">
                         <div className="h-24 w-24 bg-slate-100 rounded-full flex items-center justify-center">
                            <LayoutGrid className="h-10 w-10 text-slate-400" />
@@ -224,9 +314,15 @@ const AdminProducts = () => {
                  </TableRow>
                ) : (
                  currentProducts.map((p) => (
-                   <TableRow key={p.id} className="h-20 hover:bg-slate-50/50 transition-colors border-b border-slate-50 group">
+                   <TableRow key={p.id} className={`h-20 hover:bg-slate-50/50 transition-colors border-b border-slate-50 group ${selectedIds.includes(p.id) ? 'bg-blue-50/30' : ''}`}>
                      <TableCell className="pl-8">
-                       <div className="h-14 w-14 rounded-2xl border border-slate-100 overflow-hidden bg-white shadow-sm transition-transform group-hover:scale-110 duration-300">
+                       <Checkbox 
+                        checked={selectedIds.includes(p.id)}
+                        onCheckedChange={() => toggleSelect(p.id)}
+                       />
+                     </TableCell>
+                     <TableCell className="pl-0">
+                       <div className="h-14 w-14 rounded-2xl border border-slate-100 overflow-hidden bg-white shadow-sm transition-transform group-hover:scale-110 duration-300 mx-auto">
                          <img 
                            src={p.images && p.images.length > 0 ? p.images[0] : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200'} 
                            alt={p.name} 
@@ -243,8 +339,8 @@ const AdminProducts = () => {
                             {p.isNewArrival && <Sparkles className="h-3 w-3 text-blue-500 fill-blue-500" />}
                          </div>
                          <div className="flex items-center gap-3">
-                            <span className="text-[10px] font-bold text-slate-400 tracking-tighter uppercase">Code: PRODUCT-{p.id.substring(0, 4)}</span>
-                            <span className="text-[10px] font-bold text-primary tracking-tighter uppercase px-2 py-0.5 bg-primary/5 rounded-md">Featured</span>
+                            <span className="text-[10px] font-bold text-slate-400 tracking-tighter uppercase">SKU: {p.sku || `PRD-${p.id.substring(0, 6)}`}</span>
+                            {p.status === 'draft' && <span className="text-[10px] font-bold text-amber-600 tracking-tighter uppercase px-2 py-0.5 bg-amber-50 rounded-md">Draft</span>}
                          </div>
                        </div>
                      </TableCell>

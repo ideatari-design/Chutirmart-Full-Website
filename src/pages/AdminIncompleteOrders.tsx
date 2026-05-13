@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Table, 
   TableBody, 
@@ -38,7 +39,9 @@ import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 
 const AdminIncompleteOrders = () => {
-  const [search, setSearch] = useState('');
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('id') || '';
+  const [search, setSearch] = useState(initialSearch);
   const [orders, setOrders] = useState<IncompleteOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('All');

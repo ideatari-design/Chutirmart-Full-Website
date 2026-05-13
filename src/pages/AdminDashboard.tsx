@@ -33,6 +33,8 @@ const AdminDashboard = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
+   const [timeRange, setTimeRange] = useState<'7D' | '30D'>('7D');
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -40,27 +42,34 @@ const AdminDashboard = () => {
         orderService.getAllOrders(),
         productService.getAllProducts()
       ]);
+      
+      // Filter orders by time range if needed
+      // For now we just use all orders, but real logic would filter by date
       setOrders(orderData);
       setProducts(productData);
       setLoading(false);
     };
     fetchData();
-  }, []);
+  }, [timeRange]);
 
   const stats = useMemo(() => {
-    const totalOrdersCount = orders.length;
-    const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
-    const incompleteOrdersCount = orders.filter(o => o.status === 'pending').length; 
-    const successRate = totalOrdersCount > 0 ? Math.round(((totalOrdersCount - incompleteOrdersCount) / totalOrdersCount) * 100) : 0;
+    // Basic filter logic for demo (actually filtering data)
+    const now = new Date();
+    const days = timeRange === '7D' ? 7 : 30;
+    const filterDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
+    
+    const filteredOrders = orders.filter(o => new Date(o.createdAt) >= filterDate);
+    const totalRevenue = filteredOrders.reduce((sum, o) => sum + o.total, 0);
 
     return [
       { 
         label: 'Total Orders', 
         value: `৳ ${totalRevenue.toLocaleString()}`, 
         detail: 'Trending up this week ↑',
-        subDetail: 'Data from selected period',
+        subDetail: `Data from last ${days} days`,
         icon: <ShoppingCart className="h-6 w-6" />, 
-        color: 'bg-white border-l-4 border-indigo-500',
+        color: 'bg-white',
+        accentColor: 'border-indigo-500',
         iconColor: 'text-indigo-500 bg-indigo-50'
       },
       { 
@@ -69,7 +78,8 @@ const AdminDashboard = () => {
         detail: 'Consistent buying trend ↑',
         subDetail: 'Stable vendor activity',
         icon: <Package className="h-6 w-6" />, 
-        color: 'bg-white border-l-4 border-emerald-500',
+        color: 'bg-white',
+        accentColor: 'border-emerald-500',
         iconColor: 'text-emerald-500 bg-emerald-50'
       },
       { 
@@ -78,11 +88,12 @@ const AdminDashboard = () => {
         detail: 'Regular logistic cost ↑',
         subDetail: 'Within expected range',
         icon: <Truck className="h-6 w-6" />, 
-        color: 'bg-white border-l-4 border-amber-500',
+        color: 'bg-white',
+        accentColor: 'border-amber-500',
         iconColor: 'text-amber-500 bg-amber-50'
       },
     ];
-  }, [orders]);
+  }, [orders, timeRange]);
 
   const salesData = useMemo(() => {
      const months = ['June', 'July', 'August', 'September', 'October', 'November', 'January', 'February', 'March', 'April', 'May'];
@@ -91,7 +102,7 @@ const AdminDashboard = () => {
         sales: Math.floor(Math.random() * 5000),
         expenses: Math.floor(Math.random() * 3000)
      }));
-  }, []);
+  }, [timeRange]);
 
   if (loading) return (
     <div className="p-20 flex flex-col items-center justify-center">
@@ -104,19 +115,40 @@ const AdminDashboard = () => {
     <div className="space-y-8 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col space-y-1">
-          <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-wider">
+          <div className="flex items-center gap-2 text-slate-400 text-[10px] font-black uppercase tracking-widest leading-none">
             <LayoutDashboard className="h-3 w-3" />
             <span>Dashboard</span>
-            <ChevronRight className="h-3 w-3" />
-            <span>Profile</span>
-            <ChevronRight className="h-3 w-3" />
-            <span className="text-slate-900 border-b border-primary/30 pb-0.5">Shorab Elite Mart</span>
+            <ChevronRight className="h-2.5 w-2.5 opacity-50" />
+            <span className="text-slate-900">Shorab Elite Mart</span>
           </div>
         </div>
-        <div className="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border border-slate-100">
-          <Button variant="ghost" size="sm" className="text-[10px] h-8 font-black rounded-lg px-4 bg-slate-900 text-white hover:bg-slate-800 hover:text-white transition-all shadow-md">7D</Button>
-          <Button variant="ghost" size="sm" className="text-[10px] h-8 font-black rounded-lg px-4 text-slate-400 hover:bg-slate-50">30D</Button>
-          <Button variant="outline" size="sm" className="text-[10px] h-8 font-black rounded-lg px-4 text-rose-500 border-rose-200 hover:bg-rose-50 hover:text-rose-600 gap-2">
+        <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-xl shadow-sm border border-slate-100">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setTimeRange('7D')}
+            className={`text-[10px] h-8 font-black rounded-lg px-4 transition-all duration-200 ${
+              timeRange === '7D' 
+              ? 'bg-slate-900 text-white shadow-md' 
+              : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'
+            }`}
+          >
+            7D
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setTimeRange('30D')}
+            className={`text-[10px] h-8 font-black rounded-lg px-4 transition-all duration-200 ${
+              timeRange === '30D' 
+              ? 'bg-slate-900 text-white shadow-md' 
+              : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'
+            }`}
+          >
+            30D
+          </Button>
+          <div className="w-px h-4 bg-slate-100 mx-1"></div>
+          <Button variant="outline" size="sm" className="text-[10px] h-8 font-black rounded-lg px-4 text-rose-500 border-rose-100 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 gap-2 transition-all">
             <BarChart3 className="h-3 w-3" /> Source
           </Button>
         </div>
@@ -124,28 +156,28 @@ const AdminDashboard = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className={`p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer group ${stat.color}`}>
+          <div key={i} className={`p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100/80 flex flex-col justify-between transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] hover:-translate-y-1.5 cursor-pointer group bg-white border-l-4 ${stat.accentColor}`}>
             <div className="flex justify-between items-start mb-4">
               <div className="space-y-1">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
                 <h3 className="text-2xl font-black text-slate-900 tracking-tighter">{stat.value}</h3>
               </div>
-              <div className={`h-10 w-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 duration-300 shadow-sm ${stat.iconColor}`}>
+              <div className={`h-11 w-11 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 duration-500 shadow-sm ${stat.iconColor}`}>
                 {stat.icon}
               </div>
             </div>
-            <div className="space-y-1 pt-2">
+            <div className="space-y-0.5 pt-3 border-t border-slate-50/50">
               <p className="text-[11px] font-bold text-slate-900 flex items-center gap-1">
                 {stat.detail}
               </p>
-              <p className="text-[9px] font-medium text-slate-400">{stat.subDetail}</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{stat.subDetail}</p>
             </div>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 gap-8">
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+        <div className="bg-white rounded-2xl border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden flex flex-col transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.04)]">
           <div className="p-6 border-b border-slate-50">
              <h3 className="font-black text-slate-900 tracking-tight text-sm uppercase">Sales / Income Overview</h3>
           </div>
@@ -194,7 +226,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden p-8 text-center space-y-6">
+      <div className="bg-white rounded-2xl border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden p-12 text-center space-y-8 transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.04)]">
          <div className="flex flex-col items-center space-y-4">
             <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Top Selling Products</h3>
             <div className="h-16 w-16 bg-blue-50 rounded-full flex items-center justify-center text-primary">

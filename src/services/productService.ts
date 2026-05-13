@@ -129,5 +129,19 @@ export const productService = {
       console.error('Error adding review:', error);
       return null;
     }
+  },
+
+  async bulkAction(ids: string[], action: 'delete' | 'update', data?: any): Promise<boolean> {
+    try {
+      const response = await fetch('/api/products/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, action, data })
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Bulk action failed:', error);
+      return false;
+    }
   }
 };
