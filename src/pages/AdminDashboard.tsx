@@ -19,10 +19,10 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis
+  PieChart,
+  Pie,
+  Cell,
+  Legend
 } from 'recharts';
 import { orderService } from '@/services/orderService';
 import { productService } from '@/services/productService';
@@ -43,8 +43,6 @@ const AdminDashboard = () => {
         productService.getAllProducts()
       ]);
       
-      // Filter orders by time range if needed
-      // For now we just use all orders, but real logic would filter by date
       setOrders(orderData);
       setProducts(productData);
       setLoading(false);
@@ -53,7 +51,6 @@ const AdminDashboard = () => {
   }, [timeRange]);
 
   const stats = useMemo(() => {
-    // Basic filter logic for demo (actually filtering data)
     const now = new Date();
     const days = timeRange === '7D' ? 7 : 30;
     const filterDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
@@ -106,6 +103,7 @@ const AdminDashboard = () => {
   }, [orders, timeRange]);
 
   const salesData = useMemo(() => {
+     // Generate dummy monthly data for the chart logic
      const months = ['June', 'July', 'August', 'September', 'October', 'November', 'January', 'February', 'March', 'April', 'May'];
      return months.map(month => ({
         name: month,
@@ -113,6 +111,15 @@ const AdminDashboard = () => {
         expenses: Math.floor(Math.random() * 3000)
      }));
   }, [timeRange]);
+
+  const pieData = useMemo(() => {
+     const totalSales = salesData.reduce((acc, curr) => acc + curr.sales, 0);
+     const totalExpenses = salesData.reduce((acc, curr) => acc + curr.expenses, 0);
+     return [
+       { name: 'Total Sales', value: totalSales, color: '#00458e' },
+       { name: 'Total Expenses', value: totalExpenses, color: '#f43f5e' }
+     ];
+  }, [salesData]);
 
   if (loading) return (
     <div className="p-20 flex flex-col items-center justify-center">
@@ -139,7 +146,7 @@ const AdminDashboard = () => {
             onClick={() => setTimeRange('7D')}
             className={`text-[10px] h-8 font-black rounded-lg px-4 transition-all duration-200 ${
               timeRange === '7D' 
-              ? 'bg-slate-900 text-white shadow-md' 
+              ? 'bg-[#00458e] text-white shadow-md' 
               : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'
             }`}
           >
@@ -151,7 +158,7 @@ const AdminDashboard = () => {
             onClick={() => setTimeRange('30D')}
             className={`text-[10px] h-8 font-black rounded-lg px-4 transition-all duration-200 ${
               timeRange === '30D' 
-              ? 'bg-slate-900 text-white shadow-md' 
+              ? 'bg-[#00458e] text-white shadow-md' 
               : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'
             }`}
           >
@@ -166,13 +173,13 @@ const AdminDashboard = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className={`p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100/80 flex flex-col justify-between transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] hover:-translate-y-1.5 cursor-pointer group bg-white border-l-4 ${stat.accentColor}`}>
+          <div key={i} className={`p-6 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100/80 flex flex-col justify-between transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] hover:-translate-y-1.5 cursor-pointer group bg-white border-l-4 ${stat.accentColor}`}>
             <div className="flex justify-between items-start mb-4">
               <div className="space-y-1">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
                 <h3 className="text-2xl font-black text-slate-900 tracking-tighter">{stat.value}</h3>
               </div>
-              <div className={`h-11 w-11 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 duration-500 shadow-sm ${stat.iconColor}`}>
+              <div className={`h-11 w-11 rounded-lg flex items-center justify-center transition-all group-hover:scale-110 duration-500 shadow-sm ${stat.iconColor}`}>
                 {stat.icon}
               </div>
             </div>
@@ -187,74 +194,60 @@ const AdminDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-8">
-        <div className="bg-white rounded-2xl border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden flex flex-col transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.04)]">
-          <div className="p-6 border-b border-slate-50">
+        <div className="bg-white rounded-xl border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden flex flex-col transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.04)]">
+          <div className="p-6 border-b border-slate-50 flex justify-between items-center">
              <h3 className="font-black text-slate-900 tracking-tight text-sm uppercase">Sales / Income Overview</h3>
+             <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                   <div className="w-2.5 h-2.5 rounded-full bg-[#00458e]"></div>
+                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Sales</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                   <div className="w-2.5 h-2.5 rounded-full bg-[#f43f5e]"></div>
+                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Expenses</span>
+                </div>
+             </div>
           </div>
-          <div className="p-6 flex-grow h-[400px]">
+          <div className="p-6 flex-grow h-[350px] md:h-[450px] relative">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={salesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#00458e" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#00458e" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.05}/>
-                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="8 8" vertical={false} stroke="#f1f5f9" />
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 9, fill: '#64748b', fontWeight: 700 }} 
-                  dy={10}
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 9, fill: '#64748b', fontWeight: 700 }} 
-                />
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={80}
+                  outerRadius={120}
+                  paddingAngle={8}
+                  dataKey="value"
+                  animationBegin={0}
+                  animationDuration={1500}
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
+                  ))}
+                </Pie>
                 <Tooltip 
-                  cursor={{ stroke: '#e2e8f0', strokeWidth: 2 }}
                   contentStyle={{ 
-                    borderRadius: '20px', 
-                    border: '1px solid #f1f5f9', 
-                    boxShadow: '0 20px 50px -12px rgb(0 0 0 / 0.1)',
-                    padding: '16px',
-                    fontSize: '12px',
-                    fontWeight: 'bold'
+                    borderRadius: '12px', 
+                    border: 'none', 
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                    padding: '12px 16px'
                   }}
+                  itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="sales" 
-                  stroke="#00458e" 
-                  strokeWidth={4} 
-                  fillOpacity={1} 
-                  fill="url(#colorSales)" 
-                  animationDuration={2000}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="expenses" 
-                  stroke="#f43f5e" 
-                  strokeWidth={2} 
-                  strokeDasharray="5 5"
-                  fillOpacity={1} 
-                  fill="url(#colorExpenses)" 
-                  animationDuration={2000}
-                />
-              </AreaChart>
+              </PieChart>
             </ResponsiveContainer>
-             <p className="text-[10px] text-slate-400 font-medium text-center pb-2">After every 4 hours chart data will automatically update</p>
+            
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Income</p>
+               <p className="text-2xl font-black text-slate-900 tracking-tighter">৳ {(pieData[0].value - pieData[1].value).toLocaleString()}</p>
+            </div>
           </div>
+          <p className="text-[10px] text-slate-400 font-medium text-center pb-6 uppercase tracking-widest">Real-time data visualization based on current activity</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden p-12 text-center space-y-8 transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.04)]">
+      <div className="bg-white rounded-xl border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden p-8 md:p-12 text-center space-y-8 transition-all duration-500 hover:shadow-[0_20px_40px_rgb(0,0,0,0.04)]">
          <div className="flex flex-col items-center space-y-4">
             <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Top Selling Products</h3>
             <div className="h-16 w-16 bg-blue-50 rounded-full flex items-center justify-center text-primary">
@@ -262,10 +255,10 @@ const AdminDashboard = () => {
             </div>
             <div className="space-y-1">
                <h4 className="font-bold text-slate-900">No Top Selling Products Yet</h4>
-               <p className="text-sm text-slate-500 max-w-md">Start seeing your best performers here once you start making sales. Add more products to boost your inventory.</p>
+               <p className="text-sm text-slate-500 max-w-md mx-auto">Start seeing your best performers here once you start making sales. Add more products to boost your inventory.</p>
             </div>
             <Link to="/admin/products/add">
-               <Button className="rounded-xl h-12 px-8 bg-slate-900 text-white hover:bg-slate-800 gap-3 font-bold shadow-lg shadow-slate-200">
+               <Button className="rounded-lg h-12 px-8 bg-[#00458e] text-white hover:bg-blue-800 gap-3 font-bold shadow-lg shadow-blue-100">
                   <PlusCircle className="h-5 w-5" /> ADD PRODUCT
                </Button>
             </Link>

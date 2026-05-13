@@ -94,13 +94,13 @@ const AdminCategories = () => {
               <h1 className="text-2xl font-black text-slate-900 tracking-tight">Categories</h1>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Group your products into organized collections for easier browsing and management.</p>
            </div>
-           <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger nativeButton={true} render={
-              <Button className="h-11 bg-[#00458e] hover:bg-blue-800 text-white rounded-xl font-black text-[11px] uppercase px-6 gap-2 shadow-lg shadow-blue-100 transition-all hover:scale-105 active:scale-95">
+              <Button className="h-11 bg-[#00458e] hover:bg-blue-800 text-white rounded-lg font-black text-[11px] uppercase px-6 gap-2 shadow-lg shadow-blue-100 transition-all hover:scale-105 active:scale-95">
                 <PlusCircle className="h-4 w-4" /> Add New Category
               </Button>
             } />
-            <DialogContent className="rounded-[32px] sm:max-w-md border-none shadow-2xl p-8">
+            <DialogContent className="rounded-xl sm:max-w-md border-none shadow-2xl p-8">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-black text-slate-900">Create Category</DialogTitle>
               </DialogHeader>
@@ -109,7 +109,7 @@ const AdminCategories = () => {
                   <Label className="text-[11px] font-black text-slate-400 uppercase ml-1">Category Name</Label>
                   <Input 
                     placeholder="e.g. Fashion & Apparel" 
-                    className="h-12 rounded-2xl border-slate-100 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary/10 font-bold transition-all" 
+                    className="h-12 rounded-lg border-slate-100 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary/10 font-bold transition-all" 
                     value={newCat.name}
                     onChange={e => setNewCat({...newCat, name: e.target.value})}
                   />
@@ -118,7 +118,7 @@ const AdminCategories = () => {
                   <Label className="text-[11px] font-black text-slate-400 uppercase ml-1">SEO URL Slug</Label>
                   <Input 
                     placeholder="e.g. fashion-apparel" 
-                    className="h-12 rounded-2xl border-slate-100 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary/10 font-bold transition-all" 
+                    className="h-12 rounded-lg border-slate-100 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary/10 font-bold transition-all" 
                     value={newCat.slug}
                     onChange={e => setNewCat({...newCat, slug: e.target.value})}
                   />
@@ -127,7 +127,7 @@ const AdminCategories = () => {
                   <Label className="text-[11px] font-black text-slate-400 uppercase ml-1">Category Image URL</Label>
                   <Input 
                     placeholder="https://images..." 
-                    className="h-12 rounded-2xl border-slate-100 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary/10 font-bold transition-all" 
+                    className="h-12 rounded-lg border-slate-100 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary/10 font-bold transition-all" 
                     value={newCat.image}
                     onChange={e => {
                       const val = e.target.value;
@@ -138,8 +138,8 @@ const AdminCategories = () => {
                 </div>
               </div>
               <DialogFooter className="grid grid-cols-2 gap-4 sm:space-x-0 mt-4">
-                <Button variant="ghost" className="h-14 rounded-2xl font-black uppercase text-xs tracking-widest text-slate-400" onClick={() => setIsOpen(false)}>Discard</Button>
-                <Button className="h-14 rounded-2xl bg-[#00458e] text-white font-black uppercase text-xs tracking-widest px-8 shadow-lg shadow-blue-100" onClick={handleAdd}>Save Category</Button>
+                <Button variant="ghost" className="h-14 rounded-lg font-black uppercase text-xs tracking-widest text-slate-400" onClick={() => setIsOpen(false)}>Discard</Button>
+                <Button className="h-14 rounded-lg bg-[#00458e] text-white font-black uppercase text-xs tracking-widest px-8 shadow-lg shadow-blue-100" onClick={handleAdd}>Save Category</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -153,18 +153,18 @@ const AdminCategories = () => {
                 placeholder="Search categories by name..." 
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="h-12 pl-12 rounded-2xl border-slate-100 bg-white shadow-sm ring-0 focus:ring-2 focus:ring-primary/10 text-sm font-medium"
+                className="h-12 pl-12 rounded-lg border-slate-100 bg-white shadow-sm ring-0 focus:ring-2 focus:ring-primary/10 text-sm font-medium"
               />
            </div>
            <div className="flex items-center gap-3">
-              <Button className="h-12 px-6 bg-slate-900 text-white rounded-2xl gap-2 font-black text-[11px] uppercase shadow-lg shadow-slate-200 transition-all hover:scale-105">
+              <Button className="h-12 px-6 bg-[#00458e] text-white rounded-lg gap-2 font-black text-[11px] uppercase shadow-lg shadow-blue-50 transition-all hover:scale-105">
                  <RefreshCcw className="h-4 w-4" /> Reset Filters
               </Button>
            </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/50">
+      <div className="bg-white rounded-xl overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/50">
         <Table>
           <TableHeader className="bg-slate-50/50 border-b border-slate-100">
             <TableRow className="hover:bg-transparent h-14">
@@ -191,8 +191,8 @@ const AdminCategories = () => {
             ) : filteredCategories.map((cat) => (
               <TableRow key={cat.id} className="hover:bg-slate-50/50 transition-colors h-20 group border-b border-slate-50">
                 <TableCell className="pl-8">
-                  <div className="h-14 w-14 bg-white rounded-2xl border border-slate-100 overflow-hidden flex items-center justify-center p-0.5 shadow-sm transition-transform group-hover:scale-110 duration-300">
-                     <img src={cat.image} alt={cat.name} className="w-full h-full object-cover rounded-xl" referrerPolicy="no-referrer" />
+                  <div className="h-14 w-14 bg-white rounded-lg border border-slate-100 overflow-hidden flex items-center justify-center p-0.5 shadow-sm transition-transform group-hover:scale-110 duration-300">
+                     <img src={cat.image} alt={cat.name} className="w-full h-full object-cover rounded-md" referrerPolicy="no-referrer" />
                   </div>
                 </TableCell>
                 <TableCell>
@@ -202,7 +202,7 @@ const AdminCategories = () => {
                   <span className="text-[12px] text-slate-400 font-bold uppercase tracking-tight">{cat.slug}</span>
                 </TableCell>
                 <TableCell>
-                   <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100">
+                   <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100">
                       <span className="text-[11px] font-black">{cat.productCount}</span>
                       <span className="text-[9px] font-black uppercase tracking-tighter opacity-70 whitespace-nowrap">Items Linked</span>
                    </div>
@@ -217,13 +217,13 @@ const AdminCategories = () => {
                    <div className="flex justify-end gap-2">
                       <button 
                         onClick={() => openEdit(cat)}
-                        className="h-9 w-9 flex items-center justify-center rounded-2xl bg-white text-slate-400 hover:bg-[#00458e] hover:text-white transition-all shadow-sm border border-slate-100"
+                        className="h-9 w-9 flex items-center justify-center rounded-lg bg-white text-slate-400 hover:bg-[#00458e] hover:text-white transition-all shadow-sm border border-slate-100"
                       >
                          <Edit className="h-4 w-4" />
                       </button>
                       <button 
                         onClick={() => handleDelete(cat.id)}
-                        className="h-9 w-9 flex items-center justify-center rounded-2xl bg-white text-slate-400 hover:bg-rose-500 hover:text-white transition-all shadow-sm border border-slate-100"
+                        className="h-9 w-9 flex items-center justify-center rounded-lg bg-white text-slate-400 hover:bg-rose-500 hover:text-white transition-all shadow-sm border border-slate-100"
                       >
                          <Trash2 className="h-4 w-4" />
                       </button>

@@ -210,7 +210,7 @@ const AdminProducts = () => {
                onClick={() => { setFilterTab(tab.name); setCurrentPage(1); }}
                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg whitespace-nowrap transition-all duration-300 ${
                  filterTab === tab.name 
-                   ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10' 
+                   ? 'bg-[#00458e] text-white shadow-lg shadow-blue-900/10' 
                    : 'text-slate-500 hover:bg-slate-50'
                }`}
              >
@@ -232,11 +232,11 @@ const AdminProducts = () => {
                 placeholder="Search products by name, SKU, or category..." 
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="h-12 pl-12 rounded-xl border-slate-100 bg-white shadow-sm ring-0 focus:ring-2 focus:ring-primary/10 text-sm font-medium"
+                className="h-12 pl-12 rounded-lg border-slate-100 bg-white shadow-sm ring-0 focus:ring-2 focus:ring-primary/10 text-sm font-medium"
               />
            </div>
            <div className="flex items-center gap-3">
-              <div className="flex items-center bg-white border border-slate-100 rounded-xl shadow-sm h-12 overflow-hidden px-1">
+              <div className="flex items-center bg-white border border-slate-100 rounded-lg shadow-sm h-12 overflow-hidden px-1">
                  <select 
                   value={bulkAction}
                   onChange={(e) => setBulkAction(e.target.value)}
@@ -253,7 +253,7 @@ const AdminProducts = () => {
                   onClick={handleBulkAction}
                   disabled={!bulkAction || selectedIds.length === 0}
                   size="icon" 
-                  className={`h-10 w-10 ${!bulkAction || selectedIds.length === 0 ? 'bg-slate-100 text-slate-400' : 'bg-slate-900 text-white'} rounded-lg shadow-md`}
+                  className={`h-10 w-10 ${!bulkAction || selectedIds.length === 0 ? 'bg-slate-100 text-slate-400' : 'bg-[#00458e] text-white'} rounded-md shadow-md`}
                  >
                     <CheckCircle2 className="h-4 w-4" />
                  </Button>
@@ -261,7 +261,7 @@ const AdminProducts = () => {
               <Button 
                 variant="ghost" 
                 onClick={() => { setSearch(''); setFilterTab('All'); setSelectedIds([]); }}
-                className="h-12 w-12 rounded-xl border border-slate-100 bg-white text-slate-400 hover:text-slate-900 shadow-sm"
+                className="h-12 w-12 rounded-lg border border-slate-100 bg-white text-slate-400 hover:text-slate-900 shadow-sm"
               >
                  <RefreshCcw className="h-4 w-4" />
               </Button>
@@ -270,8 +270,9 @@ const AdminProducts = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-         <div className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/50">
-           <Table>
+         <div className="bg-white rounded-xl overflow-x-auto border border-slate-100 shadow-xl shadow-slate-200/50">
+           <div className="min-w-[1000px]">
+             <Table>
              <TableHeader className="bg-slate-50/50 border-b border-slate-100">
                <TableRow className="h-14 hover:bg-transparent">
                  <TableHead className="pl-8 w-12">
@@ -386,7 +387,7 @@ const AdminProducts = () => {
                      </TableCell>
                      <TableCell className="text-right pr-8">
                        <div className="flex items-center justify-end gap-2">
-                          <button className="h-9 w-9 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-500 hover:bg-slate-900 hover:text-white transition-all shadow-sm border border-slate-100">
+                          <button className="h-9 w-9 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-500 hover:bg-slate-300 hover:text-white transition-all shadow-sm border border-slate-100">
                              <Eye className="h-4 w-4" />
                           </button>
                           <button 
@@ -424,6 +425,7 @@ const AdminProducts = () => {
               />
            </div>
          </div>
+       </div>
       </div>
 
       {/* Delete Confirmation Dialog */}

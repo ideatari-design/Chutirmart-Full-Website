@@ -174,12 +174,12 @@ const AdminOrders = () => {
         </div>
 
         {/* Status Tabs Navigation */}
-        <div className="flex bg-white p-1 rounded-2xl shadow-sm border border-slate-100 overflow-x-auto no-scrollbar gap-1">
+        <div className="flex bg-white p-1 rounded-xl shadow-sm border border-slate-100 overflow-x-auto no-scrollbar gap-1">
            {tabs.map((tab) => (
              <button
                key={tab.name}
                onClick={() => { setFilterStatus(tab.name); setCurrentPage(1); }}
-               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl whitespace-nowrap transition-all duration-300 ${
+               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap transition-all duration-300 ${
                  filterStatus === tab.name 
                    ? 'bg-[#00458e] text-white shadow-lg shadow-blue-900/10' 
                    : 'text-slate-500 hover:bg-slate-50'
@@ -210,7 +210,7 @@ const AdminOrders = () => {
                       placeholder="Invoice / Phone" 
                       value={invoicePhone}
                       onChange={(e) => setInvoicePhone(e.target.value)}
-                      className="h-10 pl-9 text-[11px] font-bold border-slate-100 bg-white rounded-xl shadow-sm focus:ring-primary/20" 
+                      className="h-10 pl-9 text-[11px] font-bold border-slate-100 bg-white rounded-lg shadow-sm focus:ring-primary/20" 
                     />
                  </div>
               </div>
@@ -219,7 +219,7 @@ const AdminOrders = () => {
                  <select 
                    value={orderType}
                    onChange={(e) => setOrderType(e.target.value)}
-                   className="h-10 px-3 text-[11px] font-bold bg-white border border-slate-100 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer pr-8"
+                   className="h-10 px-3 text-[11px] font-bold bg-white border border-slate-100 rounded-lg shadow-sm outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer pr-8"
                  >
                     <option value="All">All</option>
                     <option value="Multiple">Multiple Products</option>
@@ -234,7 +234,7 @@ const AdminOrders = () => {
                       type="date"
                       value={orderDate}
                       onChange={(e) => setOrderDate(e.target.value)}
-                      className="h-10 pl-9 text-[11px] font-bold border-slate-100 bg-white rounded-xl shadow-sm appearance-none" 
+                      className="h-10 pl-9 text-[11px] font-bold border-slate-100 bg-white rounded-lg shadow-sm appearance-none" 
                     />
                  </div>
               </div>
@@ -254,21 +254,22 @@ const AdminOrders = () => {
 
            {/* Right Controls - Bulk Actions */}
            <div className="flex flex-wrap items-center justify-end gap-2">
-              <Button className="h-10 bg-[#0db39e] hover:bg-teal-600 text-white px-5 rounded-xl gap-2 font-black text-[10px] shadow-lg shadow-teal-50 uppercase tracking-widest border-none">
+              <Button className="h-10 bg-[#0db39e] hover:bg-teal-600 text-white px-5 rounded-lg gap-2 font-black text-[10px] shadow-lg shadow-teal-50 uppercase tracking-widest border-none">
                  <Send className="h-3.5 w-3.5" /> Bulk Send to Courier
               </Button>
-              <Button className="h-10 bg-slate-800 hover:bg-slate-900 text-white px-5 rounded-xl gap-2 font-black text-[10px] shadow-lg shadow-slate-200 uppercase tracking-widest">
+              <Button className="h-10 bg-[#00458e] hover:bg-blue-800 text-white px-5 rounded-lg gap-2 font-black text-[10px] shadow-lg shadow-blue-100 uppercase tracking-widest">
                  <Printer className="h-3.5 w-3.5" /> Bulk Print <ChevronDown className="h-3 w-3 opacity-50 ml-1" />
               </Button>
-              <Button className="h-10 bg-rose-500 hover:bg-rose-600 text-white px-5 rounded-xl gap-2 font-black text-[10px] shadow-lg shadow-rose-50 uppercase tracking-widest">
+              <Button className="h-10 bg-rose-500 hover:bg-rose-600 text-white px-5 rounded-lg gap-2 font-black text-[10px] shadow-lg shadow-rose-50 uppercase tracking-widest">
                  <Trash2 className="h-3.5 w-3.5" /> Bulk Delete
               </Button>
            </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/50">
-        <Table>
+      <div className="bg-white rounded-xl overflow-x-auto border border-slate-100 shadow-xl shadow-slate-200/50">
+        <div className="min-w-[1000px]">
+          <Table>
           <TableHeader className="bg-slate-50/50 border-b border-slate-100">
             <TableRow className="hover:bg-transparent h-12">
               <TableHead className="pl-6 w-12">
@@ -352,15 +353,15 @@ const AdminOrders = () => {
                   <TableCell className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                     FB Website
                   </TableCell>
-                  <TableCell className="text-right pr-6">
+                   <TableCell className="text-right pr-6">
                     <div className="flex items-center justify-end gap-2">
-                       <button className="h-8 w-8 flex items-center justify-center rounded-xl bg-white text-slate-500 hover:bg-slate-900 hover:text-white transition-all shadow-sm border border-slate-100">
+                       <button className="h-8 w-8 flex items-center justify-center rounded-lg bg-white text-slate-500 hover:bg-slate-900 hover:text-white transition-all shadow-sm border border-slate-100">
                           <Eye className="h-4 w-4" />
                        </button>
-                       <button className="h-8 w-8 flex items-center justify-center rounded-xl bg-white text-slate-500 hover:bg-emerald-500 hover:text-white transition-all shadow-sm border border-slate-100">
+                       <button className="h-8 w-8 flex items-center justify-center rounded-lg bg-white text-slate-500 hover:bg-emerald-500 hover:text-white transition-all shadow-sm border border-slate-100">
                           <CheckCircle2 className="h-4 w-4" />
                        </button>
-                       <button className="h-8 w-8 flex items-center justify-center rounded-xl bg-white text-slate-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm border border-slate-100">
+                       <button className="h-8 w-8 flex items-center justify-center rounded-lg bg-white text-slate-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm border border-slate-100">
                           <Trash2 className="h-4 w-4" />
                        </button>
                     </div>
@@ -370,6 +371,7 @@ const AdminOrders = () => {
             )}
           </TableBody>
         </Table>
+        </div>
 
         <div className="p-6 bg-[#f8fafc] border-t border-slate-100">
           <AdminPagination

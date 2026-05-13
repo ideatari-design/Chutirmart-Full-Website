@@ -149,7 +149,7 @@ const SidebarItem = ({
       {item.children ? (
         <button
           onClick={onToggle}
-          className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 group ${
+          className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-300 group ${
             isActive 
               ? 'bg-[#00458e] text-white shadow-[0_10px_20px_-10px_rgba(0,69,142,0.4)]' 
               : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -167,7 +167,7 @@ const SidebarItem = ({
         <Link 
           to={item.path} 
           onClick={handleLinkClick}
-          className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group ${
+          className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 group ${
             isActive 
               ? 'bg-[#00458e] text-white shadow-[0_10px_20px_-10px_rgba(0,69,142,0.4)]' 
               : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -181,9 +181,9 @@ const SidebarItem = ({
       )}
 
       {item.children && isOpen && (
-        <div className="pl-3 space-y-1 mt-1 animate-in fade-in slide-in-from-left-2 duration-300">
+        <div className="pl-1 space-y-1 mt-1 animate-in fade-in slide-in-from-left-2 duration-300">
           {item.children.map((child: any, idx: number) => {
-            const isChildActive = pathname === child.path || pathname.startsWith(child.path + '/');
+            const isChildActive = pathname === child.path;
             return (
               <Link
                 key={idx}
@@ -191,11 +191,11 @@ const SidebarItem = ({
                 onClick={onLinkClick}
                 className={`flex items-center gap-2.5 px-3 py-2 text-[13px] rounded-lg transition-all duration-200 ${
                   isChildActive 
-                    ? 'text-[#00458e] font-black bg-blue-50/50' 
+                    ? 'text-white font-black bg-[#00458e] shadow-sm' 
                     : 'text-slate-500 font-bold hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
-                <div className={`transition-colors duration-300 ${isChildActive ? 'text-[#00458e]' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                <div className={`transition-colors duration-300 ${isChildActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`}>
                   {child.icon}
                 </div>
                 <span>{child.label}</span>
@@ -300,19 +300,19 @@ const AdminLayout = () => {
         <header className="hidden lg:flex h-20 bg-transparent items-center justify-between px-8 pt-4">
            {/* Breadcrumbs can go here but existing design has it better in pages */}
            <div></div>
-           <div className="flex items-center gap-6">
-              <button className="h-10 w-10 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white rounded-xl transition-all shadow-sm">
+            <div className="flex items-center gap-6">
+              <button className="h-10 w-10 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white rounded-lg transition-all shadow-sm">
                 <HelpCircle className="h-5 w-5" />
               </button>
-              <button className="h-10 w-10 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white rounded-xl transition-all shadow-sm relative">
+              <button className="h-10 w-10 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white rounded-lg transition-all shadow-sm relative">
                 <div className="w-2 h-2 bg-rose-500 rounded-full absolute top-2 right-2 border-2 border-white shadow-sm animate-pulse"></div>
                 <Bell className="h-5 w-5" />
               </button>
               
               <Dialog>
                 <DialogTrigger nativeButton={false} render={
-                  <div className="flex items-center gap-3 ml-2 group cursor-pointer p-1 pr-3 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100">
-                     <div className="w-9 h-9 rounded-lg bg-[#00458e] overflow-hidden flex items-center justify-center border-2 border-white shadow-sm transform group-hover:rotate-3 transition-transform">
+                  <div className="flex items-center gap-3 ml-2 group cursor-pointer p-1 pr-3 hover:bg-white rounded-lg transition-all shadow-sm border border-transparent hover:border-slate-100">
+                     <div className="w-9 h-9 rounded bg-[#00458e] overflow-hidden flex items-center justify-center border-2 border-white shadow-sm transform group-hover:rotate-3 transition-transform">
                         <img src="https://i.pravatar.cc/150?u=admin" alt="User" className="w-full h-full object-cover" />
                      </div>
                      <div className="text-left">
@@ -322,10 +322,10 @@ const AdminLayout = () => {
                      <ChevronDown className="h-4 w-4 text-slate-300 group-hover:text-slate-950 transition-colors" />
                   </div>
                 } />
-                <DialogContent className="sm:max-w-[300px] rounded-2xl p-6 top-[15%] left-[90%] translate-x-[-100%] border-none shadow-2xl">
+                <DialogContent className="sm:max-w-[300px] rounded-xl p-6 top-[15%] lg:right-[8%] lg:left-auto lg:translate-x-0 border-none shadow-2xl">
                    <div className="space-y-4">
                       <div className="flex flex-col items-center py-4 border-b border-slate-50">
-                        <div className="w-16 h-16 rounded-xl bg-slate-100 flex items-center justify-center mb-3">
+                        <div className="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center mb-3">
                            <Users className="h-8 w-8 text-slate-400" />
                         </div>
                         <p className="font-black text-slate-900">Admin Panel</p>
@@ -333,11 +333,11 @@ const AdminLayout = () => {
                       </div>
                       <div className="space-y-1">
                         <Link to="/admin/settings">
-                           <Button variant="ghost" className="w-full justify-start gap-3 rounded-xl h-11 text-slate-600 hover:text-[#00458e] hover:bg-blue-50 font-bold text-xs uppercase tracking-tight">
+                           <Button variant="ghost" className="w-full justify-start gap-3 rounded-lg h-11 text-slate-600 hover:text-[#00458e] hover:bg-blue-50 font-bold text-xs uppercase tracking-tight">
                               <Settings className="h-4 w-4" /> Account Settings
                            </Button>
                         </Link>
-                        <Button variant="ghost" className="w-full justify-start gap-3 rounded-xl h-11 text-rose-500 hover:text-rose-600 hover:bg-rose-50 font-bold text-xs uppercase tracking-tight" onClick={() => window.location.href = '/'}>
+                        <Button variant="ghost" className="w-full justify-start gap-3 rounded-lg h-11 text-rose-500 hover:text-rose-600 hover:bg-rose-50 font-bold text-xs uppercase tracking-tight" onClick={() => window.location.href = '/'}>
                            <LogOut className="h-4 w-4" /> Logout
                         </Button>
                       </div>
@@ -374,8 +374,8 @@ const AdminLayout = () => {
         </header>
 
         {/* Main View Area */}
-        <div className="flex-grow p-4 md:p-6 lg:px-8 lg:py-10 overflow-x-hidden">
-           <div className="max-w-[1600px] mx-auto">
+        <div className="flex-grow p-4 md:p-6 overflow-x-hidden">
+           <div className="max-w-[1600px] mx-auto pb-10">
               <Routes>
                 <Route index element={<AdminDashboard />} />
                 
