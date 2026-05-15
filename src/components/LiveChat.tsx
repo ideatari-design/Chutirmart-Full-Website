@@ -106,7 +106,7 @@ const LiveChat = () => {
             {/* Header */}
             <div className="bg-primary p-4 text-primary-foreground flex justify-between items-center shrink-0">
                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <div className="h-10 w-10 bg-white/20 rounded-full flex items-center justify-center">
                      <MessageCircle className="h-6 w-6" />
                   </div>
                   <div>

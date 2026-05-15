@@ -79,6 +79,40 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /* Aggressive mobile rendering fixes */
+  @media (max-width: 768px) {
+    * {
+      -webkit-tap-highlight-color: transparent;
+      outline: none !important;
+      will-change: auto !important;
+      perspective: none !important;
+      backface-visibility: visible !important;
+    }
+
+    /* Disable expensive filters that cause ghosting on mobile GPUs */
+    .backdrop-blur-md, 
+    .backdrop-blur-xl,
+    .backdrop-blur-sm,
+    .bg-white\/90,
+    .bg-white\/10,
+    .bg-white\/20,
+    .bg-white\/70,
+    .backdrop-blur-xs {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    /* Simplify shadows on mobile to reduce rendering passes */
+    .shadow-2xl, .shadow-xl, .shadow-lg {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+    }
+
+    /* Force clean rendering context for problematic layers */
+    section, .group, .group-hover {
+       transform: none !important;
+    }
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;
@@ -93,6 +127,13 @@
     .mobile-no-blur {
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
+    }
+    
+    /* Ensure clean transforms on mobile */
+    .mobile-clean-transform {
+      transform: translate3d(0,0,0);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
     }
   }
   

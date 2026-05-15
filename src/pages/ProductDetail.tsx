@@ -220,7 +220,7 @@ const ProductDetail = () => {
               variant="ghost" 
               size="icon" 
               onClick={() => setSelectedImage(prev => (prev - 1 + product.images.length) % product.images.length)}
-              className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/20 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all"
+              className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/20 md:backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all"
             >
               <ChevronLeft className="h-6 w-6" />
             </Button>
@@ -228,7 +228,7 @@ const ProductDetail = () => {
               variant="ghost" 
               size="icon" 
               onClick={() => setSelectedImage(prev => (prev + 1) % product.images.length)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/20 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all"
+              className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/20 md:backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all"
             >
               <ChevronRight className="h-6 w-6" />
             </Button>

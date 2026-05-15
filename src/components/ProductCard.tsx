@@ -37,7 +37,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <div className="group bg-white flex flex-col h-full md:transition-shadow duration-300 hover:shadow-2xl hover:shadow-[#00458f]/10 rounded-3xl border border-slate-100 w-full relative overflow-hidden">
+    <div className="group bg-white flex flex-col h-full md:transition-all md:duration-300 md:hover:shadow-2xl md:hover:shadow-[#00458f]/10 rounded-3xl border border-slate-100 w-full relative overflow-hidden">
       {/* Image Section */}
       <div className="relative aspect-square overflow-hidden bg-muted/20 shrink-0">
         <Link to={`/product/${product.id}`} className="w-full h-full block">
@@ -64,7 +64,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         )}
 
         {/* Floating Actions */}
-        <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-4 opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100 transition-all duration-500">
+        <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-4 opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100 md:transition-all duration-500">
           <Button 
             onClick={toggleWishlist}
             variant="secondary" 
@@ -120,14 +120,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               });
             }}
             variant="outline" 
-            className="w-full h-10 md:h-14 rounded-xl md:rounded-2xl border md:border-2 border-accent/20 text-accent md:hover:bg-accent md:hover:text-white md:hover:border-accent md:hover:scale-[1.02] font-bold text-[10px] md:text-sm flex items-center justify-center gap-1.5 md:gap-3 transition-all active:scale-95 px-2 md:px-6 shadow-sm"
+            className="w-full h-10 md:h-14 rounded-xl md:rounded-2xl border md:border-2 border-accent/20 text-accent md:hover:bg-accent md:hover:text-white md:hover:border-accent md:hover:scale-[1.02] font-bold text-[10px] md:text-sm flex items-center justify-center gap-1.5 md:gap-3 transition-opacity md:transition-all active:opacity-80 md:active:scale-95 px-2 md:px-6 shadow-sm"
           >
             Add to cart
             <ShoppingCart className="w-3.5 h-3.5 md:w-5 h-5" />
           </Button>
           <Button 
             onClick={handleBuyNow}
-            className="w-full h-10 md:h-14 rounded-xl md:rounded-2xl bg-primary text-primary-foreground md:hover:opacity-90 md:hover:scale-[1.02] font-bold text-[10px] md:text-sm transition-all active:scale-95 border-none shadow-lg shadow-primary/20"
+            className="w-full h-10 md:h-14 rounded-xl md:rounded-2xl bg-primary text-primary-foreground md:hover:opacity-90 md:hover:scale-[1.02] font-bold text-[10px] md:text-sm transition-opacity md:transition-all active:opacity-80 md:active:scale-95 border-none shadow-md md:shadow-lg shadow-primary/20"
           >
             Buy now
           </Button>

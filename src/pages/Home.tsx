@@ -67,7 +67,7 @@ const CategoryCircles = () => {
   const allCategories = [...categories, ...categories, ...categories];
 
   return (
-    <div className="py-16 overflow-hidden bg-background/50">
+    <div className="py-16 bg-background/50">
       <div className="max-w-[1140px] mx-auto px-4 relative overflow-hidden">
         <motion.div 
           className="flex gap-12 w-max"
@@ -259,9 +259,8 @@ const BannerSlider = () => {
           animate="center"
           exit="exit"
           transition={{
-            x: { type: "spring", stiffness: 350, damping: 35 },
-            opacity: { duration: 0.4 },
-            scale: { duration: 0.5 }
+            x: { type: "tween", ease: "easeInOut", duration: 0.4 },
+            opacity: { duration: 0.3 }
           }}
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
@@ -335,13 +334,13 @@ const BannerSlider = () => {
         <>
           <button 
             onClick={(e) => { e.stopPropagation(); paginate(-1); }}
-            className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 h-8 w-8 md:h-14 md:w-14 rounded-full bg-white/20 md:bg-white/10 md:backdrop-blur-xl flex items-center justify-center text-white md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-white/20 z-30 border border-white/20 mobile-no-blur"
+            className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 h-8 w-8 md:h-14 md:w-14 rounded-full bg-white/20 md:bg-white/10 md:backdrop-blur-xl flex items-center justify-center text-white md:opacity-0 md:group-hover:opacity-100 md:transition-all hover:bg-white/20 z-30 border border-white/20"
           >
             <ChevronLeft className="h-4 w-4 md:h-8 md:w-8" />
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); paginate(1); }}
-            className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 h-8 w-8 md:h-14 md:w-14 rounded-full bg-white/20 md:bg-white/10 md:backdrop-blur-xl flex items-center justify-center text-white md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-white/20 z-30 border border-white/20 mobile-no-blur"
+            className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 h-8 w-8 md:h-14 md:w-14 rounded-full bg-white/20 md:bg-white/10 md:backdrop-blur-xl flex items-center justify-center text-white md:opacity-0 md:group-hover:opacity-100 md:transition-all hover:bg-white/20 z-30 border border-white/20"
           >
             <ChevronRight className="h-4 w-4 md:h-8 md:w-8" />
           </button>
@@ -515,12 +514,12 @@ const Home = () => {
       </section>
 
       {/* Middle Search banner */}
-      <section className="bg-primary py-16 md:py-24 text-white overflow-hidden relative">
+      <section className="bg-primary py-16 md:py-24 text-white relative">
          <div className="max-w-2xl mx-auto px-4 text-center relative z-10">
             <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 md:mb-8 leading-tight">Looking for <br /> something else?</h2>
             <div className="relative mb-8 group">
-               <Input placeholder="Search for products..." className="h-14 md:h-16 pr-14 md:pr-16 rounded-full text-xs md:text-sm text-center border-none bg-white/10 backdrop-blur-xl text-white placeholder:text-white/40 focus-visible:ring-white/20" />
-               <Button className="absolute right-1.5 md:right-2 top-1.5 md:top-2 h-11 w-11 md:h-12 md:w-12 rounded-full bg-white text-primary hover:bg-white/90 shadow-xl transition-all active:scale-95"><Search className="h-4 w-4 md:h-5 md:w-5" /></Button>
+               <Input placeholder="Search for products..." className="h-14 md:h-16 pr-14 md:pr-16 rounded-full text-xs md:text-sm text-center border-none bg-white text-primary placeholder:text-muted-foreground/40 focus-visible:ring-primary/20" />
+               <Button className="absolute right-1.5 md:right-2 top-1.5 md:top-2 h-11 w-11 md:h-12 md:w-12 rounded-full bg-primary text-white hover:bg-primary/90 shadow-xl transition-all active:scale-95"><Search className="h-4 w-4 md:h-5 md:w-5" /></Button>
             </div>
             <div className="flex flex-wrap justify-center gap-x-6 md:gap-x-8 gap-y-3 md:gap-y-4 text-[10px] md:text-xs font-black uppercase tracking-widest text-white/70">
                {["Smartphone", "Tablet", "Furniture", "Laptop", "Fashion", "Home & decor", "Camera"].map(tag => (
