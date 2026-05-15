@@ -192,7 +192,7 @@ const MainHeader = () => {
   const [isMobileSearchFocused, setIsMobileSearchFocused] = React.useState(false);
 
   return (
-    <div className="bg-background border-b py-5 sticky top-0 z-50 shadow-sm [isolation:isolate] md:[contain:none] [contain:paint_layout]">
+    <div className="bg-background border-b py-5 sticky top-0 z-50 shadow-sm">
       <div className="max-w-[1140px] mx-auto px-4 flex items-center justify-between gap-4 md:gap-8">
         <Link to="/" className="flex items-center shrink-0 transition-transform active:scale-95 group">
           <Logo className="h-10 md:h-12 w-auto object-contain" />

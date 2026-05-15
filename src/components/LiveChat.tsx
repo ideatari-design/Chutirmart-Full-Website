@@ -94,7 +94,7 @@ const LiveChat = () => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[100] flex flex-col items-end">
+    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[9999] flex flex-col items-end">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -179,7 +179,7 @@ const LiveChat = () => {
                           }`}>
                             {msg.message}
                             <div className={`text-[9px] mt-1 opacity-50 font-bold uppercase text-right leading-none`}>
-                               {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                               {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
                             </div>
                           </div>
                         </div>

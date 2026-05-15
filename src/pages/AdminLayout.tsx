@@ -133,7 +133,7 @@ const SidebarItem = ({
 }) => {
   if (item.isHeader) {
     return (
-      <p className="text-[11px] font-medium text-slate-500 px-3 pt-6 pb-2 uppercase tracking-wider">
+      <p className="text-[11px] font-medium text-white/40 px-3 pt-6 pb-2 uppercase tracking-wider">
         {item.label}
       </p>
     );
@@ -145,34 +145,35 @@ const SidebarItem = ({
 
   return (
     <div className="space-y-1">
+      {/* Only show parent highlighted if NO child is highlighted, OR if the parent button IS the link */}
       {item.children ? (
         <button
           onClick={onToggle}
-          className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-300 group ${
+          className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 group ${
             isActive 
-              ? 'bg-[#00458e] text-white shadow-[0_10px_20px_-10px_rgba(0,69,142,0.4)]' 
-              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              ? 'bg-white/10 text-white shadow-sm' 
+              : 'text-white/70 hover:bg-white/5 hover:text-white'
           }`}
         >
           <div className="flex items-center gap-3">
-            <div className={`transition-colors duration-300 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-900'}`}>
+            <div className={`transition-colors duration-300 ${isActive ? 'text-white' : 'text-white/40 group-hover:text-white'}`}>
               {item.icon}
             </div>
             <span className="font-bold text-[13px] tracking-tight">{item.label}</span>
           </div>
-          <ChevronRight className={`h-3.5 w-3.5 opacity-50 transition-transform duration-300 ${isOpen ? 'rotate-90' : ''}`} />
+          <ChevronRight className={`h-3.5 w-3.5 opacity-30 transition-transform duration-300 ${isOpen ? 'rotate-90 opacity-100' : ''}`} />
         </button>
       ) : (
         <Link 
           to={item.path} 
           onClick={handleLinkClick}
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 group ${
+          className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group ${
             isActive 
-              ? 'bg-[#00458e] text-white shadow-[0_10px_20px_-10px_rgba(0,69,142,0.4)]' 
-              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              ? 'bg-white/10 text-white shadow-sm' 
+              : 'text-white/70 hover:bg-white/5 hover:text-white'
           }`}
         >
-          <div className={`transition-colors duration-300 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-900'}`}>
+          <div className={`transition-colors duration-300 ${isActive ? 'text-white' : 'text-white/40 group-hover:text-white'}`}>
             {item.icon}
           </div>
           <span className="font-bold text-[13px] tracking-tight">{item.label}</span>
@@ -180,7 +181,7 @@ const SidebarItem = ({
       )}
 
       {item.children && isOpen && (
-        <div className="pl-1 space-y-1 mt-1 animate-in fade-in slide-in-from-left-2 duration-300">
+        <div className="pl-1 space-y-0.5 mt-1 animate-in fade-in slide-in-from-left-2 duration-300">
           {item.children.map((child: any, idx: number) => {
             const isChildActive = pathname === child.path;
             return (
@@ -190,11 +191,11 @@ const SidebarItem = ({
                 onClick={onLinkClick}
                 className={`flex items-center gap-2.5 px-3 py-2 text-[13px] rounded-lg transition-all duration-200 ${
                   isChildActive 
-                    ? 'text-white font-black bg-[#00458e] shadow-sm' 
-                    : 'text-slate-500 font-bold hover:text-slate-900 hover:bg-slate-50'
+                    ? 'text-white font-black bg-white/10' 
+                    : 'text-white/60 font-bold hover:text-white hover:bg-white/5'
                 }`}
               >
-                <div className={`transition-colors duration-300 ${isChildActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                <div className={`transition-colors duration-300 ${isChildActive ? 'text-white' : 'text-white/40 group-hover:text-white/70'}`}>
                   {child.icon}
                 </div>
                 <span>{child.label}</span>
@@ -212,12 +213,22 @@ const SidebarContent = ({ pathname, onLinkClick }: { pathname: string, onLinkCli
   
   // Find which menu item is active by default based on URL
   const activeMenuLabel = React.useMemo(() => {
-    // Exact match or prefix match for parent items
+    // Reverse find might be better if paths overlap, but find is okay with specific logic
     const activeItem = menuItems.find(item => {
+      // Dashboard special case: only active if exact match
       if (item.path === '/admin') return pathname === '/admin' || pathname === '/admin/';
-      if (pathname === item.path || (item.path !== '/admin' && pathname.startsWith(item.path + '/'))) return true;
+      
+      // If the current path is exactly the item path
+      if (pathname === item.path) return true;
+      
+      // If the current path is a sub-path of the item path (ensuring boundary with /)
+      if (item.path !== '/admin' && pathname.startsWith(item.path + '/')) return true;
+      
+      // If any of the children paths match exactly or are a prefix
       if (item.children) {
-        return item.children.some((child: any) => pathname === child.path || pathname.startsWith(child.path + '/'));
+        return item.children.some((child: any) => 
+          pathname === child.path || pathname.startsWith(child.path + '/')
+        );
       }
       return false;
     });
@@ -227,26 +238,30 @@ const SidebarContent = ({ pathname, onLinkClick }: { pathname: string, onLinkCli
   const [openMenu, setOpenMenu] = React.useState<string | null>(activeMenuLabel);
 
   // Sync open menu when pathname changes (for external navigation)
+  // Ensure we only open if the menu actually has children
   React.useEffect(() => {
     if (activeMenuLabel) {
-      setOpenMenu(activeMenuLabel);
+      const activeItem = menuItems.find(i => i.label === activeMenuLabel);
+      if (activeItem?.children) {
+        setOpenMenu(activeMenuLabel);
+      }
     }
   }, [activeMenuLabel]);
 
   return (
-    <div className="flex flex-col h-full bg-white">
-      <div className="p-6 sticky top-0 bg-white z-10 mb-4">
+    <div className="flex flex-col h-full bg-[#00458e] overflow-hidden">
+      <div className="p-6 sticky top-0 bg-[#00458e] z-10 flex-shrink-0">
          <Link to="/admin" className="flex items-center shrink-0">
            {settings.logo ? (
              <img 
                src={convertGoogleDriveLink(settings.logo)} 
                alt="Logo" 
-               className="h-14 w-auto object-contain" 
+               className="h-14 w-auto object-contain brightness-0 invert" 
                referrerPolicy="no-referrer"
              />
            ) : (
-             <div className="text-2xl font-black text-primary flex items-center group uppercase">
-               {settings.shopName?.split(' ')[0] || 'CHUTIR'} <span className="text-accent ml-1 uppercase">{settings.shopName?.split(' ')[1] || 'MART'}</span>
+             <div className="text-2xl font-black text-white flex items-center group uppercase">
+               {settings.shopName?.split(' ')[0] || 'CHUTIR'} <span className="text-white/80 ml-1 uppercase">{settings.shopName?.split(' ')[1] || 'MART'}</span>
              </div>
            )}
          </Link>
@@ -269,12 +284,12 @@ const SidebarContent = ({ pathname, onLinkClick }: { pathname: string, onLinkCli
       </ScrollArea>
 
 
-      <div className="p-4 border-t mt-auto">
+      <div className="p-4 border-t border-white/10 mt-auto">
          <Link to="/" className="block">
-           <Button variant="ghost" className="w-full justify-start gap-3 text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg h-11">
-              <LogOut className="h-5 w-5 -rotate-180" />
-              <span className="font-medium text-sm">Exit Admin</span>
-           </Button>
+            <Button variant="ghost" className="w-full justify-start gap-3 text-white/70 hover:text-white hover:bg-white/10 rounded-lg h-11">
+               <LogOut className="h-5 w-5 -rotate-180" />
+               <span className="font-medium text-sm">Exit Admin</span>
+            </Button>
          </Link>
       </div>
     </div>
@@ -289,9 +304,12 @@ const AdminLayout = () => {
   return (
     <div className="flex min-h-screen w-full bg-[#f8fafa] relative">
       {/* Sidebar for Desktop */}
-      <aside className="w-72 bg-white border-r hidden lg:flex flex-col sticky top-0 h-screen z-20 shadow-[8px_0_40px_rgb(0,0,0,0.015)]">
+      <aside className="w-72 bg-[#00458e] border-r border-white/5 hidden lg:flex flex-col fixed inset-y-0 left-0 z-20 shadow-[8px_0_40px_rgb(0,0,0,0.05)]">
         <SidebarContent pathname={location.pathname} />
       </aside>
+
+      {/* Spacer for desktop sidebar because it's now fixed */}
+      <div className="hidden lg:block w-72 shrink-0"></div>
 
       {/* Main Content Area */}
       <div className="flex-grow flex flex-col min-w-0">
@@ -363,7 +381,7 @@ const AdminLayout = () => {
                   <Menu className="h-6 w-6" />
                 </div>
               } />
-              <SheetContent side="left" className="p-0 w-72 flex flex-col">
+              <SheetContent side="left" className="p-0 w-72 flex flex-col bg-[#00458e] border-none">
                  <SidebarContent 
                   pathname={location.pathname} 
                   onLinkClick={() => setIsMobileMenuOpen(false)} 

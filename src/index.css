@@ -119,7 +119,7 @@
     }
 
     /* Prevent ghosting/double rendering by forcing new stacking contexts on major containers */
-    main, .bg-background, section, [role="main"] {
+    main, section, [role="main"] {
       contain: paint;
       isolation: isolate;
       -webkit-overflow-scrolling: touch;
