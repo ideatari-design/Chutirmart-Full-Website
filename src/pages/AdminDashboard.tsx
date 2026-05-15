@@ -19,10 +19,10 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis
 } from 'recharts';
 import { orderService } from '@/services/orderService';
 import { productService } from '@/services/productService';
@@ -208,24 +208,36 @@ const AdminDashboard = () => {
                 </div>
              </div>
           </div>
-          <div className="p-6 flex-grow h-[350px] md:h-[450px] relative">
+          <div className="p-2 flex-grow h-[350px] md:h-[450px] relative">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={80}
-                  outerRadius={120}
-                  paddingAngle={8}
-                  dataKey="value"
-                  animationBegin={0}
-                  animationDuration={1500}
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
-                  ))}
-                </Pie>
+              <AreaChart
+                data={salesData}
+                margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#00458e" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#00458e" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }}
+                  dy={10}
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }}
+                  tickFormatter={(value) => `৳${value}`}
+                />
                 <Tooltip 
                   contentStyle={{ 
                     borderRadius: '12px', 
@@ -235,13 +247,26 @@ const AdminDashboard = () => {
                   }}
                   itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
                 />
-              </PieChart>
+                <Area 
+                  type="monotone" 
+                  dataKey="sales" 
+                  stroke="#00458e" 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#colorSales)" 
+                  animationDuration={2000}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="expenses" 
+                  stroke="#f43f5e" 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#colorExpenses)" 
+                  animationDuration={2500}
+                />
+              </AreaChart>
             </ResponsiveContainer>
-            
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Income</p>
-               <p className="text-2xl font-black text-slate-900 tracking-tighter">৳ {(pieData[0].value - pieData[1].value).toLocaleString()}</p>
-            </div>
           </div>
           <p className="text-[10px] text-slate-400 font-medium text-center pb-6 uppercase tracking-widest">Real-time data visualization based on current activity</p>
         </div>
