@@ -94,14 +94,14 @@ const OrderTracking = () => {
           </p>
           <Button 
             onClick={() => navigate('/products')}
-            className="rounded-full h-14 px-8 font-bold gap-2 text-lg shadow-xl shadow-primary/20 hover:scale-105 transition-all"
+            className="rounded-xl h-14 px-8 font-bold gap-2 text-lg shadow-xl shadow-primary/20 hover:scale-105 transition-all"
           >
             <ShoppingBag className="h-5 w-5" />
             Continue Shopping & Go to Store
           </Button>
         </div>
 
-        <Card className="border-none shadow-xl rounded-3xl overflow-hidden bg-white mb-12">
+        <Card className="border-none shadow-xl rounded-xl md:rounded-3xl overflow-hidden bg-white mb-12">
           <CardContent className="p-8">
             <form onSubmit={handleTrack} className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-grow">
@@ -110,10 +110,10 @@ const OrderTracking = () => {
                   value={orderId}
                   onChange={(e) => setOrderId(e.target.value)}
                   placeholder="e.g. #123456" 
-                  className="pl-12 h-14 rounded-2xl bg-secondary/30 border-none text-lg"
+                  className="pl-12 h-14 rounded-xl bg-secondary/30 border-none text-lg"
                 />
               </div>
-              <Button size="lg" className="h-14 px-10 rounded-2xl text-lg shadow-lg shadow-primary/20" disabled={loading}>
+              <Button size="lg" className="h-14 px-10 rounded-xl text-lg shadow-lg shadow-primary/20" disabled={loading}>
                 {loading ? 'Loading...' : 'Submit'}
               </Button>
             </form>
@@ -128,19 +128,19 @@ const OrderTracking = () => {
               className="space-y-8"
             >
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="rounded-2xl border-primary/5 shadow-sm">
+                <Card className="rounded-xl md:rounded-2xl border-primary/5 shadow-sm">
                   <CardContent className="p-6 text-center">
                     <Badge variant="outline" className="mb-2 bg-primary/5">Order ID</Badge>
                     <p className="font-bold text-xl">{trackingData.id}</p>
                   </CardContent>
                 </Card>
-                <Card className="rounded-2xl border-primary/5 shadow-sm">
+                <Card className="rounded-xl md:rounded-2xl border-primary/5 shadow-sm">
                   <CardContent className="p-6 text-center">
                     <Badge variant="outline" className="mb-2 bg-primary/5">Order Date</Badge>
                     <p className="font-bold text-xl">{trackingData.date}</p>
                   </CardContent>
                 </Card>
-                <Card className="rounded-2xl border-primary/5 shadow-sm">
+                <Card className="rounded-xl md:rounded-2xl border-primary/5 shadow-sm">
                   <CardContent className="p-6 text-center">
                     <Badge variant="outline" className="mb-2 bg-primary/5">Payment Status</Badge>
                     <p className="font-bold text-xl text-accent">
@@ -151,12 +151,12 @@ const OrderTracking = () => {
                 </Card>
               </div>
 
-              <Card className="rounded-3xl border-primary/5 shadow-xl p-8">
+              <Card className="rounded-xl md:rounded-3xl border-primary/5 shadow-xl p-8">
                 <div className="flex justify-between items-center mb-10">
                   <h3 className="font-bold text-xl flex items-center gap-2">
                     <Package className="h-5 w-5 text-primary" /> Shipping Status
                   </h3>
-                  <Button variant="outline" className="gap-2 rounded-xl">
+                  <Button variant="outline" className="gap-2 rounded-lg md:rounded-xl">
                     <FileText className="h-4 w-4" /> Download Invoice
                   </Button>
                 </div>
@@ -181,9 +181,9 @@ const OrderTracking = () => {
                 </div>
               </Card>
 
-              <div className="p-6 bg-secondary/50 rounded-2xl flex items-center justify-between">
+              <div className="p-6 bg-secondary/50 rounded-xl md:rounded-2xl flex items-center justify-between">
                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 bg-white rounded-xl shadow-sm flex items-center justify-center">
+                    <div className="h-12 w-12 bg-white rounded-lg md:rounded-xl shadow-sm flex items-center justify-center">
                        <Headset className="h-6 w-6 text-primary" />
                     </div>
                     <div>
@@ -191,7 +191,7 @@ const OrderTracking = () => {
                        <p className="text-xs text-muted-foreground">Call our customer support</p>
                     </div>
                  </div>
-                 <Button className="rounded-xl">+8801700000000</Button>
+                 <Button className="rounded-lg md:rounded-xl">+8801700000000</Button>
               </div>
             </motion.div>
           )}
@@ -204,7 +204,7 @@ const OrderTracking = () => {
           <div className="flex flex-col md:flex-row justify-between items-center sm:items-end mb-16 md:mb-20 gap-8 px-4 sm:px-0 text-center sm:text-left">
             <div className="space-y-4 sm:space-y-2">
               <div className="flex justify-center sm:justify-start">
-                <Badge className="bg-accent text-white border-none px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                <Badge className="bg-accent text-white border-none px-4 py-1 rounded-lg md:rounded-full text-[10px] font-black uppercase tracking-widest">
                   Top Recommendations
                 </Badge>
               </div>
@@ -214,10 +214,10 @@ const OrderTracking = () => {
             <Button 
               variant="ghost" 
               onClick={() => navigate('/products')}
-              className="group font-bold text-primary gap-2 hover:bg-primary/5 rounded-xl pr-2 w-full sm:w-auto justify-center sm:justify-start transition-all"
+              className="group font-bold text-primary gap-2 hover:bg-primary/5 rounded-lg md:rounded-xl pr-2 w-full sm:w-auto justify-center sm:justify-start transition-all"
             >
               Explore More Products
-              <div className="h-10 w-10 rounded-xl bg-primary text-white flex items-center justify-center group-hover:translate-x-1 transition-transform hidden sm:flex">
+              <div className="h-10 w-10 rounded-lg md:rounded-xl bg-primary text-white flex items-center justify-center group-hover:translate-x-1 transition-transform hidden sm:flex">
                 <ArrowRight className="h-5 w-5" />
               </div>
             </Button>
@@ -238,7 +238,7 @@ const OrderTracking = () => {
                variant="outline" 
                size="lg"
                onClick={() => navigate('/products')}
-               className="h-14 md:h-20 px-10 md:px-16 rounded-[2rem] border-2 font-black text-base md:text-xl gap-4 hover:bg-primary hover:text-white hover:border-primary transition-all shadow-xl w-full sm:w-auto"
+               className="h-14 md:h-20 px-10 md:px-16 rounded-xl md:rounded-[2rem] border-2 font-black text-base md:text-xl gap-4 hover:bg-primary hover:text-white hover:border-primary transition-all shadow-xl w-full sm:w-auto"
              >
                <ShoppingBag className="h-6 w-6 md:h-8 md:w-8" />
                Visit Full Shop Again

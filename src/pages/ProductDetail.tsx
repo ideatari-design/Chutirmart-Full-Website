@@ -162,7 +162,7 @@ const ProductDetail = () => {
     return (
       <div className="max-w-[1140px] mx-auto px-4 py-20 animate-pulse">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <Skeleton className="aspect-square rounded-3xl" />
+          <Skeleton className="aspect-square rounded-xl md:rounded-3xl" />
           <div className="space-y-6">
             <Skeleton className="h-10 w-3/4" />
             <Skeleton className="h-6 w-1/4" />
@@ -190,7 +190,7 @@ const ProductDetail = () => {
               onMouseMove={handleMouseMove}
               onMouseEnter={() => setZoom(true)}
               onMouseLeave={() => setZoom(false)}
-              className="aspect-square bg-secondary/30 rounded-[2rem] overflow-hidden border border-border shadow-xl shadow-secondary/50 relative cursor-crosshair"
+              className="aspect-square bg-secondary/30 rounded-xl md:rounded-[2rem] overflow-hidden border border-border shadow-xl shadow-secondary/50 relative cursor-crosshair"
             >
               <img 
                 src={convertGoogleDriveLink(product.images[selectedImage])} 
@@ -220,7 +220,7 @@ const ProductDetail = () => {
               variant="ghost" 
               size="icon" 
               onClick={() => setSelectedImage(prev => (prev - 1 + product.images.length) % product.images.length)}
-              className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/20 md:backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all"
+              className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-lg md:rounded-full bg-white/20 md:backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all"
             >
               <ChevronLeft className="h-6 w-6" />
             </Button>
@@ -228,7 +228,7 @@ const ProductDetail = () => {
               variant="ghost" 
               size="icon" 
               onClick={() => setSelectedImage(prev => (prev + 1) % product.images.length)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/20 md:backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all"
+              className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-lg md:rounded-full bg-white/20 md:backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all"
             >
               <ChevronRight className="h-6 w-6" />
             </Button>
@@ -239,7 +239,7 @@ const ProductDetail = () => {
               <button 
                 key={i} 
                 onClick={() => setSelectedImage(i)}
-                className={`w-20 h-20 rounded-2xl overflow-hidden border-2 flex-shrink-0 transition-all ${selectedImage === i ? 'border-primary ring-4 ring-primary/10' : 'border-border opacity-60 hover:opacity-100 hover:border-primary/30'}`}
+                className={`w-20 h-20 rounded-lg md:rounded-2xl overflow-hidden border-2 flex-shrink-0 transition-all ${selectedImage === i ? 'border-primary ring-4 ring-primary/10' : 'border-border opacity-60 hover:opacity-100 hover:border-primary/30'}`}
               >
                 <img 
                   src={convertGoogleDriveLink(img)} 
@@ -261,7 +261,7 @@ const ProductDetail = () => {
         <div className="flex flex-col">
           <div className="space-y-6">
             <div className="space-y-2">
-              <span className="text-[10px] font-bold text-primary bg-primary/5 px-4 py-1.5 rounded-full border border-primary/10">
+              <span className="text-[10px] font-bold text-primary bg-primary/5 px-4 py-1.5 rounded-lg md:rounded-full border border-primary/10">
                 {product.category}
               </span>
               <h1 className="text-[36px] font-bold leading-[33.8px] text-foreground pt-4">
@@ -294,11 +294,11 @@ const ProductDetail = () => {
             <div className="pt-4 space-y-4">
               <div className="flex items-center gap-4">
                 <span className="text-sm font-bold text-slate-500 uppercase">Quantity:</span>
-                <div className="flex items-center bg-secondary/50 rounded-2xl p-1.5 border border-border/50 shadow-inner">
+                <div className="flex items-center bg-secondary/50 rounded-xl md:rounded-2xl p-1.5 border border-border/50 shadow-inner">
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-10 w-10 rounded-xl hover:bg-white transition-all active:scale-90"
+                    className="h-10 w-10 rounded-lg md:rounded-xl hover:bg-white transition-all active:scale-90"
                     onClick={decrementQty}
                   >
                     <Minus className="h-4 w-4" />
@@ -307,7 +307,7 @@ const ProductDetail = () => {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-10 w-10 rounded-xl hover:bg-white transition-all active:scale-90"
+                    className="h-10 w-10 rounded-lg md:rounded-xl hover:bg-white transition-all active:scale-90"
                     onClick={incrementQty}
                   >
                     <Plus className="h-4 w-4" />
@@ -322,7 +322,7 @@ const ProductDetail = () => {
               <Button 
                 onClick={() => handleAddToCart(true)}
                 size="lg" 
-                className="h-16 rounded-2xl text-sm font-bold gap-2 bg-accent hover:bg-accent/90 text-accent-foreground shadow-2xl shadow-accent/20 transition-all active:scale-95"
+                className="h-16 rounded-xl md:rounded-2xl text-sm font-bold gap-2 bg-accent hover:bg-accent/90 text-accent-foreground shadow-2xl shadow-accent/20 transition-all active:scale-95"
               >
                 Buy it now
               </Button>
@@ -331,7 +331,7 @@ const ProductDetail = () => {
                   onClick={() => handleAddToCart(false)}
                   size="lg" 
                   variant="outline"
-                  className="h-16 flex-grow rounded-2xl text-sm font-bold gap-2 border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all active:scale-95"
+                  className="h-16 flex-grow rounded-xl md:rounded-2xl text-sm font-bold gap-2 border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all active:scale-95"
                 >
                   <ShoppingCart className="h-5 w-5" /> Add to cart
                 </Button>
@@ -339,7 +339,7 @@ const ProductDetail = () => {
                   onClick={() => isInWishlist(product.id) ? removeFromWishlist(product.id) : addToWishlist(product)}
                   size="icon" 
                   variant="outline"
-                  className={`h-16 w-16 rounded-2xl transition-all active:scale-95 ${isInWishlist(product.id) ? 'bg-accent/10 border-accent text-accent' : 'border-2'}`}
+                  className={`h-16 w-16 rounded-xl md:rounded-2xl transition-all active:scale-95 ${isInWishlist(product.id) ? 'bg-accent/10 border-accent text-accent' : 'border-2'}`}
                 >
                   <Heart className={`h-6 w-6 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
                 </Button>
@@ -347,7 +347,7 @@ const ProductDetail = () => {
             </div>
             
             <Button 
-              className="w-full h-16 rounded-2xl text-sm font-bold gap-2 bg-[#00458F] hover:bg-[#00356F] text-white shadow-2xl shadow-[#00458F]/20 transition-all active:scale-95"
+              className="w-full h-16 rounded-xl md:rounded-2xl text-sm font-bold gap-2 bg-[#00458F] hover:bg-[#00356F] text-white shadow-2xl shadow-[#00458F]/20 transition-all active:scale-95"
               onClick={() => window.open(`tel:01700000000`)}
             >
               <Phone className="h-5 w-5 fill-current" /> Call to order
@@ -379,7 +379,7 @@ const ProductDetail = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
-              <div className="flex items-center gap-5 p-5 bg-secondary rounded-[1.5rem] border border-border group hover:bg-background hover:shadow-xl transition-all">
+              <div className="flex items-center gap-5 p-5 bg-secondary rounded-xl md:rounded-[1.5rem] border border-border group hover:bg-background hover:shadow-xl transition-all">
                 <div className="h-12 w-12 bg-background rounded-2xl flex items-center justify-center text-primary shadow-sm group-hover:bg-primary group-hover:text-primary-foreground transition-all">
                   <Truck className="h-6 w-6" />
                 </div>
@@ -388,7 +388,7 @@ const ProductDetail = () => {
                   <p className="text-[10px] text-muted-foreground font-bold">Fast nationwide shipping</p>
                 </div>
               </div>
-              <div className="flex items-center gap-5 p-5 bg-secondary rounded-[1.5rem] border border-border group hover:bg-background hover:shadow-xl transition-all">
+              <div className="flex items-center gap-5 p-5 bg-secondary rounded-xl md:rounded-[1.5rem] border border-border group hover:bg-background hover:shadow-xl transition-all">
                 <div className="h-12 w-12 bg-background rounded-2xl flex items-center justify-center text-primary shadow-sm group-hover:bg-primary group-hover:text-primary-foreground transition-all" >
                   <ShieldCheck className="h-6 w-6" />
                 </div>
@@ -405,12 +405,12 @@ const ProductDetail = () => {
       {/* Product Details Tabs */}
       <section className="mt-24">
         <div className="flex flex-col items-center">
-          <div className="flex bg-secondary/50 p-1.5 rounded-[1.5rem] gap-1 mb-16 shadow-inner">
+          <div className="flex bg-secondary/50 p-1.5 rounded-xl md:rounded-[1.5rem] gap-1 mb-16 shadow-inner">
             {(['description', 'additional', 'reviews'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-8 py-3.5 rounded-[1.2rem] text-sm font-bold capitalize transition-all duration-300 ${
+                className={`px-8 py-3.5 rounded-lg md:rounded-[1.2rem] text-sm font-bold capitalize transition-all duration-300 ${
                   activeTab === tab 
                     ? 'bg-white text-primary shadow-xl shadow-primary/5' 
                     : 'text-muted-foreground hover:text-foreground'
@@ -435,7 +435,7 @@ const ProductDetail = () => {
                   {product.description}
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12 text-left">
-                  <div className="p-8 bg-secondary/20 rounded-[2rem] border border-border/50">
+                  <div className="p-8 bg-secondary/20 rounded-xl md:rounded-[2rem] border border-border/50">
                     <h4 className="font-bold text-lg mb-4 flex items-center gap-2">
                       <ShieldCheck className="h-5 w-5 text-primary" /> Why choose us?
                     </h4>
@@ -445,7 +445,7 @@ const ProductDetail = () => {
                       <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#11bb99]" /> Best price in Bangladesh</li>
                     </ul>
                   </div>
-                  <div className="p-8 bg-secondary/20 rounded-[2rem] border border-border/50">
+                  <div className="p-8 bg-secondary/20 rounded-xl md:rounded-[2rem] border border-border/50">
                     <h4 className="font-bold text-lg mb-4 flex items-center gap-2">
                       <Truck className="h-5 w-5 text-primary" /> Delivery Info
                     </h4>
@@ -467,7 +467,7 @@ const ProductDetail = () => {
                 {product.specs ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {Object.entries(product.specs).map(([key, val]) => (
-                      <div key={key} className="flex items-center justify-between p-6 bg-secondary/30 rounded-[1.5rem] border border-border hover:bg-white hover:shadow-xl hover:shadow-primary/5 transition-all group">
+                      <div key={key} className="flex items-center justify-between p-6 bg-secondary/30 rounded-xl md:rounded-[1.5rem] border border-border hover:bg-white hover:shadow-xl hover:shadow-primary/5 transition-all group">
                         <span className="text-sm text-muted-foreground font-bold group-hover:text-primary">{key}:</span>
                         <span className="font-bold text-foreground">{val}</span>
                       </div>
@@ -498,7 +498,7 @@ const ProductDetail = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                   <div className="lg:col-span-2 space-y-6">
                     {reviews.length > 0 ? reviews.map(review => (
-                      <div key={review.id} className="p-8 bg-white rounded-[2rem] border border-border shadow-sm">
+                      <div key={review.id} className="p-8 bg-white rounded-xl md:rounded-[2rem] border border-border shadow-sm">
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex items-center gap-4">
                             <div className="h-12 w-12 rounded-2xl bg-secondary flex items-center justify-center text-primary/40">
@@ -518,14 +518,14 @@ const ProductDetail = () => {
                         <p className="text-muted-foreground leading-relaxed">"{review.comment}"</p>
                       </div>
                     )) : (
-                      <div className="text-center p-16 bg-secondary/20 rounded-[2rem] border border-dashed">
+                      <div className="text-center p-16 bg-secondary/20 rounded-xl md:rounded-[2rem] border border-dashed">
                         <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-10" />
                         <p className="text-muted-foreground font-bold">No reviews yet. Be the first to review!</p>
                       </div>
                     )}
                   </div>
 
-                  <div className="bg-white border border-border p-8 rounded-[2rem] shadow-xl h-fit">
+                  <div className="bg-white border border-border p-8 rounded-xl md:rounded-[2rem] shadow-xl h-fit">
                     <h4 className="font-bold text-xs mb-8 flex items-center gap-2">
                         <MessageSquare className="h-4 w-4 text-primary" /> Write a review
                     </h4>
@@ -535,7 +535,7 @@ const ProductDetail = () => {
                           <Input 
                             value={newReview.userName}
                             onChange={(e) => setNewReview({ ...newReview, userName: e.target.value })}
-                            className="bg-secondary/50 border-none rounded-2xl h-12 text-sm"
+                            className="bg-secondary/50 border-none rounded-xl md:rounded-2xl h-12 text-sm"
                             placeholder="Your name"
                             required
                           />
@@ -561,12 +561,12 @@ const ProductDetail = () => {
                             rows={4}
                             value={newReview.comment}
                             onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-                            className="w-full bg-secondary/50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-primary/20 transition-all resize-none shadow-inner"
+                            className="w-full bg-secondary/50 border-none rounded-xl md:rounded-2xl p-4 text-sm focus:ring-2 focus:ring-primary/20 transition-all resize-none shadow-inner"
                             placeholder="Share your thoughts about this product..."
                             required
                           />
                         </div>
-                        <Button type="submit" disabled={submittingReview} className="w-full h-14 rounded-2xl bg-primary text-white font-bold text-xs gap-2 shadow-lg shadow-primary/20">
+                        <Button type="submit" disabled={submittingReview} className="w-full h-14 rounded-xl md:rounded-2xl bg-primary text-white font-bold text-xs gap-2 shadow-lg shadow-primary/20">
                            {submittingReview ? 'Submitting...' : 'Submit Review'} <Send className="h-4 w-4" />
                         </Button>
                     </form>

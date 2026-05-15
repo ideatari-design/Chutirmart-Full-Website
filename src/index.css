@@ -54,6 +54,12 @@
     --radius: 0.75rem;
   }
 
+  @media (max-width: 768px) {
+    :root {
+      --radius: 0.5rem; /* Reduced from 0.75rem for mobile */
+    }
+  }
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -111,6 +117,35 @@
     section, .group, .group-hover {
        transform: none !important;
     }
+
+    /* Prevent ghosting/double rendering by forcing new stacking contexts on major containers */
+    main, .bg-background, section, [role="main"] {
+      contain: paint;
+      isolation: isolate;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Optimization for mobile scrolling */
+    .snap-x, .snap-y {
+      scroll-snap-type: both mandatory;
+    }
+
+    img {
+      /* Force GPU rendering for images to avoid repaint artifacts */
+      transform: translate3d(0, 0, 0);
+      backface-visibility: hidden;
+      -webkit-perspective: 1000;
+      perspective: 1000;
+      will-change: transform;
+    }
+
+    /* Disable all transitions on mobile that might cause lag during scroll */
+    .transition-all, .transition-transform, .transition-colors, .transition-opacity {
+      @media (max-width: 768px) {
+        transition-duration: 0ms !important;
+        transition-delay: 0ms !important;
+      }
+    }
   }
 
   body {
@@ -119,6 +154,8 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Prevent rubber banding on mobile which often causes rendering glitches */
+    overscroll-behavior-y: none;
   }
   
   /* Optimize mobile scrolling performance */

@@ -15,7 +15,8 @@ import {
   Upload,
   Search,
   Check,
-  ChevronsUpDown
+  ChevronsUpDown,
+  Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,11 +25,18 @@ import { convertGoogleDriveLink } from '@/lib/imageUtils';
 import { productService } from '@/services/productService';
 import { categoryService } from '@/services/categoryService';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const AdminAddProduct = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [product, setProduct] = useState({
@@ -54,10 +62,39 @@ const AdminAddProduct = () => {
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [categorySearch, setCategorySearch] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   useEffect(() => {
     loadCategories();
-  }, []);
+    if (id) {
+      loadProduct(id);
+    }
+  }, [id]);
+
+  const loadProduct = async (productId: string) => {
+    try {
+      const data = await productService.getProductById(productId);
+      if (data) {
+        setProduct({
+          name: data.name,
+          price: data.price,
+          oldPrice: data.oldPrice || 0,
+          category: data.category,
+          images: data.images || [],
+          stock: data.stock || 0,
+          description: data.description || '',
+          specs: data.specs || {},
+          isFeatured: !!data.isFeatured,
+          isFlashSale: !!data.isFlashSale,
+          isNewArrival: !!data.isNewArrival,
+          isBestSelling: !!data.isBestSelling,
+          status: data.status || 'active'
+        });
+      }
+    } catch (err) {
+      toast.error("Failed to load product data");
+    }
+  };
 
   const loadCategories = async () => {
     try {
@@ -76,33 +113,45 @@ const AdminAddProduct = () => {
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error("Please select an image file.");
-      return;
-    }
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
+    const uploadPromises = Array.from(files).map(async (file) => {
+      if (!file.type.startsWith('image/')) {
+        toast.error(`${file.name} is not an image file.`);
+        return null;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          return data.url;
+        } else {
+          toast.error(data.message || `Upload failed for ${file.name}`);
+          return null;
+        }
+      } catch (err) {
+        toast.error(`Upload failed for ${file.name}`);
+        return null;
+      }
+    });
 
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setProduct({ ...product, images: [...product.images, data.url] });
-        toast.success("Image uploaded!");
-      } else {
-        toast.error(data.message || "Upload failed");
+      const urls = await Promise.all(uploadPromises);
+      const validUrls = urls.filter((url): url is string => url !== null);
+      if (validUrls.length > 0) {
+        setProduct(prev => ({ ...prev, images: [...prev.images, ...validUrls] }));
+        toast.success(`${validUrls.length} image(s) uploaded successfully!`);
       }
-    } catch (err) {
-      toast.error("Upload failed");
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -139,9 +188,16 @@ const AdminAddProduct = () => {
       }
       
       const payload = { ...product, status: isDraft ? 'draft' : 'active' };
-      const result = await productService.addProduct(payload as any);
+      
+      let result;
+      if (id) {
+        result = await productService.updateProduct(id, payload as any);
+      } else {
+        result = await productService.addProduct(payload as any);
+      }
+
       if (result) {
-        toast.success(isDraft ? "Product saved as draft!" : "Product published successfully!");
+        toast.success(id ? "Product updated successfully!" : (isDraft ? "Product saved as draft!" : "Product published successfully!"));
         navigate('/admin/products');
       }
     } catch (err) {
@@ -174,20 +230,20 @@ const AdminAddProduct = () => {
   return (
     <div className="space-y-8 pb-32">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-10 w-10 rounded-xl bg-white border shadow-sm"
-            onClick={() => navigate('/admin/products')}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Add New Product</h1>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">List a new product in your inventory with full details.</p>
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-10 w-10 rounded-xl bg-white border shadow-sm"
+              onClick={() => navigate('/admin/products')}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight">{id ? 'Edit Product' : 'Add New Product'}</h1>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{id ? 'Update existing product details.' : 'List a new product in your inventory with full details.'}</p>
+            </div>
           </div>
-        </div>
         <div className="flex items-center gap-3">
           <Button 
             variant="outline" 
@@ -350,6 +406,7 @@ const AdminAddProduct = () => {
                       ref={fileInputRef} 
                       className="hidden" 
                       accept="image/*" 
+                      multiple
                       onChange={handleFileUpload} 
                     />
                     
@@ -365,12 +422,26 @@ const AdminAddProduct = () => {
                        </Button>
                     </div>
                  </div>
-                 
-                 <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
+                                <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
                     {product.images.map((img, i) => (
-                      <div key={i} className="relative group h-24 rounded-xl overflow-hidden border border-slate-100 shadow-sm transition-all hover:scale-105 cursor-pointer">
+                      <div 
+                        key={i} 
+                        className="relative group h-24 rounded-xl overflow-hidden border border-slate-100 shadow-sm transition-all hover:scale-105 cursor-pointer"
+                        onClick={() => setPreviewImage(img)}
+                      >
                          <img src={img} alt="Product" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <Button 
+                              variant="secondary" 
+                              size="icon" 
+                              className="h-8 w-8 rounded-lg bg-white/20 hover:bg-white text-white hover:text-slate-900 border-none"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPreviewImage(img);
+                              }}
+                            >
+                               <Eye className="h-4 w-4" />
+                            </Button>
                             <Button 
                               variant="destructive" 
                               size="icon" 
@@ -485,16 +556,27 @@ const AdminAddProduct = () => {
                            <Plus className="h-4 w-4" />
                         </Button>
                      </div>
-                     <div className="flex gap-2 pt-1">
-                        {[5, 10, 20, 50].map(val => (
+                     <div className="flex gap-2 pt-1 overflow-x-auto no-scrollbar">
+                        {[5, 10, 20].map(val => (
                           <Button 
-                            key={val}
+                            key={`plus-${val}`}
                             variant="ghost" 
                             size="sm" 
-                            className="h-8 flex-1 rounded-lg bg-slate-50 text-[10px] font-black border border-slate-100 hover:bg-slate-100"
+                            className="h-8 flex-1 min-w-[50px] rounded-lg bg-emerald-50 text-emerald-600 text-[10px] font-black border border-emerald-100 hover:bg-emerald-100"
                             onClick={() => adjustStock(val)}
                           >
                             +{val}
+                          </Button>
+                        ))}
+                        {[5, 10, 20].map(val => (
+                          <Button 
+                            key={`minus-${val}`}
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-8 flex-1 min-w-[50px] rounded-lg bg-rose-50 text-rose-600 text-[10px] font-black border border-rose-100 hover:bg-rose-100"
+                            onClick={() => adjustStock(-val)}
+                          >
+                            -{val}
                           </Button>
                         ))}
                      </div>
@@ -525,6 +607,25 @@ const AdminAddProduct = () => {
            </div>
         </div>
       </div>
+
+      <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
+        <DialogContent className="max-w-3xl p-0 overflow-hidden bg-transparent border-none shadow-none">
+          <div className="relative group">
+            <img 
+              src={previewImage || ''} 
+              alt="Preview" 
+              className="w-full h-auto max-h-[80vh] object-contain rounded-2xl mx-auto shadow-2xl" 
+              referrerPolicy="no-referrer"
+            />
+            <button 
+              className="absolute top-4 right-4 h-10 w-10 bg-black/50 text-white rounded-full flex items-center justify-center backdrop-blur-md hover:bg-black/70 transition-all shadow-lg"
+              onClick={() => setPreviewImage(null)}
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

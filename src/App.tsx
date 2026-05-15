@@ -192,14 +192,14 @@ const MainHeader = () => {
   const [isMobileSearchFocused, setIsMobileSearchFocused] = React.useState(false);
 
   return (
-    <div className="bg-background border-b py-5 sticky top-0 z-50 shadow-sm">
+    <div className="bg-background border-b py-5 sticky top-0 z-50 shadow-sm [isolation:isolate] md:[contain:none] [contain:paint_layout]">
       <div className="max-w-[1140px] mx-auto px-4 flex items-center justify-between gap-4 md:gap-8">
         <Link to="/" className="flex items-center shrink-0 transition-transform active:scale-95 group">
           <Logo className="h-10 md:h-12 w-auto object-contain" />
         </Link>
         
         <div className="flex-grow max-w-2xl hidden md:block relative" ref={searchRef}>
-          <div className="flex items-center bg-secondary rounded-full overflow-hidden px-4 border border-transparent focus-within:border-primary/20 transition-all">
+          <div className="flex items-center bg-secondary rounded-xl md:rounded-full overflow-hidden px-4 border border-transparent focus-within:border-primary/20 transition-all">
             {isLoadingSuggestions ? (
               <Loader2 className="h-5 w-5 text-primary animate-spin mr-2" />
             ) : (
@@ -217,7 +217,7 @@ const MainHeader = () => {
 
           {/* Search Suggestions */}
           {isSearchFocused && searchQuery.trim().length >= 2 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-background border rounded-2xl shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-background border rounded-xl md:rounded-2xl shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
               {isLoadingSuggestions ? (
                 <div className="p-8 text-center text-muted-foreground">
                   <div className="flex items-center justify-center gap-3">
@@ -240,7 +240,7 @@ const MainHeader = () => {
                       }}
                       onMouseEnter={() => setSelectedIndex(idx)}
                     >
-                      <div className="w-12 h-12 rounded-xl overflow-hidden bg-secondary flex-shrink-0">
+                      <div className="w-12 h-12 rounded-lg md:rounded-xl overflow-hidden bg-secondary flex-shrink-0">
                         <img 
                           src={convertGoogleDriveLink(product.images[0])} 
                           alt={product.name} 
@@ -320,7 +320,7 @@ const MainHeader = () => {
                   <div className="space-y-6">
                     {wishlist.map(item => (
                       <div key={item.id} className="flex gap-4 group">
-                        <Link to={`/product/${item.id}`} className="w-20 h-20 bg-secondary rounded-2xl overflow-hidden flex-shrink-0">
+                        <Link to={`/product/${item.id}`} className="w-20 h-20 bg-secondary rounded-xl md:rounded-2xl overflow-hidden flex-shrink-0">
                           <img 
                             src={convertGoogleDriveLink(item.images[0])} 
                             alt={item.name} 
@@ -385,7 +385,7 @@ const MainHeader = () => {
                   <div className="space-y-6 pb-4">
                     {cart.map(item => (
                       <div key={item.id} className="flex gap-4 group">
-                        <div className="w-16 h-16 md:w-20 md:h-20 bg-secondary rounded-2xl overflow-hidden flex-shrink-0">
+                        <div className="w-16 h-16 md:w-20 md:h-20 bg-secondary rounded-xl md:rounded-2xl overflow-hidden flex-shrink-0">
                           <img 
                             src={convertGoogleDriveLink(item.images[0])} 
                             alt={item.name} 
@@ -445,7 +445,7 @@ const MainHeader = () => {
                     </Button>
                   </Link>
                   <Button 
-                    className="h-11 md:h-14 w-full text-sm font-bold uppercase rounded-xl md:rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-95 transition-all" 
+                    className="h-11 md:h-14 w-full text-sm font-bold uppercase rounded-lg md:rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-95 transition-all" 
                     disabled={cart.length === 0}
                     onClick={() => {
                       document.body.click();
@@ -462,7 +462,7 @@ const MainHeader = () => {
 
           {/* Mobile Menu Trigger */}
           <Sheet>
-            <SheetTrigger nativeButton={false} render={<div className="lg:hidden h-10 w-10 flex items-center justify-center cursor-pointer hover:bg-secondary rounded-lg transition-colors" />}>
+            <SheetTrigger nativeButton={false} render={<div className="lg:hidden h-10 w-10 flex items-center justify-center cursor-pointer hover:bg-secondary rounded-xl transition-colors" />}>
               <Menu className="h-7 w-7" />
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] p-0 flex flex-col">
@@ -560,7 +560,7 @@ const MainHeader = () => {
                 </div>
                 <div className="flex gap-4">
                   {[Facebook, Twitter, Instagram, Youtube].map((Icon, i) => (
-                    <Link key={i} to="#" className="h-8 w-8 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-all">
+                    <Link key={i} to="#" className="h-8 w-8 rounded-lg md:rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-all">
                       <Icon className="h-4 w-4" />
                     </Link>
                   ))}
@@ -591,7 +591,7 @@ const NavHeader = () => (
         </nav>
       </div>
       <div className="flex items-center gap-4">
-        <Link to="/track" target="_blank" rel="noopener noreferrer" className="text-xs font-bold border rounded-full px-4 py-1.5 hover:bg-secondary transition-colors uppercase">Track Order</Link>
+        <Link to="/track" target="_blank" rel="noopener noreferrer" className="text-xs font-bold border rounded-lg md:rounded-full px-4 py-1.5 hover:bg-secondary transition-colors uppercase">Track Order</Link>
       </div>
     </div>
   </div>
@@ -681,7 +681,7 @@ const Footer = () => {
             </div>
             <div className="flex gap-2 mt-8">
                {[Facebook, Twitter, Instagram, Youtube].map((Icon, i) => (
-                 <Link key={i} to="#" className="h-10 w-10 border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-all">
+                 <Link key={i} to="#" className="h-10 w-10 border border-border rounded-lg md:rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-all">
                    <Icon className="h-4 w-4" />
                  </Link>
                ))}

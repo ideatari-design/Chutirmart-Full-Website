@@ -144,7 +144,7 @@ const Catalog = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Type to search..."
-                    className="bg-secondary/50 border-none rounded-xl h-12 text-sm pl-4 pr-10"
+                    className="bg-secondary/50 border-none rounded-lg md:rounded-xl h-12 text-sm pl-4 pr-10"
                   />
                   <Search className="absolute right-3 top-3.5 h-5 w-5 text-muted-foreground/50" />
                 </div>
@@ -162,7 +162,7 @@ const Catalog = () => {
                         setCurrentPage(1);
                         setSearchParams({ category: cat });
                       }}
-                      className={`text-left px-4 py-2 rounded-xl text-xs font-bold uppercase transition-all ${categoryFilter === cat ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-secondary/30 hover:bg-secondary text-muted-foreground'}`}
+                      className={`text-left px-4 py-2 rounded-lg md:rounded-xl text-xs font-bold uppercase transition-all ${categoryFilter === cat ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-secondary/30 hover:bg-secondary text-muted-foreground'}`}
                     >
                       {cat}
                     </button>
@@ -179,7 +179,7 @@ const Catalog = () => {
                       type="number"
                       value={priceRange.min}
                       onChange={(e) => setPriceRange(prev => ({ ...prev, min: parseInt(e.target.value) || 0 }))}
-                      className="h-10 rounded-xl text-xs font-bold bg-secondary/30 border-none"
+                      className="h-10 rounded-lg md:rounded-xl text-xs font-bold bg-secondary/30 border-none"
                       placeholder="Min"
                     />
                     <span className="text-muted-foreground text-xs font-bold">TO</span>
@@ -187,7 +187,7 @@ const Catalog = () => {
                       type="number"
                       value={priceRange.max}
                       onChange={(e) => setPriceRange(prev => ({ ...prev, max: parseInt(e.target.value) || 0 }))}
-                      className="h-10 rounded-xl text-xs font-bold bg-secondary/30 border-none"
+                      className="h-10 rounded-lg md:rounded-xl text-xs font-bold bg-secondary/30 border-none"
                       placeholder="Max"
                     />
                   </div>
@@ -211,7 +211,7 @@ const Catalog = () => {
         {/* Main Content */}
         <main className="flex-grow space-y-8">
           {/* Controls Bar */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 bg-secondary/20 p-6 rounded-[2rem] border border-secondary/30">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 bg-secondary/20 p-6 rounded-xl md:rounded-[2rem] border border-secondary/30">
             <div className="flex items-center gap-4">
                <p className="text-xs font-bold text-muted-foreground uppercase">
                  Showing <span className="text-foreground">{paginatedProducts.length}</span> of {filteredProducts.length} items
@@ -238,7 +238,7 @@ const Catalog = () => {
                   <select 
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full bg-background border rounded-2xl h-11 px-4 text-xs font-bold uppercase outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
+                    className="w-full bg-background border rounded-lg md:rounded-2xl h-11 px-4 text-xs font-bold uppercase outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
                   >
                     <option value="newest">Newest First</option>
                     <option value="price-low">Price: Low to High</option>
@@ -255,17 +255,17 @@ const Catalog = () => {
             <div className="flex flex-wrap items-center gap-3">
               <p className="text-[10px] font-black uppercase text-muted-foreground italic">Applied Filters:</p>
               {categoryFilter !== 'All' && (
-                <Badge variant="secondary" className="gap-2 rounded-full px-4 py-2 bg-accent/10 border-accent text-accent">
+                <Badge variant="secondary" className="gap-2 rounded-lg md:rounded-full px-4 py-2 bg-accent/10 border-accent text-accent">
                    {categoryFilter} <X className="h-3 w-3 cursor-pointer" onClick={() => setCategoryFilter('All')} />
                 </Badge>
               )}
               {searchQuery && (
-                <Badge variant="secondary" className="gap-2 rounded-full px-4 py-2">
+                <Badge variant="secondary" className="gap-2 rounded-lg md:rounded-full px-4 py-2">
                    "{searchQuery}" <X className="h-3 w-3 cursor-pointer" onClick={() => setSearchQuery('')} />
                 </Badge>
               )}
               {(priceRange.min > 0 || priceRange.max < 200000) && (
-                <Badge variant="secondary" className="gap-2 rounded-full px-4 py-2 bg-primary/10 border-primary text-primary">
+                <Badge variant="secondary" className="gap-2 rounded-lg md:rounded-full px-4 py-2 bg-primary/10 border-primary text-primary">
                    ৳{priceRange.min} - ৳{priceRange.max} <X className="h-3 w-3 cursor-pointer" onClick={() => setPriceRange({ min: 0, max: 200000 })} />
                 </Badge>
               )}
@@ -281,7 +281,7 @@ const Catalog = () => {
                {[...Array(6)].map((_, i) => <ProductCardSkeleton key={i} />)}
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="h-[400px] flex flex-col items-center justify-center text-center gap-6 bg-secondary/10 rounded-[3rem] border border-dashed">
+            <div className="h-[400px] flex flex-col items-center justify-center text-center gap-6 bg-secondary/10 rounded-xl md:rounded-[3rem] border border-dashed">
                <div className="h-20 w-20 rounded-full bg-secondary flex items-center justify-center">
                   <Search className="h-8 w-8 text-muted-foreground opacity-30" />
                </div>
@@ -331,7 +331,7 @@ const Catalog = () => {
                <Button 
                 variant="outline" 
                 size="icon" 
-                className="rounded-2xl h-12 w-12 border-2 disabled:opacity-30"
+                className="rounded-xl md:rounded-2xl h-12 w-12 border-2 disabled:opacity-30"
                 disabled={currentPage === totalPages}
                 onClick={() => handlePageChange(currentPage + 1)}
                >

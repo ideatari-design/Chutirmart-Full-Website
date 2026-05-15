@@ -125,7 +125,7 @@ const FlashDeals = ({ products, loading }: { products: Product[], loading: boole
 
   return (
     <div className="py-12 md:py-20 max-w-[1140px] mx-auto px-0 sm:px-4">
-      <div className="flex flex-col lg:flex-row justify-between items-center mb-12 gap-6 bg-secondary/50 p-6 md:p-8 rounded-[1.5rem] md:rounded-3xl border border-border mx-4 sm:mx-0">
+      <div className="flex flex-col lg:flex-row justify-between items-center mb-12 gap-6 bg-secondary/50 p-6 md:p-8 rounded-xl md:rounded-3xl border border-border mx-4 sm:mx-0">
         <div className="flex flex-col items-center lg:items-start lg:flex-row lg:gap-12 w-full">
           <div className="text-center lg:text-left mb-4 lg:mb-0">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground">Flash sale</h2>
@@ -136,7 +136,7 @@ const FlashDeals = ({ products, loading }: { products: Product[], loading: boole
             <div className="flex gap-2">
               {[timeLeft.h, timeLeft.m, timeLeft.s].map((t, i) => (
                 <div key={i} className="flex flex-col items-center">
-                  <div className="bg-accent text-accent-foreground w-11 h-11 md:w-12 md:h-12 flex items-center justify-center text-lg md:text-xl font-bold rounded-xl shadow-lg shadow-accent/20">
+                  <div className="bg-accent text-accent-foreground w-11 h-11 md:w-12 md:h-12 flex items-center justify-center text-lg md:text-xl font-bold rounded-lg md:rounded-xl shadow-lg shadow-accent/20">
                     {t.toString().padStart(2, '0')}
                   </div>
                   <span className="text-[9px] font-bold mt-1 text-muted-foreground">{i === 0 ? 'Hrs' : i === 1 ? 'Min' : 'Sec'}</span>
@@ -146,7 +146,7 @@ const FlashDeals = ({ products, loading }: { products: Product[], loading: boole
           </div>
         </div>
         <Link to="/products" className="w-full lg:w-auto">
-          <Button variant="outline" className="w-full lg:w-auto rounded-xl md:rounded-2xl px-10 h-12 md:h-14 font-black text-[13px] md:text-[15px] leading-[18px] border-2 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all shadow-sm hover:shadow-md no-underline uppercase tracking-tight">
+          <Button variant="outline" className="w-full lg:w-auto rounded-lg md:rounded-2xl px-10 h-12 md:h-14 font-black text-[13px] md:text-[15px] leading-[18px] border-2 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all shadow-sm hover:shadow-md no-underline uppercase tracking-tight">
             See all products
           </Button>
         </Link>
@@ -217,7 +217,7 @@ const BannerSlider = () => {
     enter: (direction: number) => ({
       x: direction > 0 ? '100%' : '-100%',
       opacity: 0,
-      scale: 1.1
+      scale: 1
     }),
     center: {
       zIndex: 1,
@@ -229,7 +229,7 @@ const BannerSlider = () => {
       zIndex: 0,
       x: direction < 0 ? '100%' : '-100%',
       opacity: 0,
-      scale: 0.9
+      scale: 1
     })
   };
 
@@ -249,7 +249,7 @@ const BannerSlider = () => {
   }
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-2xl md:rounded-[1.5rem] group bg-secondary shadow-2xl">
+    <div className="relative h-full w-full overflow-hidden rounded-xl md:rounded-[1.5rem] group bg-secondary shadow-2xl">
       <AnimatePresence initial={false} custom={direction} mode="wait">
         <motion.div
           key={currentSlide}
@@ -397,7 +397,7 @@ const Home = () => {
       <CategoryCircles />
       
       <div className="max-w-[1140px] mx-auto px-4">
-         <div className="bg-accent/10 border border-accent/20 p-4 rounded-2xl">
+         <div className="bg-accent/10 border border-accent/20 p-4 rounded-xl md:rounded-2xl">
             <p className="text-[11px] text-center font-bold text-muted-foreground">
                Super discount for your <span className="text-accent font-bold">first purchase</span> — Use code <span className="bg-accent text-accent-foreground px-2 py-0.5 rounded ml-1">COUPON25</span>
             </p>
@@ -456,7 +456,7 @@ const Home = () => {
             <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6 px-4 md:px-0">
                <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center md:text-left">Best selling</h2>
                <Link to="/products" className="w-full md:w-auto">
-                 <Button variant="outline" className="w-full md:w-auto h-12 md:h-auto rounded-full px-8 py-2.5 bg-white border-border/50 text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-accent hover:border-accent transition-all shadow-sm">
+                 <Button variant="outline" className="w-full md:w-auto h-12 md:h-auto rounded-xl md:rounded-full px-8 py-2.5 bg-white border-border/50 text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-accent hover:border-accent transition-all shadow-sm">
                    See all products
                  </Button>
                </Link>
@@ -487,7 +487,7 @@ const Home = () => {
               { category: "Electronics", title: "Tips for Cleaning Hardware", author: "Mirtul Mina", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=600" },
             ].map((blog, i) => (
               <div key={i} className="group cursor-pointer">
-                  <div className="aspect-[16/10] overflow-hidden rounded-[1.5rem] md:rounded-[2rem] mb-6 shadow-xl shadow-foreground/5">
+                  <div className="aspect-[16/10] overflow-hidden rounded-xl md:rounded-[2rem] mb-6 shadow-xl shadow-foreground/5">
                     <img 
                       src={blog.image} 
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" 
@@ -506,7 +506,7 @@ const Home = () => {
                     </div>
                     <h3 className="text-xl md:text-2xl font-bold group-hover:text-primary transition-colors leading-tight">{blog.title}</h3>
                     <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 leading-relaxed">High quality products and expert advice for your everyday needs.</p>
-                    <Button variant="outline" className="w-full md:w-auto h-11 md:h-12 text-[10px] md:text-[11px] font-black uppercase tracking-widest px-8 rounded-xl md:rounded-2xl border-2 hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm">Read more</Button>
+                    <Button variant="outline" className="w-full md:w-auto h-11 md:h-12 text-[10px] md:text-[11px] font-black uppercase tracking-widest px-8 rounded-lg md:rounded-2xl border-2 hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm">Read more</Button>
                  </div>
               </div>
             ))}
@@ -518,8 +518,8 @@ const Home = () => {
          <div className="max-w-2xl mx-auto px-4 text-center relative z-10">
             <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 md:mb-8 leading-tight">Looking for <br /> something else?</h2>
             <div className="relative mb-8 group">
-               <Input placeholder="Search for products..." className="h-14 md:h-16 pr-14 md:pr-16 rounded-full text-xs md:text-sm text-center border-none bg-white text-primary placeholder:text-muted-foreground/40 focus-visible:ring-primary/20" />
-               <Button className="absolute right-1.5 md:right-2 top-1.5 md:top-2 h-11 w-11 md:h-12 md:w-12 rounded-full bg-primary text-white hover:bg-primary/90 shadow-xl transition-all active:scale-95"><Search className="h-4 w-4 md:h-5 md:w-5" /></Button>
+               <Input placeholder="Search for products..." className="h-14 md:h-16 pr-14 md:pr-16 rounded-xl md:rounded-full text-xs md:text-sm text-center border-none bg-white text-primary placeholder:text-muted-foreground/40 focus-visible:ring-primary/20" />
+               <Button className="absolute right-1.5 md:right-2 top-1.5 md:top-2 h-11 w-11 md:h-12 md:w-12 rounded-lg md:rounded-full bg-primary text-white hover:bg-primary/90 shadow-xl transition-all active:scale-95"><Search className="h-4 w-4 md:h-5 md:w-5" /></Button>
             </div>
             <div className="flex flex-wrap justify-center gap-x-6 md:gap-x-8 gap-y-3 md:gap-y-4 text-[10px] md:text-xs font-black uppercase tracking-widest text-white/70">
                {["Smartphone", "Tablet", "Furniture", "Laptop", "Fashion", "Home & decor", "Camera"].map(tag => (
@@ -527,8 +527,8 @@ const Home = () => {
                ))}
             </div>
          </div>
-         <div className="absolute top-1/2 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2" />
-         <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl translate-y-1/2 translate-x-1/2" />
+         <div className="absolute top-1/2 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2 hidden md:block" />
+         <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl translate-y-1/2 translate-x-1/2 hidden md:block" />
       </section>
     </div>
   );

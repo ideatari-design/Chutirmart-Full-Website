@@ -134,14 +134,14 @@ const Checkout = () => {
                 <h2 className="text-xl font-bold text-slate-800">Contact Information</h2>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] shadow-sm border border-slate-100">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-5 sm:p-8 rounded-xl sm:rounded-[2rem] shadow-sm border border-slate-100">
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-slate-500 uppercase ml-1">Your Name</Label>
                   <div className="relative group">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#00458F] transition-colors" />
                     <Input 
                       placeholder="e.g. John Doe" 
-                      className="pl-12 h-14 rounded-xl border-slate-200 focus:border-[#00458F] focus:ring-4 focus:ring-[#00458F]/10 transition-all bg-slate-50/30" 
+                      className="pl-12 h-14 rounded-lg md:rounded-xl border-slate-200 focus:border-[#00458F] focus:ring-4 focus:ring-[#00458F]/10 transition-all bg-slate-50/30" 
                       value={formData.name}
                       onChange={e => setFormData(f => ({ ...f, name: e.target.value }))}
                       required 
@@ -155,7 +155,7 @@ const Checkout = () => {
                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#00458F] transition-colors" />
                     <Input 
                       placeholder="017XXXXXXXX" 
-                      className="pl-12 h-14 rounded-xl border-slate-200 focus:border-[#00458F] focus:ring-4 focus:ring-[#00458F]/10 transition-all bg-slate-50/30" 
+                      className="pl-12 h-14 rounded-lg md:rounded-xl border-slate-200 focus:border-[#00458F] focus:ring-4 focus:ring-[#00458F]/10 transition-all bg-slate-50/30" 
                       value={formData.phone}
                       onChange={e => setFormData(f => ({ ...f, phone: e.target.value }))}
                       required 
@@ -169,7 +169,7 @@ const Checkout = () => {
                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#00458F] transition-colors" />
                     <Input 
                       placeholder="House No., Road No., Area and City" 
-                      className="pl-12 h-14 rounded-xl border-slate-200 focus:border-[#00458F] focus:ring-4 focus:ring-[#00458F]/10 transition-all bg-slate-50/30" 
+                      className="pl-12 h-14 rounded-lg md:rounded-xl border-slate-200 focus:border-[#00458F] focus:ring-4 focus:ring-[#00458F]/10 transition-all bg-slate-50/30" 
                       value={formData.address}
                       onChange={e => setFormData(f => ({ ...f, address: e.target.value }))}
                       required 
@@ -189,7 +189,7 @@ const Checkout = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div 
                   onClick={() => setDeliveryArea('inside')}
-                  className={`relative p-5 sm:p-6 rounded-[1.5rem] sm:rounded-3xl border-2 transition-all cursor-pointer flex flex-col gap-4 bg-white shadow-sm ${deliveryArea === 'inside' ? 'border-[#00458F] bg-[#00458F]/5' : 'border-slate-100'}`}
+                  className={`relative p-5 sm:p-6 rounded-xl sm:rounded-3xl border-2 transition-all cursor-pointer flex flex-col gap-4 bg-white shadow-sm ${deliveryArea === 'inside' ? 'border-[#00458F] bg-[#00458F]/5' : 'border-slate-100'}`}
                 >
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${deliveryArea === 'inside' ? 'bg-[#00458F] text-white' : 'bg-slate-100 text-slate-400'}`}>
                     <MapPin className="h-6 w-6" />
@@ -208,7 +208,7 @@ const Checkout = () => {
 
                 <div 
                   onClick={() => setDeliveryArea('outside')}
-                  className={`relative p-5 sm:p-6 rounded-[1.5rem] sm:rounded-3xl border-2 transition-all cursor-pointer flex flex-col gap-4 bg-white shadow-sm ${deliveryArea === 'outside' ? 'border-[#00458F] bg-[#00458F]/5' : 'border-slate-100'}`}
+                  className={`relative p-5 sm:p-6 rounded-xl sm:rounded-3xl border-2 transition-all cursor-pointer flex flex-col gap-4 bg-white shadow-sm ${deliveryArea === 'outside' ? 'border-[#00458F] bg-[#00458F]/5' : 'border-slate-100'}`}
                 >
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${deliveryArea === 'outside' ? 'bg-[#00458F] text-white' : 'bg-slate-100 text-slate-400'}`}>
                     <MapPin className="h-6 w-6" />
@@ -234,11 +234,11 @@ const Checkout = () => {
                 <h2 className="text-xl font-bold text-slate-800">Payment Method</h2>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-5 sm:p-8 rounded-xl sm:rounded-[2rem] border border-slate-100 shadow-sm">
                  <button 
                    type="button"
                    onClick={() => setPaymentMethod('cod')}
-                   className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${paymentMethod === 'cod' ? 'border-[#00458F] bg-[#00458F]/5' : 'border-slate-100 hover:border-slate-200'}`}
+                   className={`flex items-center gap-4 p-4 rounded-xl md:rounded-2xl border-2 transition-all ${paymentMethod === 'cod' ? 'border-[#00458F] bg-[#00458F]/5' : 'border-slate-100 hover:border-slate-200'}`}
                  >
                     <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center ${paymentMethod === 'cod' ? 'bg-[#00458F] text-white shadow-lg shadow-[#00458F]/20' : 'bg-slate-100 text-slate-400'}`}>
                       <PackageCheck className="h-5 w-5 md:h-6 md:w-6" />
@@ -249,7 +249,7 @@ const Checkout = () => {
                  <button 
                    type="button"
                    disabled
-                   className="flex items-center gap-4 p-4 rounded-2xl border-2 border-slate-100 opacity-50 cursor-not-allowed bg-slate-50"
+                   className="flex items-center gap-4 p-4 rounded-xl md:rounded-2xl border-2 border-slate-100 opacity-50 cursor-not-allowed bg-slate-50"
                  >
                     <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center">
                       <Wallet className="h-5 w-5 md:h-6 md:w-6" />
@@ -262,14 +262,14 @@ const Checkout = () => {
 
           {/* Sidebar: Order Summary */}
           <aside className="lg:sticky lg:top-28">
-            <div className="bg-white rounded-[1.5rem] sm:rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+            <div className="bg-white rounded-xl sm:rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
                <div className="p-6 md:p-8 pb-4">
                   <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-6 md:mb-8">Order</h3>
                   
                   <div className="space-y-4 md:space-y-6 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
                     {cart.map(item => (
-                      <div key={item.id} className="group relative flex gap-4 md:gap-5 bg-slate-50 p-3 md:p-4 rounded-2xl md:rounded-3xl border border-transparent hover:border-slate-200 transition-all">
-                        <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl md:rounded-2xl overflow-hidden bg-white border border-slate-100 shrink-0">
+                      <div key={item.id} className="group relative flex gap-4 md:gap-5 bg-slate-50 p-3 md:p-4 rounded-xl md:rounded-3xl border border-transparent hover:border-slate-200 transition-all">
+                        <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg md:rounded-2xl overflow-hidden bg-white border border-slate-100 shrink-0">
                           <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex flex-col justify-between py-1">
@@ -307,7 +307,7 @@ const Checkout = () => {
 
                   <Button 
                     type="submit" 
-                    className="w-full h-14 md:h-16 bg-[#00458F] hover:opacity-90 text-white rounded-xl md:rounded-2xl font-bold text-base md:text-lg shadow-xl shadow-[#00458F]/20 transition-all active:scale-95 flex items-center justify-center gap-3"
+                    className="w-full h-14 md:h-16 bg-[#00458F] hover:opacity-90 text-white rounded-lg md:rounded-2xl font-bold text-base md:text-lg shadow-xl shadow-[#00458F]/20 transition-all active:scale-95 flex items-center justify-center gap-3"
                     disabled={isProcessing}
                   >
                     {isProcessing ? (
