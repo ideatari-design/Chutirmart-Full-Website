@@ -89,18 +89,6 @@
   
   /* Optimize mobile scrolling performance */
   @media (max-width: 768px) {
-    .smooth-scroll-container {
-      -webkit-overflow-scrolling: touch;
-      scroll-behavior: smooth;
-    }
-    
-    /* Force GPU acceleration for elements that might flicker */
-    .gpu-accelerate {
-      transform: translateZ(0);
-      backface-visibility: hidden;
-      perspective: 1000px;
-    }
-
     /* Disable heavy effects on low-end mobile if needed, but let's try optimization first */
     .mobile-no-blur {
       backdrop-filter: none !important;

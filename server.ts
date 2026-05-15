@@ -389,6 +389,43 @@ async function startServer() {
 
   app.use("/uploads", express.static(uploadDir));
 
+  // --- Categories API ---
+  app.get("/api/categories", async (req, res) => {
+    try {
+      const d1Result = await queryD1("SELECT * FROM categories ORDER BY name ASC");
+      if (d1Result && Array.isArray(d1Result.results)) {
+        return res.json(d1Result.results);
+      }
+    } catch (err) {
+      console.error("Categories GET Exception:", err);
+    }
+    // Static fallback
+    res.json([
+      { id: '1', name: 'Smartphones', slug: 'smartphones' },
+      { id: '2', name: 'Electronics', slug: 'electronics' },
+      { id: '3', name: 'Home & Decor', slug: 'home-decor' },
+      { id: '4', name: 'Fashion', slug: 'fashion' },
+    ]);
+  });
+
+  app.post("/api/categories", async (req, res) => {
+    const { name, slug, image } = req.body;
+    const id = String(Date.now());
+    const createdAt = new Date().toISOString();
+    const finalSlug = slug || name.toLowerCase().replace(/\s+/g, '-');
+    
+    try {
+      await queryD1(
+        "INSERT INTO categories (id, name, slug, image, status, createdAt) VALUES (?, ?, ?, ?, ?, ?)",
+        [id, name, finalSlug, image || '', 'active', createdAt]
+      );
+      res.status(201).json({ id, name, slug: finalSlug, image, status: 'active', createdAt });
+    } catch (err) {
+      console.error("Category POST failed:", err);
+      res.status(500).json({ success: false });
+    }
+  });
+
   // --- Upload API ---
   app.post("/api/upload", (req, res, next) => {
     console.log("[Upload API] Received upload request");
@@ -1516,6 +1553,14 @@ async function startServer() {
         sessionId TEXT, 
         sender TEXT, 
         message TEXT, 
+        createdAt TEXT
+      )`);
+      await queryD1(`CREATE TABLE IF NOT EXISTS categories (
+        id TEXT PRIMARY KEY,
+        name TEXT,
+        slug TEXT,
+        image TEXT,
+        status TEXT,
         createdAt TEXT
       )`);
 

@@ -39,6 +39,7 @@ const AdminChat = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   const [mobileView, setMobileView] = useState<'list' | 'chat'>('list');
+  const [incompleteOrders, setIncompleteOrders] = useState<IncompleteOrder[]>([]);
 
   useEffect(() => {
     if (activeSessionId) {

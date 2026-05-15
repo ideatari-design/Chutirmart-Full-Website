@@ -37,14 +37,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <div className="group bg-white flex flex-col h-full transition-shadow duration-300 hover:shadow-2xl hover:shadow-[#00458f]/10 rounded-3xl border border-slate-100 w-full relative overflow-hidden">
+    <div className="group bg-white flex flex-col h-full md:transition-shadow duration-300 hover:shadow-2xl hover:shadow-[#00458f]/10 rounded-3xl border border-slate-100 w-full relative overflow-hidden">
       {/* Image Section */}
       <div className="relative aspect-square overflow-hidden bg-muted/20 shrink-0">
         <Link to={`/product/${product.id}`} className="w-full h-full block">
           <img 
             src={convertGoogleDriveLink(product.images[0] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800')} 
             alt={product.name} 
-            className="w-full h-full object-cover md:group-hover:scale-105 transition-transform duration-700"
+            className="w-full h-full object-cover md:group-hover:scale-105 md:transition-transform duration-700"
             referrerPolicy="no-referrer"
             loading="lazy"
             onError={(e) => {

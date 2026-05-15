@@ -250,7 +250,7 @@ const BannerSlider = () => {
 
   return (
     <div className="relative h-full w-full overflow-hidden rounded-2xl md:rounded-[1.5rem] group bg-secondary shadow-2xl">
-      <AnimatePresence initial={false} custom={direction} mode="popLayout">
+      <AnimatePresence initial={false} custom={direction} mode="wait">
         <motion.div
           key={currentSlide}
           custom={direction}
@@ -387,7 +387,7 @@ const Home = () => {
       {/* Hero Section */}
       <section className="bg-background py-4 md:py-8 lg:py-10">
         <div className="max-w-[1140px] mx-auto px-4">
-          <div className="relative aspect-[16/9] sm:aspect-[16/7] md:aspect-[21/9] lg:h-[520px] w-full gpu-accelerate">
+          <div className="relative aspect-[16/9] sm:aspect-[16/7] md:aspect-[21/9] lg:h-[520px] w-full">
              <BannerSlider />
           </div>
         </div>
@@ -434,31 +434,19 @@ const Home = () => {
            {loading ? (
              [...Array(8)].map((_, i) => <ProductCardSkeleton key={i} />)
            ) : (
-             <AnimatePresence mode="wait">
+             <>
                {filteredProducts.slice(0, 8).map((p) => (
-                 <motion.div
-                   key={p.id}
-                   initial={{ opacity: 0 }}
-                   animate={{ opacity: 1 }}
-                   exit={{ opacity: 0 }}
-                   transition={{ duration: 0.2 }}
-                 >
-                   <ProductCard product={p} />
-                 </motion.div>
+                 <ProductCard key={p.id} product={p} />
                ))}
                {filteredProducts.length === 0 && !loading && (
-                 <motion.div 
-                   initial={{ opacity: 0 }}
-                   animate={{ opacity: 1 }}
-                   className="col-span-full py-20 text-center"
-                 >
+                 <div className="col-span-full py-20 text-center">
                    <div className="bg-secondary/30 rounded-3xl p-12 inline-block">
                      <ShoppingBag className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
                      <p className="text-muted-foreground font-bold">No products found in this category</p>
                    </div>
-                 </motion.div>
+                 </div>
                )}
-             </AnimatePresence>
+             </>
            )}
         </div>
       </section>
